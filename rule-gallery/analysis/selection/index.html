@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Rule Selection — cherry-pick 10</title>
+  <title>Rule Slate Walkthrough — 10 rules for the SE study</title>
   <link rel="stylesheet" href="selection.css">
 </head>
 <body>
   <header>
-    <h1>Rule Selection</h1>
-    <p class="subtitle">Cherry-pick 10 rules for the follow-up self-explanation study. The picker shows every signal we have on each rule and tracks live coverage as you tick boxes. You pick.</p>
+    <h1>Rule Slate Walkthrough</h1>
+    <p class="subtitle">The 10 rules selected for the follow-up self-explanation study. Each row links to its full atlas entry; click 👁 to expand the diagnostic-hands panel and see the five candidate adversarial-hand-selection strategies side by side. Strategy default follows the demo page's toggle.</p>
     <p class="hint">Serve over HTTP (file:// is blocked):
       <code>python -m http.server 8765 --directory rule-gallery/analysis/selection</code>
       then open <code>http://localhost:8765/</code></p>
@@ -56,12 +56,10 @@
     </div>
   </details>
 
-  <section id="coverage-panel"></section>
+  <section id="slate-glance-panel"></section>
 
   <section id="filter-row">
-    <button id="toggle-band-filter">Hide rules outside [0.2, 0.8] mcc band</button>
-    <button id="export-picks">Export picks (JSON)</button>
-    <button id="clear-picks">Clear all picks &amp; rationales</button>
+    <button id="toggle-selected-filter">Show all 60 rules</button>
     <details id="column-toggles" style="display: inline-block; margin-left: 0.5rem;">
       <summary>Toggle columns</summary>
       <div id="column-toggle-list"></div>

@@ -1,124 +1,107 @@
-# Rule Selection Cheat Sheet
+# Rule Slate Walkthrough
 
-Internal tool for cherry-picking 10 rules from the 60-rule gallery for
-the follow-up self-explanation study.
+Companion view linked from the SE-pilot demo launcher. Shows the 10 rules
+selected for the follow-up self-explanation study, side by side with the
+five candidate adversarial-hand-selection strategies that were considered.
+
+Originally an internal picker tool; repurposed 2026-05-09 for collaborator
+walkthroughs. The picker affordances (checkboxes, free-text rationales,
+export, live coverage tracker) have been removed. The slate is now locked
+and read from `shortlist_final_10.json`.
 
 ## Quick start
 
 From `card-games/`:
 
 ```bash
-# 1. Generate the data feed (re-run any time upstream data changes)
+# 1. (One-off) regenerate the data feeds — only needed when upstream data changes.
 cd rule-gallery/analysis
 python -m selection.build_selection_table
+python -m selection.build_diagnostic_hands_data    # optional — diag panel feed
 
-# 2. Serve the page (file:// is blocked by browsers; HTTP is required)
+# 2. Serve the page (file:// is blocked by browsers; HTTP is required).
 cd ../..
 python3 -m http.server 8765 --directory rule-gallery/analysis/selection
 
 # 3. Open http://localhost:8765/
 ```
 
+GitHub Pages mirror: <https://konukcan.github.io/card-games-demo/rule-gallery/analysis/selection/>.
+
+## URL parameters
+
+The page accepts `?strategy=<key>` where `<key>` is one of:
+
+- `A_entropy` — top-10 hands the empirical posterior is most split on (entropy ≈ 1 bit)
+- `B_misclass` — top-10 hands collaborators are most likely to call the wrong way (default)
+- `C_flip_random` — minimal-flip 1-edit edits of random non-exemplar winning hands
+- `D_flip_exemplar` — minimal-flip edits of the 6 frozen exemplars
+- `model` — model-based picker (under-developed; not used in the final experiment)
+
+Sets the default selected strategy across every rule's diagnostic-hands panel.
+The demo launcher's strategy toggle is expected to pass this param through.
+A bare URL (no query string) defaults to `B_misclass`.
+
 ## What it shows
 
-The page has four parts, top to bottom:
+Top to bottom:
 
-**1. Legend bar** — decodes RB/II classes, failure_dir labels, and the decile color scale (D1=cool to D10=warm). Collapsible; open by default.
+**1. Slate-at-a-glance** — static summary of the 10 picks: difficulty mix,
+RB/II distribution, feature coverage, MCC range, and mean response time
+(from the gallery pilot).
 
-**2. Coverage panel (sticky)** — live updates as you tick checkboxes (see "Coverage panel" section below).
+**2. Rule table** — one row per rule. Default-on columns: `selected ✓`,
+`👁` (open diagnostic panel), `rule_id`, `answer`, `mcc_mean`, `mcc D`,
+`base_rate`, `br D`, `H_norm`, `H D`. Other 14 columns available via
+"Toggle columns".
 
-**3. Table** — one row per rule with 22 columns (default-shown marked ✓):
+The 10 selected rules are highlighted with a warm cream tint and a 4 px
+honey-coloured left border. By default the table shows only those 10 rows;
+click "Show all 60 rules" to reveal the rest of the gallery.
 
-| ✓ | column | notes |
-|---|---|---|
-| ✓ | `pick` | checkbox, persisted across reloads |
-| ✓ | `rule_id` | links to the atlas rule page; click to highlight the dot in plots |
-| ✓ | `rule_answer` | ground-truth phrasing, truncated |
-| ✓ | `rb_ii_class` | RB_CLEAR / MIXED / II_CANDIDATE / TOO_HARD from `rb_vs_ii_classification.csv` |
-| ✓ | `difficulty` | tier 1–4 |
-| ✓ | `mcc_mean` | post-exclusion mean MCC |
-| ✓ | `mcc_decile` | decile 1–10 within the 60-rule mcc distribution |
-|   | `mcc_std` | population std-dev of mcc, off by default |
-| ✓ | `base_rate` | true rule base rate |
-| ✓ | `base_rate_decile` | decile 1–10 within the 60-rule base-rate distribution |
-|   | `ast_complexity` | AST node count of the ground-truth lambda |
-|   | `n_features`, `features` | rank/suit/color/position/count, off by default |
-| ✓ | `entropy_norm` | normalized Shannon entropy of equivalence classes |
-| ✓ | `H_decile` | decile 1–10 within the 60-rule entropy distribution |
-|   | `eff_n_classes` | exp of entropy |
-| ✓ | `failure_dir` | mostly_overfit / mostly_undergen / balanced / near_ceiling / low_signal |
-| ✓ | `time_s_mean` | mean response time per gallery response |
-| ✓ | `decomposable` (`decomp(?)`) | **EXPLORATORY** — see caveat below |
-|   | `nearest_conf` | top-1 nearest confusable rule |
-|   | `n_eff` | included responses |
-| ✓ | `rationale` | free-text per-pick reason, persisted |
+**3. Diagnostic-hands panel** (per-rule, opens via 👁) — three sub-blocks:
 
-**4. Distribution plots (Plotly)** — three density plots (mcc_mean, H_norm, base_rate-log10) plus a 3D scatter showing all three dimensions at once. Hover any dot to identify the rule; click to scroll the table to that row and highlight it. Click a `rule_id` in the table to highlight its dot across all four plots.
+- The 6 winning **source-gallery** hands collaborators see in the experiment
+- A **Pro/Flash accuracy table** for the four LLM-pilot strategies (A–D)
+- A flat **5-button strategy strip** (A · entropy, B · misclass,
+  C · flip-from-random, D · flip-from-exemplar, model) plus the active
+  strategy's 10 hands. The model button is muted/italic with a tooltip
+  flagging it as under-developed.
 
-## Coverage panel (live, sticky at top)
-
-**Glance tier (always visible):**
-1. `X / 10 picked · Y / X with rationale`
-2. Difficulty histogram, ✓ when all 4 levels covered
-3. RB/II distribution
-4. MCC range + warn if any pick is outside [0.2, 0.8]
-
-**Details tier (click to expand):**
-5. Feature coverage pills
-6. Failure-mode mix
-7. Estimated total time
-8. Decomposable count (exploratory)
-9. Mutual confusable pairs warning
+**4. Distribution plots (Plotly)** — three density plots (mcc_mean, H_norm,
+base_rate-log10) plus a 3D scatter showing all three at once. The 10 picks
+render as larger star/diamond markers; hovering shows a "✓ selected" tag.
+Click any rule_id in the table to highlight its dot across all four plots;
+click any plot dot to scroll the table to that row.
 
 ## Decomposability caveat
 
-The `decomp(?)` column is marked YES for only 4 rules
-(`straight5_same_suit`, `four_of_a_kind_adjacent`,
-`ap_step1_len3_adj_ordered`, `some_half_red_other_black`). These were
-identified opportunistically during the judge-disagreement fairness
-review, not via a systematic survey.
-
-**The detection method is biased toward harder strata** (II_CANDIDATE
-and TOO_HARD) because it requires partial articulation + low MCC. There
-are likely decomposable rules in RB_CLEAR (e.g., `left_red_right_black`
-is structurally decomposable into "left half red" + "right half black"
-+ "halves boundary") that this method wouldn't find.
-
-**Treat this column as exploratory.** Don't sort or filter on it for
-primary selection decisions. If decomposability turns out to matter for
-your slate, do a proper rubric-based survey (Task 6 in the plan, or use
-an LLM-as-judge with a logged prompt for cheap-and-legible coverage).
-
-## Export
-
-The "Export picks (JSON)" button writes
-`rule_picks_YYYY-MM-DD.json` with:
-
-- `exported_at` timestamp
-- `snapshot` — generation time + git commit + per-stratum counts (so
-  the slate is replayable)
-- Per-pick: `rule_id`, `rationale`, full embedded `metrics` row
-
-This is the defensibility artifact: future re-runs of upstream pipelines
-won't silently change which rules satisfied which criteria.
+The `decomp(?)` column (off by default) is marked YES for only 4 rules.
+These were identified opportunistically during the judge-disagreement
+fairness review, not via a systematic survey. **Treat this column as
+exploratory.**
 
 ## File layout
 
 ```
 selection/
-├── build_selection_table.py    # backend: derives metrics, emits JSON+CSV
-├── rule_kinds.yaml             # 4 seeded decomposability tags
-├── index.html                  # the picker page
+├── build_selection_table.py        # backend: derives metrics, emits JSON+CSV
+├── build_diagnostic_hands_data.py  # backend: per-rule strategy → hands
+├── rule_kinds.yaml                 # 4 seeded decomposability tags
+├── shortlist_final_10.json         # the locked slate (drives 10-rule highlight)
+├── index.html                      # the walkthrough page
 ├── selection.css
 ├── selection.js
 └── output/
-    ├── selection_data.json     # consumed by selection.js
-    └── selection_table.csv     # raw data dump for spreadsheet inspection
+    ├── selection_data.json         # consumed by selection.js
+    ├── diagnostic_hands.json       # consumed by selection.js (diag panel)
+    └── selection_table.csv         # raw data dump for spreadsheet inspection
 ```
 
 ## When to regenerate
 
 Re-run `python -m selection.build_selection_table` after any change to:
+
 - `rule-gallery/analysis/output_human/stage3_scored_final.csv`
 - `rule-gallery/analysis/output_human/rule_summaries.csv`
 - `rule-gallery/analysis/atlas/data/cache/equivalence_extension.json`
@@ -126,10 +109,16 @@ Re-run `python -m selection.build_selection_table` after any change to:
 - `card-games/self-explanation-experiment/rb_vs_ii_classification.csv`
 - `selection/rule_kinds.yaml`
 
-The page hot-reloads via browser refresh.
+Re-run `python -m selection.build_diagnostic_hands_data` after any change
+to the LLM-pilot results (`rule-gallery/analysis/llm_pilot/output/`) or
+the frozen exemplars (`rule-gallery/frozen-exemplars.json`).
+
+The page hot-reloads via browser refresh. `localStorage` is cleared once
+on load if a `viewer_version` mismatch is detected (so collaborators see
+the walkthrough defaults rather than stale picker-mode prefs).
 
 ## Companion docs
 
-- Design: `docs/plans/2026-05-08-rule-selection-cheatsheet-design.md`
-- Implementation plan: `docs/plans/2026-05-08-rule-selection-cheatsheet-plan.md`
-- Selection rubric: `docs/plans/2026-05-08-main-study-rule-selection-rubric.md`
+- Original picker design: `docs/plans/2026-05-08-rule-selection-cheatsheet-design.md`
+- Walkthrough redesign (this revision): `docs/plans/2026-05-09-visualizer-collaborator-walkthrough-design.md`
+- Walkthrough implementation plan: `docs/plans/2026-05-09-visualizer-collaborator-walkthrough-plan.md`
