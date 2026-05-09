@@ -156,7 +156,7 @@
 <body>
   <div class="container">
     <h1>Self-Explanation Experiment — Demo Launcher</h1>
-    <p class="subtitle">Configure and launch any condition. All links include <code>save=local</code> and <code>clear=1</code> for safe demo use.</p>
+    <p class="subtitle">Configure and launch any condition. All links include <code>clear=1</code>; data saves through the Cloudflare Worker into <code>card-games-staging/results_gallery/</code>. Append <code>&amp;save=local</code> to force a browser download for dev tests.</p>
 
     <!-- file:// warning banner: shown only when this page is opened directly
          from disk. The experiment uses fetch() which browsers block on
@@ -464,8 +464,12 @@
 
     // Default supplemental params attached to every preset launch.
     // nRules + nTrials are per-snapshot; we leave them at config defaults
-    // so the snapshot's own size determines them.
-    var defaultParams = 'save=local&clear=1';
+    // so the snapshot's own size determines them. save=local was here
+    // historically (a dev convenience) but it auto-downloads JSON to
+    // collaborators' Downloads folders — bad default. Saves now flow
+    // through the worker by default. Devs can append &save=local
+    // manually to the URL or to params below for local downloads.
+    var defaultParams = 'clear=1';
 
     // The snapshot id chosen in the picker is appended to every preset URL.
     var selectedSnapshotId = null;
@@ -625,7 +629,8 @@
       var descMin = document.getElementById('p-descMinCards').value;
       if (descMin !== '3') params.push('describeMinCards=' + descMin);
 
-      params.push('save=local');
+      // save default = remote (worker-side). Append &save=local to a URL
+      // manually to force a browser download for dev tests.
       params.push('clear=1');
 
       var url = BASE + '?' + params.join('&');
