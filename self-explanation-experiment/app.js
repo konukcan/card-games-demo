@@ -324,9 +324,15 @@ window.SEApp = (function () {
           ruleData, rulePosition, curriculum.rules.length
         );
 
-        // Accumulate trials, audio segments, and the per-rule typed writeup
+        // Accumulate trials and the per-rule typed writeup.
         allTrials = allTrials.concat(gameResult.trials);
-        allAudioSegments = allAudioSegments.concat(gameResult.audioSegments);
+        // gameResult.audioSegments comes from SEAudio.getSegments(), which
+        // is CUMULATIVE across the whole session — every rule returns the
+        // full list to-date. Replacing (not concatenating) avoids the
+        // duplicate-segment bug where rule 1's mic-test would appear N
+        // times after N rules. (The same fix applies to the recap step
+        // below.)
+        allAudioSegments = gameResult.audioSegments;
         if (gameResult.ruleWriteup) {
           allRuleWriteups.push(gameResult.ruleWriteup);
         }
@@ -444,12 +450,11 @@ window.SEApp = (function () {
       // above replaces both per-round writeup AND per-rule voice recap.)
       var recapResult = await SERecap.run(curriculum);
 
-      // Collect any audio segments recorded during recap
-      // (SEAudio.getSegments() returns ALL segments including recap ones)
-      var recapAudioSegments = SEAudio.getSegments();
-      // The recap segments are those beyond what we already collected
-      var newRecapSegments = recapAudioSegments.slice(allAudioSegments.length);
-      allAudioSegments = allAudioSegments.concat(newRecapSegments);
+      // Collect any audio segments recorded during recap. SEAudio
+      // accumulates segments across the whole session; just take the
+      // current cumulative snapshot. (Same pattern as the per-rule loop —
+      // see the comment there.)
+      allAudioSegments = SEAudio.getSegments();
 
       // ── 7. Finalize and save ──
       var endTime = new Date().toISOString();
