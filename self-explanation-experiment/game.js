@@ -100,14 +100,22 @@ window.SEGame = (function () {
   // ════════════════════════════════════════════════════
 
   // waitForRecording(promptText, meta, container) — Standalone recording
-  // flow used for checkpoints, post-gallery prompts, recap, etc.
-  // Phase 4 chunk 5: toggle mechanism — press Space to start, press Space
-  // again to stop. Min-duration gate retained on the explicit-stop path.
-  // Continue button enables as soon as a valid recording exists.
+  // flow used for checkpoints, post-gallery describe prompts, recap.
+  //
+  // 2026-05-09 unification: now uses the same rich widget as
+  // attachRecordingToPromptBox (token / per-trial recording) — live
+  // waveform during recording, "✓ Recorded — Replay" widget after stop.
+  // Previously rendered a plain .se-recording-indicator with no waveform
+  // and no post-stop replay; participants couldn't tell if the recording
+  // captured anything.
+  //
+  // Toggle mechanism: press Space to start, press Space again to stop.
+  // Min-duration gate retained on the explicit-stop path. Continue button
+  // enables as soon as a valid recording exists.
   function waitForRecording(promptText, meta, container) {
     return new Promise(function (resolve) {
-      SEUI.renderPrompt(promptText, container);
-      var indicator = SEUI.renderRecordingIndicator(container);
+      var widget = SEUI.renderPromptRecordingBox(promptText, container);
+      var box = widget.box;
       var continueBtn = SEUI.renderContinueButton(onContinue, container);
 
       var segment = null;
@@ -115,12 +123,17 @@ window.SEGame = (function () {
 
       function updateLoop() {
         if (SEAudio.isRecording()) {
-          SEUI.updateRecordingIndicator(indicator, true, SEAudio.getElapsedMs(), SEAudio.meetsMinDuration());
+          SEUI.updatePromptRecordingBox(box, true, SEAudio.getElapsedMs(), SEAudio.meetsMinDuration());
           rafId = requestAnimationFrame(updateLoop);
         }
       }
 
       function startRecording() {
+        // Re-record from a recorded state: clear the recorded UI so the
+        // box flips back to recording. updatePromptRecordingBox handles
+        // the transition on the next frame; we just need to drop the
+        // .recorded class so the waveform canvas is visible again.
+        box.classList.remove("recorded");
         SEAudio.startRecording(meta);
         rafId = requestAnimationFrame(updateLoop);
       }
@@ -128,15 +141,18 @@ window.SEGame = (function () {
       function stopRecording() {
         if (!SEAudio.isRecording()) return;
         if (!SEAudio.meetsMinDuration()) {
-          // Below min — keep recording, give a console hint. The status
-          // text in the indicator already shows "Keep speaking..." in this
-          // state via updateRecordingIndicator.
+          // Below min — keep recording. updatePromptRecordingBox already
+          // shows "Keep going — minimum 2 seconds." via flashStatus
+          // semantics in attachRecordingToPromptBox; here we just hint
+          // in the console and rely on the rich widget's own status copy.
           console.log("SEGame: keep going — below 2s minimum.");
           return;
         }
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
         SEAudio.stopRecording().then(function (seg) {
-          SEUI.updateRecordingIndicator(indicator, false, 0, false);
+          // showRecordedSegment switches the box to the "recorded" state
+          // with a Replay button — the same UX as token / per-trial.
+          SEUI.showRecordedSegment(box, seg);
           segment = seg;
           continueBtn.disabled = false;
         });
@@ -144,6 +160,13 @@ window.SEGame = (function () {
 
       function onKeyDown(e) {
         if (e.code === "Space" && !e.repeat) {
+          // Don't intercept Space if focus is on the Replay button (or
+          // anything inside the recorded-state UI) — the user might be
+          // trying to play back, not toggle recording.
+          if (e.target && e.target.classList &&
+              e.target.classList.contains("se-rec-replay")) {
+            return;
+          }
           e.preventDefault();
           if (SEAudio.isRecording()) {
             stopRecording();
@@ -165,7 +188,7 @@ window.SEGame = (function () {
         if (SEAudio.isRecording()) {
           if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
           SEAudio.stopRecording().then(function (seg) {
-            SEUI.updateRecordingIndicator(indicator, false, 0, false);
+            SEUI.updatePromptRecordingBox(box, false, 0, false);
             segment = seg;
             done();
           });
