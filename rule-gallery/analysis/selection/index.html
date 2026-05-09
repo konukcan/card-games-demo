@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rule Selection — cherry-pick 10</title>
+  <link rel="stylesheet" href="selection.css">
+</head>
+<body>
+  <header>
+    <h1>Rule Selection</h1>
+    <p class="subtitle">Cherry-pick 10 rules for the follow-up self-explanation study. The picker shows every signal we have on each rule and tracks live coverage as you tick boxes. You pick.</p>
+    <p class="hint">Serve over HTTP (file:// is blocked):
+      <code>python -m http.server 8765 --directory rule-gallery/analysis/selection</code>
+      then open <code>http://localhost:8765/</code></p>
+    <p class="hint" id="snapshot-line"></p>
+  </header>
+
+  <section id="data-status">
+    <p>Loading…</p>
+  </section>
+
+  <details id="legend" open>
+    <summary><strong>Legend</strong> (click to collapse)</summary>
+    <div class="legend-grid">
+      <div class="legend-block">
+        <div class="legend-title">RB/II classification</div>
+        <span class="rb-pill rb-clear">RB_CLEAR</span> verbalized + classified ✓
+        <br><span class="rb-pill mixed">MIXED</span> partial articulation
+        <br><span class="rb-pill ii-candidate">II_CANDIDATE</span> classified OK, can't say why (Ashby II signature)
+        <br><span class="rb-pill too-hard">TOO_HARD</span> no signal — drop
+      </div>
+      <div class="legend-block">
+        <div class="legend-title">Failure mode (fail_dir)</div>
+        <span class="fail-pill mostly-overfit">mostly_overfit</span> lambdas too narrow
+        <br><span class="fail-pill mostly-undergen">mostly_undergen</span> lambdas too broad
+        <br><span class="fail-pill balanced">balanced</span> mixed direction
+        <br><span class="fail-pill near-ceiling">near_ceiling</span> rule is easy
+        <br><span class="fail-pill low-signal">low_signal</span> &lt; 5 directional fails
+      </div>
+      <div class="legend-block">
+        <div class="legend-title">Decile (1=lowest, 10=highest)</div>
+        <div class="decile-strip">
+          <span class="decile-pill d-1">D1</span>
+          <span class="decile-pill d-2">D2</span>
+          <span class="decile-pill d-3">D3</span>
+          <span class="decile-pill d-4">D4</span>
+          <span class="decile-pill d-5">D5</span>
+          <span class="decile-pill d-6">D6</span>
+          <span class="decile-pill d-7">D7</span>
+          <span class="decile-pill d-8">D8</span>
+          <span class="decile-pill d-9">D9</span>
+          <span class="decile-pill d-10">D10</span>
+        </div>
+        Each rule gets one decile per metric (mcc_mean, H_norm, base_rate). Same color scale for all three.
+      </div>
+    </div>
+  </details>
+
+  <section id="coverage-panel"></section>
+
+  <section id="filter-row">
+    <button id="toggle-band-filter">Hide rules outside [0.2, 0.8] mcc band</button>
+    <button id="export-picks">Export picks (JSON)</button>
+    <button id="clear-picks">Clear all picks &amp; rationales</button>
+    <details id="column-toggles" style="display: inline-block; margin-left: 0.5rem;">
+      <summary>Toggle columns</summary>
+      <div id="column-toggle-list"></div>
+    </details>
+  </section>
+
+  <table id="rule-table">
+    <thead><tr id="rule-thead-row"></tr></thead>
+    <tbody id="rule-tbody"></tbody>
+  </table>
+
+  <section id="plots-section">
+    <h2>Distributions</h2>
+    <p class="subtitle">Hover any dot to identify the rule. Click to scroll the table to that row and highlight it.</p>
+
+    <div id="density-plots-row">
+      <div id="density-mcc"  class="plot-pane"></div>
+      <div id="density-H"    class="plot-pane"></div>
+      <div id="density-br"   class="plot-pane"></div>
+    </div>
+
+    <h3>Three dimensions at once</h3>
+    <p class="subtitle">Each rule is one dot in (mcc_mean × H_norm × log10 base_rate) space, colored by RB/II class. Drag to rotate; hover for details.</p>
+    <div id="scatter-3d" class="plot-pane plot-3d"></div>
+  </section>
+
+  <!-- Plotly via CDN. Loaded after the table-rendering JS so the page's
+       primary content paints before the ~3MB Plotly bundle arrives. -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="selection.js"></script>
+</body>
+</html>

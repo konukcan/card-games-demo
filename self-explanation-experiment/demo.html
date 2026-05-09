@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Explanation Experiment — Demo Launcher</title>
+  <style>
+    :root {
+      --ink: #1a1a2e;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f0f2f5;
+      --brand: #0a66c2;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 32px 20px;
+      line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+    /* ── Quick Guide ── */
+    .guide {
+      background: #fff;
+      border: 2px solid var(--brand);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .guide h2 { font-size: 15px; color: var(--brand); margin-bottom: 10px; }
+    .guide p { font-size: 14px; margin-bottom: 8px; }
+    .guide table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+    .guide th { text-align: left; padding: 6px 8px; border-bottom: 2px solid var(--border); font-weight: 600; color: var(--muted); text-transform: uppercase; font-size: 11px; }
+    .guide td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    .guide code { background: #f1f5f9; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+    .guide .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .tag-control { background: #f1f5f9; color: #475569; }
+    .tag-explain { background: #eff6ff; color: #1d4ed8; }
+    .tag-combined { background: #fef3c7; color: #92400e; }
+    .tag-peer { background: #fdf2f8; color: #9d174d; }
+
+    /* ── Parameter Builder ── */
+    .builder {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .builder h2 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .param-item { display: flex; flex-direction: column; gap: 4px; }
+    .param-item label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+    .param-item select, .param-item input {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      background: #fff;
+    }
+    .param-item select:focus, .param-item input:focus {
+      outline: none;
+      border-color: var(--brand);
+    }
+    .param-divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* ── Launch Button ── */
+    .launch-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .launch-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .launch-btn:hover { background: #094d96; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(10,102,194,0.3); }
+    .launch-preview {
+      flex: 1;
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--muted);
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 6px;
+      word-break: break-all;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Presets ── */
+    .presets {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .presets h2 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .preset-grid { display: flex; flex-direction: column; gap: 8px; }
+    .preset-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--ink);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .preset-row:hover { border-color: var(--brand); box-shadow: 0 2px 8px rgba(10,102,194,0.1); }
+    .preset-name { font-weight: 600; font-size: 14px; min-width: 200px; }
+    .preset-desc { font-size: 12px; color: var(--muted); flex: 1; }
+    .preset-arrow { color: var(--muted); margin-left: auto; }
+
+    /* ── DevTools Reference ── */
+    .devtools-ref {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+    .devtools-ref h2 { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .cmd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .cmd-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+    .cmd-table code { background: #1e1e1e; color: #d4d4d4; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Self-Explanation Experiment — Demo Launcher</h1>
+    <p class="subtitle">Configure and launch any condition. All links include <code>save=local</code> and <code>clear=1</code> for safe demo use.</p>
+
+    <!-- file:// warning banner: shown only when this page is opened directly
+         from disk. The experiment uses fetch() which browsers block on
+         file:// origins, so every launch link would fail with a vague
+         "Failed to fetch" error. This banner explains the fix up front. -->
+    <div id="file-warning" style="display:none; background:#fef2f2; border:2px solid var(--red); border-radius:10px; padding:16px 20px; margin-bottom:24px;">
+      <h2 style="font-size:15px; color:var(--red); margin-bottom:8px;">⚠ You opened this file directly from disk (<code>file://</code>)</h2>
+      <p style="font-size:14px; margin-bottom:10px;">
+        The experiment loads data via <code>fetch()</code>, which browsers block on <code>file://</code> URLs. The launch buttons below are disabled until you serve this page over HTTP. From the <code>card-games/</code> folder, run:
+      </p>
+      <pre style="margin:8px 0; padding:10px 14px; background:#1e1e1e; color:#d4d4d4; border-radius:6px; font-size:12px; overflow-x:auto;">python3 -m http.server 8080</pre>
+      <p style="font-size:13px; color:var(--muted);">
+        Then open <a id="fw-link" href="#" style="color:var(--brand);">http://localhost:8080/self-explanation-experiment/demo.html</a>
+      </p>
+    </div>
+
+    <!-- Quick Guide -->
+    <div class="guide">
+      <h2>Quick Guide: What to Demo (v2 mature design)</h2>
+      <p>The v2 condition set has <strong>4 locked conditions</strong> along the verbalisation axis (none / description / counterfactual / periodic rule articulation). <code>peer</code> and <code>token-type</code> are kept in the codebase for archival replication but are deprecated for new pilots.</p>
+      <table>
+        <tr><th>Condition</th><th>What participant does</th><th>Key theoretical question</th></tr>
+        <tr>
+          <td><code>silent</code> <span class="tag tag-control">control</span></td>
+          <td>View gallery, classify silently</td>
+          <td>Baseline: rule inference without verbalisation</td>
+        </tr>
+        <tr>
+          <td><code>describe</code> <span class="tag tag-control">control</span></td>
+          <td>Describe at least 3 cards before classifying</td>
+          <td>Attention control: does verbalising attention alone help?</td>
+        </tr>
+        <tr>
+          <td><code>type</code> <span class="tag tag-explain">explain</span></td>
+          <td>Periodic recorded rule articulation at trial checkpoints</td>
+          <td>Top-down hypothesis externalisation</td>
+        </tr>
+        <tr>
+          <td><code>token</code> <span class="tag tag-explain">explain</span></td>
+          <td>For each hand, recorded counterfactual reasoning (which cards would have to change to flip it).</td>
+          <td>Contrastive token-level reasoning</td>
+        </tr>
+        <tr style="opacity:0.55;">
+          <td><code>token-type</code> <span class="tag tag-combined">deprecated</span></td>
+          <td>Per-hand counterfactual + periodic rule articulation (v1)</td>
+          <td>(Not in v2 design)</td>
+        </tr>
+        <tr style="opacity:0.55;">
+          <td><code>peer</code> <span class="tag tag-peer">deprecated</span></td>
+          <td>Judge a fictional participant's verdict, then explain (v1)</td>
+          <td>(Not in v2 design)</td>
+        </tr>
+      </table>
+      <p style="font-size: 13px; color: var(--muted); margin-top: 12px;">
+        <strong>Feedback</strong> defaults to <strong>off</strong> in v2. <strong>tokenSelection</strong> defaults to <strong>off</strong> in v2 (was <code>on</code> in v1). Toggle either via the parameter builder for legacy A/B comparisons.
+      </p>
+    </div>
+
+    <!-- Snapshot picker (v2 mature design) -->
+    <div class="builder" style="padding-bottom:12px;">
+      <h2>SE Snapshot</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">
+        Required for v2. The snapshot drives rule selection, exemplars, and
+        the adversarial trial pool. Build via
+        <code>python -m se_compare.build_snapshot_from_pilot ...</code> from
+        <code>rule-gallery/analysis/</code>.
+      </p>
+      <div id="snapshot-picker">
+        <em style="color:var(--muted);font-size:13px;">Loading snapshot manifest...</em>
+      </div>
+    </div>
+
+    <!-- Rules in this snapshot (populated after snapshot loads) -->
+    <div class="builder" id="rules-panel" style="display:none;">
+      <h2>Rules in this snapshot</h2>
+      <table id="rules-table" style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">Rule ID</th>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">Plain English</th>
+            <th style="padding:6px 8px;border-bottom:2px solid var(--border);">Group</th>
+          </tr>
+        </thead>
+        <tbody id="rules-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Rule Explorer link block -->
+    <div class="builder">
+      <h2>🔍 Rule Explorer (per-rule diagnostic-hands viewer)</h2>
+      <p style="font-size:13px;margin-bottom:10px;">
+        Per rule, shows the hands each of the 4 strategies produces and how Gemini Pro/Flash classified each.
+      </p>
+      <p style="font-size:14px;margin-top:8px;">
+        <a href="../rule-gallery/analysis/selection/" target="_blank" style="display:inline-block;padding:10px 24px;background:var(--brand);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Open Rule Explorer →</a>
+      </p>
+    </div>
+
+    <!-- Adversarial-strategy radio (replaces dropdown; default B_misclass) -->
+    <div class="builder">
+      <h2>Adversarial-hand strategy</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+        Drives <code>?adversarialStrategy=</code> on every preset launch and the custom-launch URL. Pilot accuracies are Gemini Pro / Flash, mean across the 10 rules in this snapshot.
+      </p>
+      <div id="p-strategy-radio" style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+        <label><input type="radio" name="strategy" value="A_entropy" checked onchange="onStrategyChange()"> <strong>A · Entropy</strong> (default) — probes representational ambiguity (LLM 0.83/0.81)</label>
+        <label><input type="radio" name="strategy" value="B_misclass" onchange="onStrategyChange()"> <strong>B · Misclassification</strong> — probes collective error (0.79/0.56)</label>
+        <label><input type="radio" name="strategy" value="C_flip_from_random_winning" onchange="onStrategyChange()"> <strong>C · Flip from random winning</strong> — probes feature-locality (0.84/0.87)</label>
+        <label><input type="radio" name="strategy" value="D_flip_from_exemplars" onchange="onStrategyChange()"> <strong>D · Flip from exemplar</strong> — probes feature-locality from gallery (0.90/0.75)</label>
+      </div>
+    </div>
+
+    <!-- Quick-Launch Presets -->
+    <div class="presets">
+      <h2>Quick-Launch Presets</h2>
+      <div class="preset-grid" id="presets"></div>
+    </div>
+
+    <!-- Parameter Builder -->
+    <div class="builder">
+      <h2>Custom Configuration</h2>
+      <div class="param-grid">
+        <!-- Condition -->
+        <div class="param-item">
+          <label>Condition</label>
+          <select id="p-condition" onchange="updateLink()">
+            <option value="silent" selected>Silent (control)</option>
+            <option value="describe">Describe</option>
+            <option value="type">Type-level</option>
+            <option value="token">Token (counterfactual)</option>
+            <option value="token-type">Token + Type (legacy)</option>
+            <option value="peer">Peer (legacy)</option>
+          </select>
+        </div>
+
+        <!-- Strategy + variant moved to top-level radio (default B_misclass).
+             Variant retired in v2 (C/D are first-class strategies now). -->
+
+        <!-- Group X / Y (dev override) -->
+        <div class="param-item">
+          <label>Group</label>
+          <select id="p-group" onchange="updateLink()">
+            <option value="" selected>(roll)</option>
+            <option value="X">X</option>
+            <option value="Y">Y</option>
+          </select>
+        </div>
+
+        <!-- Feedback (forced off in v2 per design §2; toggle for legacy A/B) -->
+        <div class="param-item">
+          <label>Feedback</label>
+          <select id="p-feedback" onchange="updateLink()">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </div>
+
+        <!-- Token card selection (off by default in v2 per design §2) -->
+        <div class="param-item">
+          <label>Token Card Selection</label>
+          <select id="p-tokenSelection" onchange="updateLink()">
+            <option value="off" selected>Off</option>
+            <option value="on">On (legacy)</option>
+          </select>
+        </div>
+
+        <!-- Re-engagement -->
+        <div class="param-item">
+          <label>Re-engagement</label>
+          <select id="p-reEngage" onchange="updateLink()">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </div>
+
+        <!-- Skip tutorial -->
+        <div class="param-item">
+          <label>Tutorial</label>
+          <select id="p-skipTutorial" onchange="updateLink()">
+            <option value="show" selected>Show tutorial</option>
+            <option value="skip">Skip tutorial</option>
+          </select>
+        </div>
+
+        <div class="param-divider"></div>
+
+        <!-- Trials per rule -->
+        <div class="param-item">
+          <label>Trials / Rule</label>
+          <select id="p-nTrials" onchange="updateLink()">
+            <option value="3">3 (fast demo)</option>
+            <option value="5">5</option>
+            <option value="10" selected>10 (default)</option>
+          </select>
+        </div>
+
+        <!-- Number of rules -->
+        <div class="param-item">
+          <label>Rules</label>
+          <select id="p-nRules" onchange="updateLink()">
+            <option value="1">1 (quick test)</option>
+            <option value="2" selected>2</option>
+            <option value="4">4 (default)</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+
+        <!-- Gallery time -->
+        <div class="param-item">
+          <label>Gallery Time (s)</label>
+          <select id="p-galleryTime" onchange="updateLink()">
+            <option value="5">5 (fast demo)</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="30">30 (default)</option>
+          </select>
+        </div>
+
+        <!-- Min recording -->
+        <div class="param-item">
+          <label>Min Record (s)</label>
+          <select id="p-minRec" onchange="updateLink()">
+            <option value="1">1</option>
+            <option value="2" selected>2 (default)</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div class="param-divider"></div>
+
+        <!-- Checkpoints -->
+        <div class="param-item">
+          <label>Checkpoints</label>
+          <input type="text" id="p-checkpoints" value="0,3,6,10" onchange="updateLink()" style="width:100%;">
+        </div>
+
+        <!-- Accumulate -->
+        <div class="param-item">
+          <label>Accumulate History</label>
+          <select id="p-accumulate" onchange="updateLink()">
+            <option value="on" selected>On</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+
+        <!-- Describe min cards -->
+        <div class="param-item">
+          <label>Describe Min Cards</label>
+          <select id="p-descMinCards" onchange="updateLink()">
+            <option value="3" selected>3 (default)</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="launch-row">
+        <a class="launch-btn" id="launch-link" href="#" target="_blank">Launch Experiment</a>
+        <div class="launch-preview" id="launch-preview"></div>
+      </div>
+    </div>
+
+    <!-- Console DevTools -->
+    <div class="devtools-ref">
+      <h2>Console DevTools</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 10px;">Open the browser console (Cmd+Option+J) and type these commands:</p>
+      <table class="cmd-table">
+        <tr><td><code>DevTools.skip()</code></td><td>Skip current trial/screen (clicks Winning or Continue)</td></tr>
+        <tr><td><code>DevTools.skipAll()</code></td><td>Blast through multiple screens rapidly</td></tr>
+        <tr><td><code>DevTools.skipTutorial()</code></td><td>Mark tutorial done and reload (jump to game)</td></tr>
+        <tr><td><code>DevTools.skipGallery()</code></td><td>Skip gallery countdown</td></tr>
+        <tr><td><code>DevTools.info()</code></td><td>Show current condition, phase, and state</td></tr>
+        <tr><td><code>DevTools.setCondition('type')</code></td><td>Reload with a different condition</td></tr>
+        <tr><td><code>DevTools.fastMode()</code></td><td>Reload with galleryTime=3, nTrials=3, nRules=2</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    var BASE = 'index.html';
+
+    // ── Presets (v2 mature design) ──
+    // Per design §2 the locked condition set is: silent, describe, type, token.
+    // peer + token-type are deprecated (kept in code per §10.4 but not
+    // featured here). Preset descriptions deliberately do not mention the
+    // end-of-curriculum typed bulk task — §3.3 surprise-leak audit requires
+    // the dev demo, the tutorial, and the Prolific study description to
+    // all stay quiet about it.
+    //
+    // adversarialStrategy=bayesian is the default; deeper strategy
+    // exploration goes through the Custom Configuration builder below.
+    // Strategy is set via the radio above; presetUrl() injects the chosen
+    // strategy into each preset URL at click time. Preset .params here
+    // intentionally OMIT adversarialStrategy.
+    var presets = [
+      { name: 'Silent (control)',  params: 'condition=silent',
+        desc: 'Baseline: classification only, no in-play prompts' },
+      { name: 'Describe',          params: 'condition=describe',
+        desc: 'Verbal card description before each classification trial' },
+      { name: 'Type-level',        params: 'condition=type&checkpoints=' + encodeURIComponent('[0,3,6,10]'),
+        desc: 'Periodic recorded rule articulation at trial checkpoints' },
+      { name: 'Token (counterfactual)', params: 'condition=token',
+        desc: 'Per-trial counterfactual recording before classification' },
+    ];
+
+    // Default supplemental params attached to every preset launch.
+    // nRules + nTrials are per-snapshot; we leave them at config defaults
+    // so the snapshot's own size determines them.
+    var defaultParams = 'save=local&clear=1';
+
+    // The snapshot id chosen in the picker is appended to every preset URL.
+    var selectedSnapshotId = null;
+
+    // Build a preset URL from its preset.params, with the current snapshot,
+    // current strategy radio choice, and default params appended.
+    function presetUrl(p) {
+      var snapPart = selectedSnapshotId ? '&seSnapshot=' + selectedSnapshotId : '';
+      var stratEl = document.querySelector('input[name="strategy"]:checked');
+      var stratPart = stratEl ? '&adversarialStrategy=' + stratEl.value : '';
+      return BASE + '?' + p.params + stratPart + snapPart + '&' + defaultParams;
+    }
+
+    // Re-render presets + custom URL when strategy radio changes.
+    function onStrategyChange() {
+      renderPresets();
+      updateLink();
+    }
+
+    function renderPresets() {
+      var html = '';
+      presets.forEach(function(p) {
+        var url = presetUrl(p);
+        var disabled = !selectedSnapshotId;
+        html += '<a class="preset-row" href="' + (disabled ? '#' : url) + '" ' +
+          (disabled ? 'style="pointer-events:none;opacity:0.4;" ' : 'target="_blank"') + '>' +
+          '<span class="preset-name">' + p.name + '</span>' +
+          '<span class="preset-desc">' + p.desc + '</span>' +
+          '<span class="preset-arrow">&rarr;</span>' +
+          '</a>';
+      });
+      document.getElementById('presets').innerHTML = html;
+    }
+
+    // ── Snapshot picker ──
+    // Fetches the snapshot manifest at `rule-gallery/analysis/output_se_snapshots/index.json`
+    // and renders a <select> with one option per snapshot. The first
+    // snapshot is pre-selected. Disabled in file:// mode (the file-warning
+    // banner blocks the whole flow there anyway).
+    function loadSnapshotPicker() {
+      var pickerEl = document.getElementById('snapshot-picker');
+      if (!pickerEl) return;
+      var manifestUrl = '../rule-gallery/analysis/output_se_snapshots/index.json';
+      fetch(manifestUrl)
+        .then(function (res) {
+          if (!res.ok) throw new Error('manifest HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (manifest) {
+          var snaps = (manifest && manifest.snapshots) || [];
+          if (snaps.length === 0) {
+            pickerEl.innerHTML = '<em style="color:var(--muted);font-size:13px;">No snapshots found. Run <code>python -m se_compare.build_se_snapshot --demo</code> from <code>rule-gallery/analysis/</code>.</em>';
+            return;
+          }
+          var opts = snaps.map(function (s, idx) {
+            var label = s.snapshot_id +
+              ' (' + (s.n_rules || '?') + ' rules' +
+              (s.placeholder_strategy
+                ? ' · placeholder=' + s.placeholder_strategy
+                : '') +
+              ')';
+            return '<option value="' + s.snapshot_id + '"' +
+              (idx === 0 ? ' selected' : '') + '>' + label + '</option>';
+          }).join('');
+          pickerEl.innerHTML =
+            '<select id="snapshot-select" onchange="onSnapshotChange()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;">' +
+            opts + '</select>';
+          selectedSnapshotId = snaps[0].snapshot_id;
+          renderPresets();
+          updateLink();
+          loadRulesPanel();
+        })
+        .catch(function (err) {
+          console.warn('snapshot-picker:', err);
+          pickerEl.innerHTML =
+            '<em style="color:var(--red);font-size:13px;">Could not load snapshot manifest (' + (err.message || err) + '). ' +
+            'Build a snapshot via <code>python -m se_compare.build_se_snapshot --demo</code>.</em>';
+        });
+    }
+
+    function onSnapshotChange() {
+      var sel = document.getElementById('snapshot-select');
+      selectedSnapshotId = sel ? sel.value : null;
+      renderPresets();
+      updateLink();
+      loadRulesPanel();
+    }
+
+    // ── Rules-in-snapshot panel ──
+    // Renders selected_rules as a 3-column table: Rule ID, Plain English,
+    // Group. Difficulty / RB-II / N classes deliberately omitted — that
+    // detail lives in the Rule Explorer; demo viewers don't need it here.
+    function loadRulesPanel() {
+      var panel = document.getElementById('rules-panel');
+      var tbody = document.getElementById('rules-tbody');
+      if (!panel || !tbody || !selectedSnapshotId) return;
+      var snapUrl = '../rule-gallery/analysis/output_se_snapshots/' +
+        selectedSnapshotId + '/se_snapshot_' + selectedSnapshotId + '.json';
+      fetch(snapUrl)
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (snap) {
+          var rules = snap.selected_rules || [];
+          var rows = rules.map(function (r) {
+            return '<tr>' +
+              '<td style="padding:4px 8px;border-bottom:1px solid var(--border);"><code>' + r.rule_id + '</code></td>' +
+              '<td style="padding:4px 8px;border-bottom:1px solid var(--border);">' + (r.rule_answer || '—') + '</td>' +
+              '<td style="text-align:center;padding:4px 8px;border-bottom:1px solid var(--border);">' + (r.group || '?') + '</td>' +
+              '</tr>';
+          }).join('');
+          tbody.innerHTML = rows;
+          panel.style.display = '';
+        })
+        .catch(function (e) {
+          console.warn('rules-panel load failed:', e);
+          panel.style.display = 'none';
+        });
+    }
+
+    function updateLink() {
+      var params = [];
+      params.push('condition=' + document.getElementById('p-condition').value);
+      params.push('feedback=' + document.getElementById('p-feedback').value);
+
+      // v2 strategy from the radio at top of page (variant retired)
+      var stratEl = document.querySelector('input[name="strategy"]:checked');
+      if (stratEl) params.push('adversarialStrategy=' + stratEl.value);
+      var groupSel = document.getElementById('p-group');
+      if (groupSel && groupSel.value) {
+        params.push('group=' + groupSel.value);
+      }
+      if (selectedSnapshotId) {
+        params.push('seSnapshot=' + selectedSnapshotId);
+      }
+
+      var tokenSel = document.getElementById('p-tokenSelection').value;
+      if (tokenSel === 'off') params.push('tokenSelection=off');
+
+      var reEngage = document.getElementById('p-reEngage').value;
+      if (reEngage === 'on') params.push('reEngagement=on');
+
+      var skipTut = document.getElementById('p-skipTutorial').value;
+      if (skipTut === 'skip') params.push('skipTutorial=1');
+
+      params.push('nTrials=' + document.getElementById('p-nTrials').value);
+      params.push('nRules=' + document.getElementById('p-nRules').value);
+      params.push('galleryTime=' + document.getElementById('p-galleryTime').value);
+      params.push('minRecordingDuration=' + document.getElementById('p-minRec').value);
+
+      var checkpoints = document.getElementById('p-checkpoints').value.trim();
+      if (checkpoints && checkpoints !== '0,3,6,10') {
+        params.push('checkpoints=' + encodeURIComponent('[' + checkpoints + ']'));
+      }
+
+      var accumulate = document.getElementById('p-accumulate').value;
+      if (accumulate === 'off') params.push('accumulate=off');
+
+      var descMin = document.getElementById('p-descMinCards').value;
+      if (descMin !== '3') params.push('describeMinCards=' + descMin);
+
+      params.push('save=local');
+      params.push('clear=1');
+
+      var url = BASE + '?' + params.join('&');
+      document.getElementById('launch-link').href = url;
+      document.getElementById('launch-preview').textContent = url;
+    }
+
+    renderPresets();
+    updateLink();
+    loadSnapshotPicker();
+
+    // ── file:// guard ──
+    // If the page is opened directly from disk, every launch link would fail
+    // at fetch() with a vague "Failed to fetch" error. Show the banner and
+    // disable all launch UI so the user gets a clear, actionable message.
+    if (window.location.protocol === 'file:') {
+      document.getElementById('file-warning').style.display = 'block';
+
+      // Populate the example localhost URL so it matches the file's path.
+      // E.g. /Users/.../card-games/self-explanation-experiment/demo.html
+      //   → /self-explanation-experiment/demo.html
+      var pathMatch = window.location.pathname.match(/\/card-games\/(.*)$/);
+      var suffix = pathMatch ? pathMatch[1] : 'self-explanation-experiment/demo.html';
+      var localUrl = 'http://localhost:8080/' + suffix;
+      var fwLink = document.getElementById('fw-link');
+      fwLink.href = localUrl;
+      fwLink.textContent = localUrl;
+
+      // Disable the main launch button
+      var launchBtn = document.getElementById('launch-link');
+      launchBtn.style.pointerEvents = 'none';
+      launchBtn.style.opacity = '0.4';
+      launchBtn.textContent = 'Launch disabled — serve via HTTP';
+
+      // Disable all preset rows
+      var rows = document.querySelectorAll('.preset-row');
+      rows.forEach(function (r) {
+        r.style.pointerEvents = 'none';
+        r.style.opacity = '0.4';
+      });
+    }
+  </script>
+</body>
+</html>

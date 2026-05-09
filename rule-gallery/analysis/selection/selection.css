@@ -1,0 +1,531 @@
+/* Rule-selection picker styles — vanilla, no framework. */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 1500px;
+  margin: 1rem auto;
+  padding: 0 1rem;
+  color: #222;
+}
+
+header h1 { margin-bottom: 0.2rem; }
+.subtitle { color: #444; margin-top: 0; }
+.hint { color: #666; font-size: 0.88em; margin: 0.3rem 0; }
+.hint code { background: #f0f0f0; padding: 1px 4px; border-radius: 3px; }
+
+#data-status {
+  margin: 0.5rem 0;
+  font-size: 0.92em;
+}
+#data-status.error {
+  color: #b91c1c; background: #fef2f2;
+  padding: 0.6rem; border: 1px solid #fca5a5; border-radius: 4px;
+}
+#data-status.warn {
+  color: #92400e; background: #fffbeb;
+  padding: 0.6rem; border: 1px solid #fde68a; border-radius: 4px;
+}
+#data-status.ok { display: none; }
+
+/* Coverage panel — sticky at top of viewport while scrolling the table. */
+#coverage-panel {
+  position: sticky;
+  top: 0;
+  background: #fffaf0;
+  border: 1px solid #d97706;
+  padding: 0.6rem 0.8rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  z-index: 10;
+}
+.glance-tier { font-weight: 500; line-height: 1.6; }
+.glance-tier strong { font-weight: 600; }
+.details-tier {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #d97706;
+  font-size: 0.92em;
+  color: #555;
+}
+.details-tier > div { margin: 0.2rem 0; }
+.details-tier summary { cursor: pointer; font-weight: 500; color: #92400e; }
+
+#filter-row { margin: 0.5rem 0; }
+#filter-row button {
+  margin-right: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+#column-toggles summary { cursor: pointer; font-size: 0.9em; }
+#column-toggle-list {
+  display: grid; grid-template-columns: repeat(3, auto);
+  gap: 0.2rem 1rem;
+  background: #f9f9f9;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  margin-top: 0.3rem;
+  font-size: 0.88em;
+}
+#column-toggle-list label { white-space: nowrap; cursor: pointer; }
+
+/* Table */
+table { border-collapse: collapse; font-size: 0.86em; width: 100%; }
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #f5f5f5;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  /* Header sits below the coverage panel, which is also sticky. */
+  top: 110px;
+  z-index: 5;
+}
+th .col-help {
+  font-size: 0.85em; color: #888; cursor: help;
+}
+tbody tr:nth-child(even) { background: #fafafa; }
+tbody tr.picked { background: #fffacd; }
+tbody tr.picked-but-hidden td { color: #999; font-style: italic; }
+tbody tr.picked-but-hidden::after {
+  content: "(hidden by filter — uncheck to remove)";
+  color: #b45309;
+  font-size: 0.85em;
+}
+
+td code { font-size: 0.95em; }
+.rationale-input {
+  width: 100%;
+  min-width: 120px;
+  font-size: 0.85em;
+  border: 1px solid #ccc;
+  padding: 2px 4px;
+  font-family: inherit;
+}
+.rationale-input:focus {
+  outline: 2px solid #d97706;
+  outline-offset: -2px;
+}
+
+/* Pills */
+.pill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  margin-right: 4px;
+  background: #ddd;
+}
+.pill.lit { background: #4ade80; color: #064e3b; }
+.coverage-warn { color: #b45309; }
+.coverage-ok { color: #14532d; }
+
+/* RB/II classification pills */
+.rb-pill {
+  font-size: 0.78em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.rb-pill.rb-clear      { background: #c7f0d8; color: #14532d; }
+.rb-pill.mixed         { background: #fff3c4; color: #78350f; }
+.rb-pill.ii-candidate  { background: #fed7aa; color: #7c2d12; }
+.rb-pill.too-hard      { background: #e5e5e5; color: #525252; }
+
+/* Failure-mode pills (subtle) */
+.fail-pill { font-size: 0.82em; color: #555; }
+.fail-pill.mostly-overfit  { color: #1e40af; }
+.fail-pill.mostly-undergen { color: #b45309; }
+.fail-pill.balanced        { color: #6d28d9; }
+.fail-pill.near-ceiling    { color: #14532d; }
+.fail-pill.low-signal      { color: #999; font-style: italic; }
+
+/* Legend bar */
+#legend {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.8rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.88em;
+}
+#legend > summary { cursor: pointer; font-weight: 500; }
+#legend .legend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 0.5rem;
+  line-height: 1.7;
+}
+#legend .legend-block { color: #444; }
+#legend .legend-title {
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 0.3rem;
+  font-size: 0.92em;
+}
+#legend .decile-strip { line-height: 1.4; margin-bottom: 0.3rem; }
+
+/* Decile pills — viridis-ish 10-stop scale (low=cool, high=warm).
+   Used both in the legend and in the table cells. */
+.decile-pill {
+  display: inline-block;
+  font-size: 0.78em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 2px;
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+}
+/* Plots section */
+#plots-section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 2px solid #ddd;
+}
+#plots-section h2 { margin-bottom: 0.2rem; }
+#plots-section h3 { margin: 1.5rem 0 0.2rem 0; }
+
+#density-plots-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.plot-pane {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  height: 320px;
+  overflow: hidden;
+}
+.plot-pane.plot-3d { height: 560px; }
+
+/* Cross-plot click highlight on the table row */
+@keyframes flash-highlight {
+  0%, 100% { background-color: #fffacd; }
+  20%      { background-color: #fde68a; }
+  50%      { background-color: #fef3c7; }
+}
+tbody tr.flash-from-plot {
+  animation: flash-highlight 1.6s ease-in-out;
+}
+
+.decile-pill.d-1  { background: #440154; color: #fff; }
+.decile-pill.d-2  { background: #482878; color: #fff; }
+.decile-pill.d-3  { background: #3e4989; color: #fff; }
+.decile-pill.d-4  { background: #31688e; color: #fff; }
+.decile-pill.d-5  { background: #26828e; color: #fff; }
+.decile-pill.d-6  { background: #1f9e89; color: #fff; }
+.decile-pill.d-7  { background: #35b779; color: #14532d; }
+.decile-pill.d-8  { background: #6ece58; color: #14532d; }
+.decile-pill.d-9  { background: #b5de2b; color: #14532d; }
+.decile-pill.d-10 { background: #fde725; color: #78350f; }
+
+/* ---------------------------------------------------------------------- */
+/* Diagnostic-hands toggle + expansion panel                              */
+/* ---------------------------------------------------------------------- */
+
+button.diag-toggle {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0 0.4rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.6rem;
+  color: #475569;
+}
+button.diag-toggle:hover { background: #f1f5f9; }
+button.diag-toggle.open  { background: #fde68a; border-color: #ca8a04; }
+button.diag-toggle:disabled { opacity: 0.3; cursor: not-allowed; }
+
+tbody tr.diag-detail > td {
+  background: #f8fafc;
+  border-bottom: 2px solid #94a3b8;
+  padding: 0.75rem 1rem;
+}
+
+.diag-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.diag-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 0.4rem;
+}
+
+button.diag-tab {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px 4px 0 0;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #334155;
+}
+button.diag-tab:hover { background: #f1f5f9; }
+button.diag-tab.active {
+  background: #fde68a;
+  border-color: #ca8a04;
+  color: #422006;
+  font-weight: 600;
+}
+button.diag-tab.unavailable {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.diag-meta {
+  font-size: 0.8rem;
+  color: #475569;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.diag-hands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+  gap: 0.75rem;
+}
+
+.diag-hand {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+.diag-hand-cards {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 0.4rem;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+.diag-hand-cards img {
+  width: 50px;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.diag-hand-meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  color: #1e293b;
+}
+
+.diag-hand-splitters {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+}
+.diag-hand-splitters summary {
+  cursor: pointer;
+  color: #64748b;
+}
+.splitters-section {
+  margin: 0.3rem 0 0.3rem 0.6rem;
+}
+.splitters-section strong {
+  font-size: 0.75rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.splitter-row {
+  margin-left: 0.4rem;
+  padding: 0.1rem 0;
+}
+.splitter-row code {
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  padding: 0 0.3rem;
+  border-radius: 2px;
+}
+.splitter-prob {
+  display: inline-block;
+  min-width: 4em;
+  color: #0369a1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.splitter-n {
+  display: inline-block;
+  min-width: 3em;
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+}
+
+/* ---------------------------------------------------------------------- */
+/* LLM-pilot tab — sub-condition selector + per-model response pills      */
+/* ---------------------------------------------------------------------- */
+
+.diag-llm-pilot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.diag-llm-summary-table {
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-bottom: 0.4rem;
+}
+.diag-llm-summary-table th {
+  background: #f1f5f9;
+  padding: 0.2rem 0.6rem;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+}
+.diag-llm-summary-table td {
+  padding: 0.2rem 0.6rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  cursor: pointer;
+}
+.diag-llm-summary-table tr:hover td { background: #f8fafc; }
+.diag-llm-summary-table tr.active-sub td {
+  background: #fef3c7;
+  font-weight: 600;
+}
+
+.diag-subtabs {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.3rem;
+}
+button.diag-subtab {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: #334155;
+}
+button.diag-subtab:hover { background: #f1f5f9; }
+button.diag-subtab.active {
+  background: #fde68a;
+  border-color: #ca8a04;
+  color: #422006;
+  font-weight: 600;
+}
+
+.diag-pilot-hand {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+
+.diag-pilot-responses {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0 0.3rem 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+}
+.pilot-pill {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+.pilot-pill.pilot-gt {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  font-weight: 700;
+}
+.pilot-pill.pilot-win.correct {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #065f46;
+}
+.pilot-pill.pilot-lose.correct {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #065f46;
+}
+.pilot-pill.pilot-win.wrong {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+.pilot-pill.pilot-lose.wrong {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+.pilot-pill.pilot-empty {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.diag-pilot-source {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+}
+.diag-pilot-source summary {
+  cursor: pointer;
+  color: #64748b;
+}
+.diag-pilot-source .diag-hand-cards img {
+  width: 36px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Source-gallery (the 6 winning exemplars participants saw)              */
+/* ---------------------------------------------------------------------- */
+
+.diag-exemplar-gallery {
+  margin-bottom: 0.6rem;
+  background: #fdfcf6;
+  border: 1px solid #e6c97a;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+.diag-exemplar-gallery > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #5b4b1a;
+  margin-bottom: 0.4rem;
+}
+.diag-exemplar-gallery[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+.diag-exemplar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.diag-exemplar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.diag-exemplar-label {
+  flex: 0 0 110px;
+  font-size: 0.78rem;
+  color: #6b5a30;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.diag-exemplar-row .diag-hand-cards img {
+  width: 56px;
+}

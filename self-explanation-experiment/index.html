@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Explanation Experiment</title>
+
+  <!-- Resolve all paths from the card-games/ root so shared assets
+       (js/cardex.js, rule-gallery/*.js, stim/, etc.) load correctly. -->
+  <base href="../">
+
+  <!-- Experiment-specific styles -->
+  <link rel="stylesheet" href="self-explanation-experiment/styles.css">
+</head>
+<body>
+
+  <!-- Main application mount point.
+       All UI is rendered dynamically into this container by app.js. -->
+  <div id="app"></div>
+
+  <!-- ─── Shared dependencies ─── -->
+  <!-- CyborgHunter: passive integrity monitor (loads first so app.js can
+       boot it before snapshot fetch — see design v2 §9.2) -->
+  <script src="js/cyborg-hunter.js"></script>
+
+  <!-- CardEx: card utilities, deck generation, rendering helpers -->
+  <script src="js/cardex.js"></script>
+
+  <!-- GalleryRules: 61 rule definitions with eval/generate functions -->
+  <script src="rule-gallery/gallery-rules.js"></script>
+
+  <!-- GallerySave: DataPipe + Cloudflare + local-download save cascade -->
+  <script src="rule-gallery/gallery-save.js"></script>
+
+  <!-- GalleryMouseTracker: records mouse movements during gallery phase -->
+  <script src="rule-gallery/gallery-mouse-tracker.js"></script>
+
+  <!-- GalleryFocusTracker: records tab visibility / focus changes -->
+  <script src="rule-gallery/gallery-focus-tracker.js"></script>
+
+  <!-- ─── Experiment modules (loaded in dependency order) ─── -->
+
+  <!-- SEConfig: central configuration with URL-param overrides -->
+  <script src="self-explanation-experiment/config.js"></script>
+
+  <!-- DevTools: console helpers for rapid exploration (loads early so
+       it's available even if later modules error) -->
+  <script src="self-explanation-experiment/devtools.js"></script>
+
+  <!-- AudioRecorder: microphone capture for verbal protocols -->
+  <script src="self-explanation-experiment/audio-recorder.js"></script>
+
+  <!-- HandSelector: card selection UI for token prompts -->
+  <script src="self-explanation-experiment/hand-selector.js"></script>
+
+  <!-- SnapshotLoader: fail-closed fetch + validation of the v2 snapshot -->
+  <script src="self-explanation-experiment/snapshot-loader.js"></script>
+
+  <!-- UI: shared rendering helpers, layout, and CSS injection -->
+  <script src="self-explanation-experiment/ui.js"></script>
+
+  <!-- Tutorial: instruction screens and practice trials -->
+  <script src="self-explanation-experiment/tutorial.js"></script>
+
+  <!-- Game: single-rule trial loop (gallery → classify → explain) -->
+  <script src="self-explanation-experiment/game.js"></script>
+
+  <!-- Curriculum: rule selection and ordering across the session -->
+  <script src="self-explanation-experiment/curriculum.js"></script>
+
+  <!-- Recap: end-of-session summary and debrief -->
+  <script src="self-explanation-experiment/recap.js"></script>
+
+  <!-- App: top-level orchestrator — wires modules together and starts -->
+  <script src="self-explanation-experiment/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+# rule_kinds.yaml — hand-curated decomposability annotations (EXPLORATORY)
+#
+# This is one signal among many in the picker. Not a forcing criterion.
+# The "decomposable" tag flags rules where participants systematically catch
+# one component of a multi-part rule but miss another (e.g., catching
+# "consecutive ranks" but missing "same suit"). See the atlas review notes
+# in atlas/data/fairness.py::RULE_REVIEW_NOTES for the empirical grounding
+# behind these four seeded entries.
+#
+# Schema:
+#   <rule_id>:
+#     decomposable: true | false
+#     missed_component: "string describing the pattern (only if decomposable)"
+#
+# Rules NOT in this file get decomposable=null in the picker (rendered '?').
+# To extend: walk gallery_rules.py + atlas rule pages, tag Y/N + a one-line
+# missed-component pattern. ~1.5 hrs for full 60-rule pass.
+
+straight5_same_suit:
+  decomposable: true
+  missed_component: "straight (consecutive ranks) caught; same-suit constraint missed"
+
+four_of_a_kind_adjacent:
+  decomposable: true
+  missed_component: "rank-equality caught; adjacency constraint missed"
+
+ap_step1_len3_adj_ordered:
+  decomposable: true
+  missed_component: "consecutive-rank run caught; adjacency constraint missed"
+
+some_half_red_other_black:
+  decomposable: true
+  missed_component: "3+3 count caught; halves structure missed"

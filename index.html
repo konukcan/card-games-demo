@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Games — SE Pilot Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 720px;
+      margin: 60px auto;
+      padding: 24px;
+      line-height: 1.6;
+      color: #1e293b;
+      background: #f8fafc;
+    }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 32px; }
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 24px;
+      margin: 16px 0;
+    }
+    h2 { font-size: 17px; margin: 0 0 8px; color: #0a66c2; }
+    p { margin: 6px 0; font-size: 14px; }
+    a.btn {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #0a66c2;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    a.btn:hover { background: #094d96; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Card Games — SE Pilot Demo</h1>
+  <p class="subtitle">Self-Explanation × Program Induction (v2.1, 2026-05-09 build)</p>
+
+  <div class="card">
+    <h2>SE experiment launcher</h2>
+    <p>Configure conditions and adversarial-hand strategies, then launch any preset. This is the page collaborators use to drive a demo run.</p>
+    <a class="btn" href="self-explanation-experiment/demo.html">Open launcher →</a>
+  </div>
+
+  <div class="card">
+    <h2>Rule Explorer</h2>
+    <p>Per-rule diagnostic-hands viewer. Shows what each of the 4 strategies produces and how Gemini Pro/Flash classified each.</p>
+    <a class="btn" href="rule-gallery/analysis/selection/">Open Rule Explorer →</a>
+  </div>
+
+  <div class="card">
+    <h2>About</h2>
+    <p>This is a deployable subset of the <a href="https://github.com/konukcan/card-games">card-games</a> repo, intended for collaborator demos. Saved data POSTs through a Cloudflare Worker into <code>konukcan/card-games-staging/results_gallery/</code>.</p>
+    <p>Snapshot in scope: <code>se_2026_05_09_1dcc7741</code> (10 rules × 4 strategies × 10 hands).</p>
+  </div>
+</body>
+</html>
