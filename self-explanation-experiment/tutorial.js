@@ -66,12 +66,25 @@ window.SETutorial = (function () {
   // Sample data helpers
   // ════════════════════════════════════════════════════
 
+  // TUTORIAL_HANDS: 6 hands satisfying "right_half_diamonds" (positions
+  // 4, 5, 6 are all diamonds). Copied verbatim from rule-gallery/index.html
+  // (lines 644-651 there), where they serve as the rule-gallery pilot's
+  // worked tutorial example. Reusing them here keeps the two tutorials
+  // visually consistent.
+  var TUTORIAL_HANDS = [
+    [{suit:"CLUBS",rank:"7"},{suit:"HEARTS",rank:"10"},{suit:"SPADES",rank:"3"},{suit:"DIAMONDS",rank:"5"},{suit:"DIAMONDS",rank:"K"},{suit:"DIAMONDS",rank:"8"}],
+    [{suit:"DIAMONDS",rank:"Q"},{suit:"HEARTS",rank:"4"},{suit:"CLUBS",rank:"9"},{suit:"DIAMONDS",rank:"2"},{suit:"DIAMONDS",rank:"7"},{suit:"DIAMONDS",rank:"J"}],
+    [{suit:"HEARTS",rank:"6"},{suit:"SPADES",rank:"A"},{suit:"CLUBS",rank:"5"},{suit:"DIAMONDS",rank:"10"},{suit:"DIAMONDS",rank:"3"},{suit:"DIAMONDS",rank:"Q"}],
+    [{suit:"CLUBS",rank:"K"},{suit:"SPADES",rank:"8"},{suit:"DIAMONDS",rank:"2"},{suit:"DIAMONDS",rank:"9"},{suit:"DIAMONDS",rank:"4"},{suit:"DIAMONDS",rank:"A"}],
+    [{suit:"HEARTS",rank:"J"},{suit:"CLUBS",rank:"3"},{suit:"SPADES",rank:"6"},{suit:"DIAMONDS",rank:"6"},{suit:"DIAMONDS",rank:"8"},{suit:"DIAMONDS",rank:"2"}],
+    [{suit:"SPADES",rank:"9"},{suit:"CLUBS",rank:"Q"},{suit:"HEARTS",rank:"5"},{suit:"DIAMONDS",rank:"K"},{suit:"DIAMONDS",rank:"7"},{suit:"DIAMONDS",rank:"4"}]
+  ];
+
   function generateSampleHands(n) {
-    var hands = [];
-    for (var i = 0; i < n; i++) {
-      hands.push(CardEx.sampleHand(6, 52));
+    if (n !== TUTORIAL_HANDS.length) {
+      console.warn("SETutorial: requested " + n + " sample hands but TUTORIAL_HANDS has " + TUTORIAL_HANDS.length);
     }
-    return hands;
+    return TUTORIAL_HANDS.slice(0, n);
   }
 
   // ════════════════════════════════════════════════════
@@ -191,10 +204,7 @@ window.SETutorial = (function () {
       bodyHTML:
         '<p>After studying the winning hands, you will see new hands one at a time.</p>' +
         '<p>For each hand, decide: is it a <strong>Winning</strong> hand ' +
-        'or a <strong>Losing</strong> hand?</p>' +
-        '<p>Click the <span class="se-tutorial-emph-win">green Winning button</span> ' +
-        'or the <span class="se-tutorial-emph-lose">red Losing button</span> ' +
-        'to make your choice.</p>',
+        'or a <strong>Losing</strong> hand?</p>',
       illustrationFn: function (el) {
         // Wrap the mock focal hand + Win/Lose buttons in the same outer
         // chrome the live game's .se-focal-prompt-panel uses, so this

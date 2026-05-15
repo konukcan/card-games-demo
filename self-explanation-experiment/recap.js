@@ -1,10 +1,9 @@
 // self-explanation-experiment/recap.js
-// Post-experiment recap module: rule articulation, strategy debrief, demographics.
+// Post-experiment recap module: rule articulation and demographics.
 //
 // After the main curriculum, this module:
 //   1. Re-shows each gallery and collects a rule articulation audio recording
-//   2. Collects a strategy report (free text)
-//   3. Collects demographics
+//   2. Collects demographics, including a strategy report (free text)
 //
 // Depends on:
 //   window.SEConfig  — experiment parameters (minRecordingDuration)
@@ -179,70 +178,13 @@ window.SERecap = (function () {
   }
 
   // ════════════════════════════════════════════════════
-  // Section 2: Strategy report
+  // Section 2: Demographics
   // ════════════════════════════════════════════════════
 
-  // runStrategyReport() — Shows a text area for the participant to describe
-  // their approach. Continue is enabled once they have typed at least 10
-  // characters. Returns a Promise that resolves to the typed string.
-  function runStrategyReport() {
-    return new Promise(function (resolve) {
-      SEUI.clearApp();
-      var app = document.getElementById("app");
-
-      // ── Heading ──
-      var heading = document.createElement("h2");
-      heading.className = "se-game-heading";
-      heading.textContent = "Strategy Report";
-      app.appendChild(heading);
-
-      // ── Prompt ──
-      SEUI.renderPrompt(
-        "How did you approach figuring out what made hands winning or losing? " +
-        "Did anything about the task help or hinder your thinking?",
-        app
-      );
-
-      // ── Text area ──
-      var textarea = document.createElement("textarea");
-      textarea.className = "se-strategy-textarea";
-      textarea.rows = 6;
-      textarea.placeholder = "Type your response here...";
-      textarea.style.width = "100%";
-      textarea.style.maxWidth = "600px";
-      textarea.style.display = "block";
-      textarea.style.margin = "16px auto";
-      textarea.style.padding = "10px";
-      textarea.style.fontSize = "15px";
-      textarea.style.fontFamily = "inherit";
-      textarea.style.borderRadius = "6px";
-      textarea.style.border = "1px solid #ccc";
-      textarea.style.resize = "vertical";
-      app.appendChild(textarea);
-
-      // ── Continue button — enabled once >= 10 characters typed ──
-      var continueBtn = SEUI.renderContinueButton(function () {
-        resolve(textarea.value.trim());
-      }, app);
-
-      // Monitor input to gate the Continue button
-      textarea.addEventListener("input", function () {
-        var hasEnough = textarea.value.trim().length >= 10;
-        continueBtn.disabled = !hasEnough;
-      });
-
-      // Focus the textarea so the participant can start typing immediately
-      textarea.focus();
-    });
-  }
-
-  // ════════════════════════════════════════════════════
-  // Section 3: Demographics
-  // ════════════════════════════════════════════════════
-
-  // runDemographics() — Shows a short demographics form (card game experience,
-  // age, gender). Continue is always enabled since demographics are optional.
-  // Returns a Promise that resolves to { cardExperience, age, gender }.
+  // runDemographics() — Shows a short demographics form plus a strategy
+  // writeup. Continue is enabled once all required fields are complete.
+  // Returns a Promise that resolves to
+  // { cardExperience, age, gender, race, ethnicity, strategy }.
   function runDemographics() {
     return new Promise(function (resolve) {
       SEUI.clearApp();
@@ -277,6 +219,35 @@ window.SERecap = (function () {
         row.appendChild(inputEl);
         form.appendChild(row);
         return inputEl;
+      }
+
+      function makeRadioGroup(name, options) {
+        var container = document.createElement("div");
+
+        options.forEach(function (opt) {
+          var label = document.createElement("label");
+          label.style.display = "block";
+          label.style.marginBottom = "8px";
+          label.style.fontSize = "15px";
+
+          var radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "demo-" + name;
+          radio.value = opt;
+          radio.style.marginRight = "8px";
+
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(opt));
+          container.appendChild(label);
+        });
+
+        return {
+          container: container,
+          getValue: function () {
+            var checked = container.querySelector('input[name="demo-' + name + '"]:checked');
+            return checked ? checked.value : "";
+          }
+        };
       }
 
       // ── Card game experience ──
@@ -321,15 +292,95 @@ window.SERecap = (function () {
       });
       makeField("Gender", genderSelect);
 
-      // ── Continue button — always enabled (demographics are optional) ──
+      // ── Race ──
+      var raceGroup = makeRadioGroup("race", [
+        "White",
+        "Black or African American",
+        "American Indian or Alaska Native",
+        "Asian",
+        "Native Hawaiian or Pacific Islander",
+        "Multiracial",
+        "Other",
+        "Prefer not to say"
+      ]);
+      makeField("Race", raceGroup.container);
+
+      // ── Ethnicity ──
+      var ethnicityGroup = makeRadioGroup("ethnicity", [
+        "Hispanic",
+        "Non-Hispanic",
+        "Prefer not to say"
+      ]);
+      makeField("Ethnicity", ethnicityGroup.container);
+
+      // ── Strategy ──
+      var strategyTextarea = document.createElement("textarea");
+      strategyTextarea.className = "se-strategy-textarea";
+      strategyTextarea.rows = 6;
+      strategyTextarea.placeholder = "Type your response here...";
+      strategyTextarea.style.width = "100%";
+      strategyTextarea.style.maxWidth = "600px";
+      strategyTextarea.style.padding = "10px";
+      strategyTextarea.style.fontSize = "15px";
+      strategyTextarea.style.fontFamily = "inherit";
+      strategyTextarea.style.borderRadius = "6px";
+      strategyTextarea.style.border = "1px solid #ccc";
+      strategyTextarea.style.resize = "vertical";
+      strategyTextarea.style.boxSizing = "border-box";
+      makeField(
+        "How did you approach figuring out what made hands winning or losing? Did anything about the task help or hinder your thinking?",
+        strategyTextarea
+      );
+
+      function updateContinueState() {
+        var ageValue = Number(ageInput.value);
+        var isAgeValid = ageInput.value !== "" && !isNaN(ageValue) && ageValue >= 18 && ageValue <= 99;
+        var isComplete =
+          experienceSelect.value !== "" &&
+          isAgeValid &&
+          genderSelect.value !== "" &&
+          raceGroup.getValue() !== "" &&
+          ethnicityGroup.getValue() !== "" &&
+          strategyTextarea.value.trim().length >= 10;
+
+        continueBtn.disabled = !isComplete;
+      }
+
       var continueBtn = SEUI.renderContinueButton(function () {
         resolve({
           cardExperience: experienceSelect.value,
-          age: ageInput.value ? Number(ageInput.value) : null,
-          gender: genderSelect.value
+          age: Number(ageInput.value),
+          gender: genderSelect.value,
+          race: raceGroup.getValue(),
+          ethnicity: ethnicityGroup.getValue(),
+          strategy: strategyTextarea.value.trim()
         });
       }, app);
-      continueBtn.disabled = false; // enable immediately
+      continueBtn.disabled = true;
+
+      experienceSelect.addEventListener("input", updateContinueState);
+      experienceSelect.addEventListener("change", updateContinueState);
+      experienceSelect.addEventListener("keyup", updateContinueState);
+      ageInput.addEventListener("input", updateContinueState);
+      ageInput.addEventListener("change", updateContinueState);
+      ageInput.addEventListener("keyup", updateContinueState);
+      genderSelect.addEventListener("input", updateContinueState);
+      genderSelect.addEventListener("change", updateContinueState);
+      genderSelect.addEventListener("keyup", updateContinueState);
+      strategyTextarea.addEventListener("input", updateContinueState);
+      strategyTextarea.addEventListener("change", updateContinueState);
+      strategyTextarea.addEventListener("keyup", updateContinueState);
+
+      Array.prototype.forEach.call(
+        form.querySelectorAll('input[name="demo-race"], input[name="demo-ethnicity"]'),
+        function (radio) {
+          radio.addEventListener("input", updateContinueState);
+          radio.addEventListener("change", updateContinueState);
+          radio.addEventListener("keyup", updateContinueState);
+        }
+      );
+
+      updateContinueState();
 
     });
   }
@@ -347,21 +398,25 @@ window.SERecap = (function () {
   // primary DV, directly comparable to rule-gallery pilot data.
   //
   // What remains here:
-  //   1. Strategy report (free text about overall approach)
-  //   2. Demographics questionnaire
+  //   1. Demographics questionnaire
+  //   2. Embedded strategy report (free text about overall approach)
   //
   // `curriculum` — { rules: RuleData[] }, kept in the signature for
   //                forwards-compatibility even though it's no longer used.
   //
   // Returns Promise<{ strategy, demographics }>
   async function run(curriculum) {
-    console.log("SERecap: starting recap (strategy + demographics).");
+    console.log("SERecap: starting recap (demographics + strategy).");
 
-    // 1. Strategy report — free text about their approach
-    var strategy = await runStrategyReport();
-
-    // 2. Demographics — card experience, age, gender
-    var demographics = await runDemographics();
+    var demographicsResult = await runDemographics();
+    var strategy = demographicsResult.strategy;
+    var demographics = {
+      cardExperience: demographicsResult.cardExperience,
+      age: demographicsResult.age,
+      gender: demographicsResult.gender,
+      race: demographicsResult.race,
+      ethnicity: demographicsResult.ethnicity
+    };
 
     console.log("SERecap: recap complete.", {
       strategyLength: strategy.length,
