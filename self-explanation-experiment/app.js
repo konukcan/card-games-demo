@@ -378,7 +378,7 @@ window.SEApp = (function () {
             curriculum.rules[bi],
             bi + 1,
             curriculum.rules.length,
-            { minChars: 10, minSec: 5 }
+            { minChars: 5, minSec: 5 }
           );
           endOfCurriculumWriteups.push(bulkResult);
         } catch (err) {
@@ -407,7 +407,7 @@ window.SEApp = (function () {
             rulePosition: bi + 1,
             response: null,
             rt: null,
-            minChars: 10,
+            minChars: 5,
             minSec: 5,
             passedGate: false,
             galleryRendered: null,
@@ -417,38 +417,26 @@ window.SEApp = (function () {
         }
       }
 
-      // ── 5c. Optional final synthesis screen (C4) ──
-      var endOfCurriculumSynthesis = null;
-      try {
-        SEUI.clearApp();
-        endOfCurriculumSynthesis = await SEUI.renderBulkSynthesis(
-          document.getElementById("app")
-        );
-      } catch (err) {
-        // Non-fatal — synthesis is optional. Record the error in metadata
-        // so analysis can drop the synthesis row without losing the rest.
-        console.error("SEApp: synthesis screen failed:", err);
-        endOfCurriculumSynthesis = {
-          response: null, rt: null, timestamp: new Date().toISOString(),
-          skipReason: "render_error",
-          error: (err && err.message) ? err.message : String(err),
-        };
-      }
+      // ── 5c. Optional final synthesis screen — MERGED INTO RECAP ──
+      // The standalone "Anything you would like to add overall?" page was
+      // folded into runDemographics() so demographics + strategy + comments
+      // all appear on a single final page. endOfCurriculumSynthesis is
+      // populated from recapResult.comments below to preserve the saved
+      // JSON schema (so downstream analysis reading payload.endOfCurriculumSynthesis
+      // continues to work).
 
       console.log(
         "SEApp: bulk articulation complete. " +
-        endOfCurriculumWriteups.length + " writeups, synthesis " +
-        (endOfCurriculumSynthesis && endOfCurriculumSynthesis.skipReason
-          ? "skipped (" + endOfCurriculumSynthesis.skipReason + ")"
-          : "submitted") +
+        endOfCurriculumWriteups.length + " writeups" +
         (bulkErrors.length ? " (" + bulkErrors.length + " bulk errors)" : "")
       );
 
       // ── 6. Recap ──
-      // Strategy report + demographics. (Phase 4 chunk 7 also dropped the
+      // Demographics + strategy + comments. (Phase 4 chunk 7 also dropped the
       // per-rule voice recap from this step. v2: the typed bulk articulation
       // above replaces both per-round writeup AND per-rule voice recap.)
       var recapResult = await SERecap.run(curriculum);
+      var endOfCurriculumSynthesis = recapResult.comments;
 
       // Collect any audio segments recorded during recap. SEAudio
       // accumulates segments across the whole session; just take the

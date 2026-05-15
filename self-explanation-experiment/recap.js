@@ -313,11 +313,11 @@ window.SERecap = (function () {
       ]);
       makeField("Ethnicity", ethnicityGroup.container);
 
-      // ── Strategy ──
+      // ── Strategy (optional — no min-char gate) ──
       var strategyTextarea = document.createElement("textarea");
       strategyTextarea.className = "se-strategy-textarea";
-      strategyTextarea.rows = 6;
-      strategyTextarea.placeholder = "Type your response here...";
+      strategyTextarea.rows = 5;
+      strategyTextarea.placeholder = "Type your response here... (optional)";
       strategyTextarea.style.width = "100%";
       strategyTextarea.style.maxWidth = "600px";
       strategyTextarea.style.padding = "10px";
@@ -328,32 +328,64 @@ window.SERecap = (function () {
       strategyTextarea.style.resize = "vertical";
       strategyTextarea.style.boxSizing = "border-box";
       makeField(
-        "How did you approach figuring out what made hands winning or losing? Did anything about the task help or hinder your thinking?",
+        "How did you approach figuring out what made hands winning or losing? Did anything about the task help or hinder your thinking? (optional)",
         strategyTextarea
       );
+
+      // ── Comments (optional — formerly a standalone synthesis page) ──
+      var commentsTextarea = document.createElement("textarea");
+      commentsTextarea.className = "se-comments-textarea";
+      commentsTextarea.rows = 4;
+      commentsTextarea.placeholder = "Anything else you'd like to share... (optional)";
+      commentsTextarea.style.width = "100%";
+      commentsTextarea.style.maxWidth = "600px";
+      commentsTextarea.style.padding = "10px";
+      commentsTextarea.style.fontSize = "15px";
+      commentsTextarea.style.fontFamily = "inherit";
+      commentsTextarea.style.borderRadius = "6px";
+      commentsTextarea.style.border = "1px solid #ccc";
+      commentsTextarea.style.resize = "vertical";
+      commentsTextarea.style.boxSizing = "border-box";
+      makeField(
+        "Anything else you'd like to share? If anything stood out across the games or something we missed, you can add it here. (optional)",
+        commentsTextarea
+      );
+
+      // Record when the page first rendered, so we can compute an RT for
+      // the optional comments field even though it has no min-time gate.
+      var pageStartTime = performance.now();
 
       function updateContinueState() {
         var ageValue = Number(ageInput.value);
         var isAgeValid = ageInput.value !== "" && !isNaN(ageValue) && ageValue >= 18 && ageValue <= 99;
+        // Strategy + comments are OPTIONAL — only the demographic fields
+        // (experience, age, gender, race, ethnicity) gate Continue.
         var isComplete =
           experienceSelect.value !== "" &&
           isAgeValid &&
           genderSelect.value !== "" &&
           raceGroup.getValue() !== "" &&
-          ethnicityGroup.getValue() !== "" &&
-          strategyTextarea.value.trim().length >= 10;
+          ethnicityGroup.getValue() !== "";
 
         continueBtn.disabled = !isComplete;
       }
 
       var continueBtn = SEUI.renderContinueButton(function () {
+        var strategyText = strategyTextarea.value.trim();
+        var commentsText = commentsTextarea.value.trim();
         resolve({
           cardExperience: experienceSelect.value,
           age: Number(ageInput.value),
           gender: genderSelect.value,
           race: raceGroup.getValue(),
           ethnicity: ethnicityGroup.getValue(),
-          strategy: strategyTextarea.value.trim()
+          strategy: strategyText,
+          comments: {
+            response: commentsText || null,
+            rt: Math.round(performance.now() - pageStartTime),
+            timestamp: new Date().toISOString(),
+            skipReason: commentsText ? null : "empty_submit"
+          }
         });
       }, app);
       continueBtn.disabled = true;
@@ -367,9 +399,6 @@ window.SERecap = (function () {
       genderSelect.addEventListener("input", updateContinueState);
       genderSelect.addEventListener("change", updateContinueState);
       genderSelect.addEventListener("keyup", updateContinueState);
-      strategyTextarea.addEventListener("input", updateContinueState);
-      strategyTextarea.addEventListener("change", updateContinueState);
-      strategyTextarea.addEventListener("keyup", updateContinueState);
 
       Array.prototype.forEach.call(
         form.querySelectorAll('input[name="demo-race"], input[name="demo-ethnicity"]'),
@@ -398,18 +427,22 @@ window.SERecap = (function () {
   // primary DV, directly comparable to rule-gallery pilot data.
   //
   // What remains here:
-  //   1. Demographics questionnaire
-  //   2. Embedded strategy report (free text about overall approach)
+  //   1. Demographics questionnaire (required: experience, age, gender, race, ethnicity)
+  //   2. Embedded strategy report (optional free text)
+  //   3. Embedded final comments (optional, formerly a separate synthesis page)
   //
   // `curriculum` — { rules: RuleData[] }, kept in the signature for
   //                forwards-compatibility even though it's no longer used.
   //
-  // Returns Promise<{ strategy, demographics }>
+  // Returns Promise<{ strategy, demographics, comments }>
+  //   comments shape matches the legacy endOfCurriculumSynthesis result so
+  //   the saved JSON schema stays stable: { response, rt, timestamp, skipReason }.
   async function run(curriculum) {
-    console.log("SERecap: starting recap (demographics + strategy).");
+    console.log("SERecap: starting recap (demographics + strategy + comments).");
 
     var demographicsResult = await runDemographics();
     var strategy = demographicsResult.strategy;
+    var comments = demographicsResult.comments;
     var demographics = {
       cardExperience: demographicsResult.cardExperience,
       age: demographicsResult.age,
@@ -420,12 +453,14 @@ window.SERecap = (function () {
 
     console.log("SERecap: recap complete.", {
       strategyLength: strategy.length,
+      commentsResponseLength: (comments && comments.response) ? comments.response.length : 0,
       demographics: demographics
     });
 
     return {
       strategy: strategy,
-      demographics: demographics
+      demographics: demographics,
+      comments: comments
     };
   }
 

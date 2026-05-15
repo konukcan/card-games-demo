@@ -1224,7 +1224,7 @@ window.SEUI = (function () {
   //     timestamp }
   function renderBulkArticulation(container, ruleData, position, total, gateConfig) {
     gateConfig = gateConfig || {};
-    var minChars = (typeof gateConfig.minChars === "number") ? gateConfig.minChars : 10;
+    var minChars = (typeof gateConfig.minChars === "number") ? gateConfig.minChars : 5;
     var minSec = (typeof gateConfig.minSec === "number") ? gateConfig.minSec : 5;
 
     // First-screen-only intro line so participants understand the bulk task
