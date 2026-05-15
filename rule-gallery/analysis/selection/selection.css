@@ -80,6 +80,65 @@ tbody tr.picked-but-hidden::after {
 }
 
 td code { font-size: 0.95em; }
+/* Rule-id cells are clickable triggers for cross-plot highlighting. The
+   pointer cursor + hover background signals interactivity, replacing the
+   prior <a> anchor which had to be removed (atlas links 404 when the
+   viewer is served standalone from selection/). */
+code.rule-id-cell {
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 3px;
+  transition: background-color 0.15s;
+}
+code.rule-id-cell:hover  { background: #fde68a; }
+code.rule-id-cell:focus  { outline: 2px solid #d97706; outline-offset: 1px; }
+code.rule-id-cell:active { background: #fcd34d; }
+
+/* Interactive ✓ column. Two visual states (is-on / is-off) replace the
+   prior static .selected-pill — same green-pill look when on, an outlined
+   empty box when off. Hover lifts both states so the affordance is
+   obvious. Button is small so it fits the ✓ column comfortably. */
+button.selection-toggle {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 0 0.4rem;
+  font-size: 1rem;
+  line-height: 1.4rem;
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 1.6rem;
+  text-align: center;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+button.selection-toggle.is-on {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #065f46;
+  font-weight: 600;
+}
+button.selection-toggle.is-off {
+  border-color: #cbd5e1;
+  color: #94a3b8;
+}
+button.selection-toggle:hover  { background: #fde68a; border-color: #ca8a04; }
+button.selection-toggle:focus  { outline: 2px solid #d97706; outline-offset: 1px; }
+button.selection-toggle:active { background: #fcd34d; }
+
+/* Reset-to-original-10 button sits next to the filter toggle. Subdued
+   when there's no diff from the original; the JS could light it up when
+   the working selection diverges, but baseline styling is fine for v1. */
+#reset-selection {
+  margin-left: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9em;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  color: #475569;
+}
+#reset-selection:hover { background: #f1f5f9; border-color: #94a3b8; }
 .rationale-input {
   width: 100%;
   min-width: 120px;

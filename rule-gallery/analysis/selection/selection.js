@@ -1,15 +1,25 @@
-// Rule-selection picker — vanilla JS, no framework.
+// Rule-slate walkthrough — vanilla JS, no framework.
 //
 // Loads selection_data.json + shortlist_final_10.json, renders a sortable
-// read-only table with a default filter showing only the 10 selected rules,
-// plus a static slate-at-a-glance panel and Plotly density/3D plots.
+// table with a default filter showing only the 10 selected rules, plus a
+// slate-at-a-glance panel and Plotly density/3D plots.
 //
 // Design choices that may not be obvious:
-// - The 10 picks are static, loaded from shortlist_final_10.json into
-//   SHORTLIST.ids. Rows in that set render a green ✓ pill in column 1.
-//   togglePick is a no-op stub kept for back-compat with stale callers.
-// - localStorage is no longer written for picks/rationales; legacy keys
-//   are cleared on boot.
+// - SHORTLIST.ids is the read-only original 10 from shortlist_final_10.json.
+//   USER_SELECTION is a mutable set the user can toggle via the ✓ column;
+//   it seeds from SHORTLIST on first load and persists under
+//   localStorage["viewer_user_selection_v1"]. The "Reset to original 10"
+//   button reverts USER_SELECTION ← SHORTLIST.ids. All plot markers + the
+//   slate-glance panel + the row tint read from USER_SELECTION (via the
+//   isSelected(rid) helper); the ✓ formatter compares USER_SELECTION to
+//   SHORTLIST so a tooltip can distinguish "still in the original 10"
+//   from "user-added pondering pick".
+// - togglePick mutates USER_SELECTION, persists, and surgically updates
+//   the single row + the plots (no full re-render → keyboard focus and
+//   in-flight Plotly animations survive).
+// - rule_id cells are clickable buttons (not <a> anchors): the prior
+//   ../atlas/output/rule/X.html link 404'd when served standalone, so
+//   clicking now highlights across plots instead.
 // - Decomposability column header has a `title` tooltip explaining the
 //   exploratory-and-biased nature of those tags.
 
@@ -25,16 +35,48 @@
 
 const COLUMNS = [
   ["selected",      "✓",         true,
-    (_, row) => SHORTLIST.ids.has(row.rule_id)
-      ? `<span class="selected-pill" title="In the final 10-rule slate">✓</span>`
-      : ``,
-    "Marks rules in the final 10-rule slate selected for the SE study. Read-only."],
+    (_, row) => {
+      // Interactive checkbox. Defaults to ON for the original 10 picks;
+      // toggling persists to localStorage so the user can return to a
+      // pondering-set across reloads. The visual stays as a green ✓ pill
+      // when on (matches the original walkthrough look), an empty box
+      // when off — both convey "click me" via .selection-toggle styling.
+      const on = isSelected(row.rule_id);
+      const inSlate = SHORTLIST.ids.has(row.rule_id);
+      const title = on
+        ? (inSlate ? "In the slate. Click to unselect."
+                   : "In your working selection. Click to unselect.")
+        : (inSlate ? "Was in the original 10. Click to re-select."
+                   : "Not selected. Click to add to your working selection.");
+      return `<button class="selection-toggle ${on ? "is-on" : "is-off"}"
+                      data-rid="${row.rule_id}"
+                      title="${title}"
+                      aria-pressed="${on}">${on ? "✓" : "☐"}</button>`;
+    },
+    "Click to toggle a rule's membership in your working selection. " +
+    "Defaults to the 10 rules from shortlist_final_10.json. Persisted " +
+    "across reloads via localStorage. 'Reset to original 10' button " +
+    "above the table reverts."],
   ["diag",          "👁",        true,  null,
     "Click to toggle the per-rule diagnostic-hands panel (top hands the empirical posterior is most split on, with optional model-side comparison)."],
   ["rule_id",       "rule_id",   true,
-    v => `<a href="../atlas/output/rule/${v}.html" target="_blank"><code>${v}</code></a>`],
+    // Click triggers highlight-in-plots (wired by event delegation on
+    // the table). No navigation: the atlas pages live outside the
+    // selection/ HTTP-served directory, so a relative link would 404
+    // when the viewer is served standalone. The diag 👁 panel is the
+    // in-page replacement for opening rule context.
+    v => `<code class="rule-id-cell" role="button" tabindex="0" title="Click to highlight this rule across all plots">${v}</code>`],
   ["rule_answer",   "answer",    true,
-    v => v?.length > 60 ? v.slice(0, 60) + "…" : (v ?? "—")],
+    // rule_answer is plain-text ground-truth phrasing from gallery_rules.py,
+    // but the cell content lands in innerHTML (renderBody:338) so we escape
+    // defensively — defense in depth for a page that's served publicly via
+    // GH Pages and could in theory absorb user-derived text downstream.
+    v => {
+      if (v == null) return "—";
+      const s = String(v);
+      const truncated = s.length > 60 ? s.slice(0, 60) + "…" : s;
+      return escapeHtml(truncated);
+    }],
   ["rb_ii_class",   "RB/II",     false,
     fmtRbIi,
     "Empirical classification from rb_vs_ii_classification.csv. RB_CLEAR = participants articulated AND classified correctly. MIXED = partial articulation. II_CANDIDATE = correct classification but couldn't say why (Ashby's information-integration signature). TOO_HARD = neither signal."],
@@ -54,7 +96,7 @@ const COLUMNS = [
     "AST node count of the ground-truth lambda (with referenced helpers spliced in). Higher = more structurally complex rule."],
   ["n_features",    "n_feat",    false, v => v ?? "—",
     "Number of distinct feature dimensions the rule uses (rank, suit, color, position, count, ...)."],
-  ["features",      "features",  false, v => v ?? "—"],
+  ["features",      "features",  false, v => escapeHtml(v ?? "—")],
   ["entropy_norm",  "H_norm",    true,  v => v == null ? "—" : v.toFixed(2),
     "Normalized Shannon entropy of participant-equivalence-class sizes (Method A). 0 = everyone gave the same answer; 1 = every response is its own class. Higher = more answer diversity."],
   ["H_decile",      "H D",       true,  fmtDecile,
@@ -138,10 +180,52 @@ let DATA = null;                                                          // loa
 let DIAG_DATA = null;                                                     // diagnostic_hands.json
 let SHORTLIST = { ids: new Set(), rationales: {}, exportedAt: null };     // shortlist_final_10.json
 let SORT = { field: "rule_id", asc: true };
-let SHOW_ONLY_SELECTED = true;   // default-on: collaborators see the 10 picks first
+let SHOW_ONLY_SELECTED = true;   // default-on: collaborators see the picks first
 let PICKS = new Set();          // legacy state, no longer mutated
 let RATIONALES = {};             // legacy state, no longer mutated
 let HIDDEN_COLS = new Set(JSON.parse(localStorage.getItem("rule_hidden_cols") || "[]"));
+
+// User-mutable working selection. Seeds from SHORTLIST.ids on first load;
+// persisted under USER_SELECTION_STORAGE_KEY so the user can return to
+// their pondering-set across reloads. The "Reset to original 10" button
+// reverts to a copy of SHORTLIST.ids. The 4 plots + the slate-glance
+// panel + the row tint all read from this set rather than from SHORTLIST
+// directly.
+//
+// SHORTLIST stays as the immutable original-10 reference so the reset
+// button (and any future "compare to original" diff) has somewhere to
+// look. The picker-era localStorage keys (rule_picks, rule_rationales)
+// are still cleared on boot — they're a different shape and would
+// confuse the new code.
+const USER_SELECTION_STORAGE_KEY = "viewer_user_selection_v1";
+let USER_SELECTION = new Set();
+
+function isSelected(rid) {
+  return USER_SELECTION.has(rid);
+}
+
+function loadUserSelection() {
+  // Called after SHORTLIST is populated. Restores prior pondering-set
+  // if present; otherwise seeds from SHORTLIST.
+  try {
+    const raw = localStorage.getItem(USER_SELECTION_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.every(x => typeof x === "string")) {
+        USER_SELECTION = new Set(arr);
+        return;
+      }
+    }
+  } catch (_) { /* fall through to default */ }
+  USER_SELECTION = new Set(SHORTLIST.ids);
+}
+
+function persistUserSelection() {
+  try {
+    localStorage.setItem(USER_SELECTION_STORAGE_KEY,
+                         JSON.stringify([...USER_SELECTION]));
+  } catch (_) { /* localStorage full or disabled — non-fatal */ }
+}
 
 // Picker-mode keys are no longer written but may exist from old sessions.
 // Clean them so collaborators have a fresh page.
@@ -233,6 +317,10 @@ async function load() {
     DATA = await r.json();
     await loadDiagnosticHands();
     await loadShortlist();
+    // USER_SELECTION seeds from localStorage if a prior pondering-set
+    // was saved, otherwise from SHORTLIST. Must run AFTER loadShortlist
+    // so the fallback has values.
+    loadUserSelection();
 
     const snap = DATA._snapshot || {};
     document.getElementById("snapshot-line").textContent =
@@ -252,6 +340,13 @@ async function load() {
 
     renderColumnToggles();
     render();
+    // Plot bootstrapping deferred to next tick so the DOM has the table
+    // painted before Plotly measures container sizes. plotsAvailable()
+    // gates on Plotly being loaded — if it isn't (e.g. the vendored
+    // script 404'd), the table-only view still works.
+    setTimeout(() => {
+      if (plotsAvailable()) renderAllPlots();
+    }, 0);
   } catch (e) {
     status.className = "error";
     status.innerHTML = `Failed to load <code>output/selection_data.json</code>: ${e.message}.<br>` +
@@ -307,13 +402,13 @@ function renderBody() {
   });
 
   for (const row of sorted) {
-    if (SHOW_ONLY_SELECTED && !SHORTLIST.ids.has(row.rule_id)) {
+    if (SHOW_ONLY_SELECTED && !isSelected(row.rule_id)) {
       continue;
     }
 
     const tr = document.createElement("tr");
     tr.dataset.rid = row.rule_id;
-    if (SHORTLIST.ids.has(row.rule_id)) {
+    if (isSelected(row.rule_id)) {
       tr.classList.add("selected-row");
     }
 
@@ -550,17 +645,26 @@ function buildLlmPilotHand(h) {
   }
   card.appendChild(cardsRow);
 
-  // GT + LLM responses pill row
+  // GT + LLM responses pill row.
+  // Defensive: if the LLM-pilot pipeline ever emits a hand record without a
+  // ground_truth field (or with a non-string label), we want a visible
+  // "UNKNOWN" pill in the UI rather than a TypeError that aborts rendering
+  // the entire diag panel for the rule. The fallback surfaces the data
+  // problem; throwing hides it.
   const respRow = document.createElement("div");
   respRow.className = "diag-pilot-responses";
+  const gt = (typeof h.ground_truth === "string" && h.ground_truth) || "UNKNOWN";
   const gtSpan = document.createElement("span");
-  gtSpan.className = "pilot-pill pilot-gt pilot-" + h.ground_truth.toLowerCase();
-  gtSpan.textContent = `GT: ${h.ground_truth}`;
+  gtSpan.className = "pilot-pill pilot-gt pilot-" + gt.toLowerCase();
+  gtSpan.textContent = `GT: ${gt}`;
   respRow.appendChild(gtSpan);
   for (const model of ["pro", "flash"]) {
     const r = (h.llm_responses || {})[model];
     const span = document.createElement("span");
-    if (!r) {
+    if (!r || typeof r.label !== "string" || !r.label) {
+      // Missing record OR malformed label — render as "empty" rather than
+      // crash. r.correct may still be present but is meaningless without a
+      // label, so we treat the whole record as unavailable.
       span.className = "pilot-pill pilot-empty";
       span.textContent = `${model}: —`;
     } else {
@@ -707,7 +811,7 @@ function escapeHtml(s) {
 function renderSlateGlance() {
   const panel = document.getElementById("slate-glance-panel");
   if (!panel || !DATA) return;
-  const picks = DATA.rows.filter(r => SHORTLIST.ids.has(r.rule_id));
+  const picks = DATA.rows.filter(r => isSelected(r.rule_id));
   if (picks.length === 0) {
     panel.innerHTML = "";
     return;
@@ -771,8 +875,70 @@ function renderSlateGlance() {
 // Mutations + persistence
 // ---------------------------------------------------------------------------
 
-function togglePick(_rid) {
-  // no-op: picks are now read-only from shortlist_final_10.json
+function togglePick(rid) {
+  // Toggle the rule's membership in the user's working selection.
+  // Updates: the .selection-toggle button label/state on this row, the
+  // selected-row tint on this row, the slate-glance panel aggregates,
+  // and the marker sizes for this rule across all 4 plots.
+  if (USER_SELECTION.has(rid)) USER_SELECTION.delete(rid);
+  else USER_SELECTION.add(rid);
+  persistUserSelection();
+
+  // Surgical DOM update on this row's button + tr tint; avoids the full
+  // table re-render and the focus-loss that comes with it.
+  const tr = document.querySelector(`tr[data-rid="${rid}"]`);
+  if (tr) {
+    const on = isSelected(rid);
+    tr.classList.toggle("selected-row", on);
+    const btn = tr.querySelector(".selection-toggle");
+    if (btn) {
+      btn.classList.toggle("is-on", on);
+      btn.classList.toggle("is-off", !on);
+      btn.textContent = on ? "✓" : "☐";
+      btn.setAttribute("aria-pressed", String(on));
+    }
+  }
+
+  // Refresh the slate panel + plots so the new selection is reflected
+  // everywhere the user is looking.
+  renderSlateGlance();
+  refreshPlotMarkers();
+}
+
+function resetUserSelectionToShortlist() {
+  // Revert the working selection to the original 10 from
+  // shortlist_final_10.json. Called by the "Reset to original 10" button.
+  USER_SELECTION = new Set(SHORTLIST.ids);
+  persistUserSelection();
+  // Full re-render is the simplest path here — every row's button
+  // state may have flipped, and a full pass also refreshes the plots.
+  render();
+}
+
+function refreshPlotMarkers() {
+  // Re-apply the size + symbol arrays to every plot trace so the
+  // current USER_SELECTION drives the visual emphasis. Used after
+  // togglePick / reset, and as a no-op-friendly path that won't
+  // crash if plots aren't initialized yet.
+  if (typeof Plotly === "undefined" || !DATA) return;
+  for (const id of PLOT_IDS) {
+    const div = document.getElementById(id);
+    if (!div || !div.data) continue;
+    div.data.forEach((trace, i) => {
+      if (trace.type === "histogram") return;
+      if (!trace.customdata) return;
+      const isDensityScatter = id !== "scatter-3d";
+      const selectedSymbol = isDensityScatter ? "star" : "diamond";
+      const sizes = trace.customdata.map(cd =>
+        isSelected(cd.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT);
+      const symbols = trace.customdata.map(cd =>
+        isSelected(cd.rule_id) ? selectedSymbol : "circle");
+      Plotly.restyle(id, {
+        "marker.size": [sizes],
+        "marker.symbol": [symbols],
+      }, [i]);
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -832,6 +998,17 @@ if (filterBtn) {
   };
 }
 
+const resetBtn = document.getElementById("reset-selection");
+if (resetBtn) {
+  resetBtn.onclick = () => {
+    // No confirm dialog: localStorage clears immediately on click. The
+    // operation is cheap to redo (toggle a few checkboxes back) and the
+    // friction of a confirm() in the middle of pondering is worse than
+    // the rare misclick.
+    resetUserSelectionToShortlist();
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Plots — Plotly density panel + 3D scatter
 // ---------------------------------------------------------------------------
@@ -856,12 +1033,15 @@ const RB_COLORS = {
   TOO_HARD:     "#525252",
 };
 
-// Default marker size; bumped to highlight a single rule across all plots.
-const MARKER_SIZE_DEFAULT = 8;
-// Size for the 10 shortlisted picks — sits between DEFAULT and HIGHLIGHT so
-// click-to-flash still produces a visible bump on selected dots.
-const MARKER_SIZE_SELECTED = 12;
-const MARKER_SIZE_HIGHLIGHT = 14;
+// Marker sizes for the 4 plots. The selected tier (rules in the user's
+// working selection) is the at-a-glance signal — bumped well above the
+// earlier 12 so the eye lands on the picks immediately without scouting
+// across 60 dots. The highlight tier (transient emphasis from a click)
+// is bigger still so it visually dominates even against a selected
+// backdrop.
+const MARKER_SIZE_DEFAULT   = 7;
+const MARKER_SIZE_SELECTED  = 18;
+const MARKER_SIZE_HIGHLIGHT = 26;
 
 // Module state for cross-plot highlight: which rule_id is currently
 // emphasized everywhere. Reset on a 2-second timer matching the table-row
@@ -886,9 +1066,9 @@ function buildDensityTraces(rows, valueField, jitterSeed) {
   // Per-point size and symbol so the 10 shortlisted picks stand out as
   // larger stars while the rest stay as default-size circles.
   const sizes   = valid.map(r =>
-    SHORTLIST.ids.has(r.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT);
+    isSelected(r.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT);
   const symbols = valid.map(r =>
-    SHORTLIST.ids.has(r.rule_id) ? "star" : "circle");
+    isSelected(r.rule_id) ? "star" : "circle");
   // Deterministic jitter based on rule_id hash so re-renders don't shuffle dots.
   const ys = valid.map((r, i) =>
     1 + 0.7 * (Math.sin((jitterSeed + i * 12.9898 + r.rule_id.length) * 78.233) * 0.5));
@@ -905,7 +1085,7 @@ function buildDensityTraces(rows, valueField, jitterSeed) {
     br_d: r.base_rate_decile,
     // Pre-computed string so the hovertemplate can splice it in without
     // needing if/else (which Plotly's template syntax doesn't support).
-    selectedTag: SHORTLIST.ids.has(r.rule_id) ? "<br>✓ selected" : "",
+    selectedTag: isSelected(r.rule_id) ? "<br>✓ selected" : "",
   }));
 
   const histogram = {
@@ -1001,16 +1181,16 @@ function render3DScatter() {
         mcc_d: r.mcc_decile, H_d: r.H_decile, br_d: r.base_rate_decile,
         // Pre-computed string for the hovertemplate (Plotly templates have no
         // if/else). Empty string for non-picks renders nothing.
-        selectedTag: SHORTLIST.ids.has(r.rule_id) ? "<br>✓ selected" : "",
+        selectedTag: isSelected(r.rule_id) ? "<br>✓ selected" : "",
       })),
       marker: {
         color: RB_COLORS[cls],
         // Bigger marker for the 10 picks. Plotly's 3D scatter does NOT
         // support "star"; "diamond" is the closest visually-distinct option.
         size: rows.map(r =>
-          SHORTLIST.ids.has(r.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT),
+          isSelected(r.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT),
         symbol: rows.map(r =>
-          SHORTLIST.ids.has(r.rule_id) ? "diamond" : "circle"),
+          isSelected(r.rule_id) ? "diamond" : "circle"),
         line: { color: "#fff", width: 0.5 },
       },
       hovertemplate:
@@ -1067,9 +1247,24 @@ function renderAllPlots() {
 // ---------------------------------------------------------------------------
 
 function handlePlotClick(rid) {
-  // Click came from a plot. Scroll the table to the corresponding row,
-  // flash-highlight it, and emphasize the dot across all plots too.
-  const tr = document.querySelector(`tr[data-rid="${rid}"]`);
+  // Click came from a plot. Three effects:
+  //   1. If the row is hidden by SHOW_ONLY_SELECTED, reveal it (auto-toggle
+  //      the filter and re-render). Without this the scroll target wouldn't
+  //      exist in the DOM and the user-visible feedback is just "the dot
+  //      got slightly bigger" which is too easy to miss.
+  //   2. Scroll the table to that row and flash-highlight it.
+  //   3. Emphasize the dot across all plots.
+  let tr = document.querySelector(`tr[data-rid="${rid}"]`);
+  if (!tr && SHOW_ONLY_SELECTED) {
+    // The clicked rule isn't in the current 10-row view. Reveal all rows
+    // so we can scroll to it. Toggle the filter state + update the button
+    // label, then re-render the body and re-query.
+    SHOW_ONLY_SELECTED = false;
+    const btn = document.getElementById("toggle-selected-filter");
+    if (btn) btn.textContent = "Show only the 10 selected rules";
+    renderBody();
+    tr = document.querySelector(`tr[data-rid="${rid}"]`);
+  }
   if (tr) {
     tr.scrollIntoView({ behavior: "smooth", block: "center" });
     tr.classList.remove("flash-from-plot");
@@ -1097,7 +1292,7 @@ function highlightInPlots(rid) {
       if (!trace.customdata) return;
       const sizes = trace.customdata.map(cd =>
         cd.rule_id === rid ? MARKER_SIZE_HIGHLIGHT
-        : SHORTLIST.ids.has(cd.rule_id) ? MARKER_SIZE_SELECTED
+        : isSelected(cd.rule_id) ? MARKER_SIZE_SELECTED
         : MARKER_SIZE_DEFAULT);
       Plotly.restyle(id, { "marker.size": [sizes] }, [i]);
     });
@@ -1115,43 +1310,41 @@ function highlightInPlots(rid) {
         if (trace.type === "histogram") return;
         if (!trace.customdata) return;
         const sizes = trace.customdata.map(cd =>
-          SHORTLIST.ids.has(cd.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT);
+          isSelected(cd.rule_id) ? MARKER_SIZE_SELECTED : MARKER_SIZE_DEFAULT);
         Plotly.restyle(id, { "marker.size": [sizes] }, [i]);
       });
     }
   }, 1800);
 }
 
-// Wire click on the table's rule_id <a> tags to highlight in plots.
-// Uses event delegation since rows are re-rendered on sort/filter changes.
+// Single delegated click handler on the table for two interactive cells:
+//   - .selection-toggle button (✓ column) — toggles USER_SELECTION
+//   - code.rule-id-cell (rule_id column) — highlights across plots
+// Order matters: check the toggle FIRST, since the toggle is inside a row
+// that also contains the rule-id cell.
 document.getElementById("rule-table").addEventListener("click", (e) => {
-  // Only a pure click on the rule_id link triggers highlight; cmd/ctrl-click
-  // (open in new tab) should not. The link's default behavior to open the
-  // atlas page in a new tab still fires.
-  const a = e.target.closest("a[href*='atlas/output/rule/']");
-  if (!a || e.metaKey || e.ctrlKey) return;
-  const tr = a.closest("tr");
+  const toggle = e.target.closest("button.selection-toggle");
+  if (toggle && toggle.dataset.rid) {
+    e.preventDefault();
+    togglePick(toggle.dataset.rid);
+    return;
+  }
+  const cell = e.target.closest("code.rule-id-cell");
+  if (!cell) return;
+  const tr = cell.closest("tr");
   if (tr && tr.dataset.rid) highlightInPlots(tr.dataset.rid);
 });
-
-// ---------------------------------------------------------------------------
-// Hook plots into the load() flow
-// ---------------------------------------------------------------------------
-//
-// load() is already defined above and runs render() once the JSON arrives.
-// We extend the boot sequence with one extra call that renders the plots
-// AFTER the table is drawn, so the user sees the table immediately and
-// the plots populate as Plotly initializes.
-
-const _origLoad = load;
-load = async function patchedLoad() {
-  await _origLoad();
-  // Defer to next tick so the DOM has the table painted before Plotly
-  // measures container sizes.
-  setTimeout(() => {
-    if (plotsAvailable()) renderAllPlots();
-  }, 0);
-};
+// Keyboard accessibility: Enter/Space on a focused rule_id triggers
+// the same highlight. role=button + tabindex=0 on the <code> makes it
+// part of the tab order.
+document.getElementById("rule-table").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const cell = e.target.closest("code.rule-id-cell");
+  if (!cell) return;
+  e.preventDefault();
+  const tr = cell.closest("tr");
+  if (tr && tr.dataset.rid) highlightInPlots(tr.dataset.rid);
+});
 
 // ---------------------------------------------------------------------------
 // Boot
