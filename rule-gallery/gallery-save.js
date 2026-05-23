@@ -10,6 +10,14 @@
 // Usage:
 //   GallerySave.saveResults(filename, jsonString)
 //   GallerySave.saveResults(filename, jsonString, { forceLocal: true })
+//   GallerySave.saveResults(filename, jsonString, { workerDir: "results_gallery/study2" })
+//
+// Options:
+//   forceLocal — skip remote saves, go straight to download
+//   workerDir  — override the GitHub subdirectory the Worker writes to.
+//                Defaults to "results_gallery" for back-compat with the
+//                original rule-gallery study. Study #2 passes a namespaced
+//                subdir so its files don't mix with study #1 writes.
 
 (function () {
   "use strict";
@@ -70,7 +78,10 @@
   }
 
   // 2. Cloudflare Worker → GitHub: POST base64-encoded content
-  async function saveToWorker(filename, jsonString) {
+  // `dir` selects the subdirectory inside the staging repo; defaults to
+  // GITHUB_DIR ("results_gallery") if the caller doesn't override.
+  async function saveToWorker(filename, jsonString, dir) {
+    const targetDir = dir || GITHUB_DIR;
     const res = await fetch(WORKER_URL, {
       method: "POST",
       mode: "cors",
@@ -79,7 +90,7 @@
         owner: GITHUB_OWNER,
         repo: GITHUB_REPO,
         branch: GITHUB_BRANCH,
-        dir: GITHUB_DIR,
+        dir: targetDir,
         fileName: filename,
         content: b64(jsonString)
       })
@@ -98,6 +109,7 @@
   //   forceLocal: true  — skip remote saves, go straight to download
   async function saveResults(filename, jsonString, options = {}) {
     const forceLocal = options.forceLocal || false;
+    const workerDir = options.workerDir || null;  // null → use GITHUB_DIR default
 
     if (!forceLocal) {
       let dataPipeOk = false;
@@ -113,7 +125,7 @@
 
       // Try Cloudflare Worker (always attempted, independent of DataPipe)
       try {
-        await saveToWorker(filename, jsonString);
+        await saveToWorker(filename, jsonString, workerDir);
         workerOk = true;
       } catch (e) {
         console.warn("[GallerySave] Worker failed:", e.message);

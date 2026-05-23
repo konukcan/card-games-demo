@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Explanation Experiment</title>
+
+  <!-- Resolve all paths from the card-games/ root so shared assets
+       (js/cardex.js, rule-gallery/*.js, stim/, etc.) load correctly. -->
+  <base href="../">
+
+  <!-- Experiment-specific styles -->
+  <link rel="stylesheet" href="self-explanation-experiment-study2/styles.css">
+</head>
+<body>
+
+  <!-- Main application mount point.
+       All UI is rendered dynamically into this container by app.js. -->
+  <div id="app"></div>
+
+  <!-- ─── Shared dependencies ─── -->
+  <!-- CyborgHunter: passive integrity monitor (loads first so app.js can
+       boot it before snapshot fetch — see design v2 §9.2).
+       Vendored alongside study #2 so it doesn't have to share with study #1
+       on card-games-demo, which carries a different cyborg-hunter build.
+       See self-explanation-experiment-study2/vendored/README.md. -->
+  <script src="self-explanation-experiment-study2/vendored/cyborg-hunter.js"></script>
+
+  <script>
+  /* Roundtable Proof-of-Humanity — passive session-level integrity collector,
+     wired the same way as the cyborg-hunter red-teaming bench studies. rt.js
+     self-initializes from its data-* attributes and ships telemetry to
+     Roundtable's servers. Its verdict is retrieved OUT-OF-BAND afterward via
+     Roundtable's REST API, joined to this run by runId — which is also saved
+     in the experiment payload as metadata.roundtableRunId.
+     Gated: study #2 sessions only, and not under test automation. */
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("study2") !== "1") return;        // study #2 sessions only
+    if (navigator.webdriver) return;                  // skip automated tests — no junk RT sessions
+    var ROUNDTABLE_SITE_KEY = "pub-g8UmIPDFhjzGHNnngOWR";
+    var runId = params.get("PROLIFIC_PID")
+      || ("se2-" + new Date().toISOString().replace(/[:.]/g, "-"));
+    window.SE_ROUNDTABLE_RUN_ID = runId;              // app.js reads this for the payload join
+    var condition = params.get("condition") || "";
+    var s = document.createElement("script");
+    s.src = "https://cdn.roundtable.ai/v1/rt.js";
+    s.dataset.siteKey = ROUNDTABLE_SITE_KEY;
+    s.dataset.userId = runId;
+    s.dataset.tags = "study:se2,condition:" + condition + ",runId:" + runId;
+    s.onerror = function (e) { console.error("[se-study2] Roundtable rt.js failed to load:", e); };
+    s.onload = function () { console.log("[se-study2] Roundtable rt.js loaded; runId =", runId); };
+    document.head.appendChild(s);
+  })();
+  </script>
+
+  <!-- CardEx: card utilities, deck generation, rendering helpers -->
+  <script src="js/cardex.js"></script>
+
+  <!-- GalleryRules: 61 rule definitions with eval/generate functions -->
+  <script src="rule-gallery/gallery-rules.js"></script>
+
+  <!-- GallerySave: DataPipe + Cloudflare + local-download save cascade -->
+  <script src="rule-gallery/gallery-save.js"></script>
+
+  <!-- GalleryMouseTracker: records mouse movements during gallery phase -->
+  <script src="rule-gallery/gallery-mouse-tracker.js"></script>
+
+  <!-- GalleryFocusTracker: records tab visibility / focus changes -->
+  <script src="rule-gallery/gallery-focus-tracker.js"></script>
+
+  <!-- ─── Experiment modules (loaded in dependency order) ─── -->
+
+  <!-- SEConfig: central configuration with URL-param overrides -->
+  <script src="self-explanation-experiment-study2/config.js"></script>
+
+  <!-- Study2Orderings: rule orderings and group assignments for study #2 -->
+  <script src="self-explanation-experiment-study2/study2-orderings.js"></script>
+
+  <!-- Study2Comprehension: 2-question, 2-attempt comprehension check for study #2 -->
+  <script src="self-explanation-experiment-study2/study2-comprehension.js"></script>
+
+  <!-- DevTools: console helpers for rapid exploration (loads early so
+       it's available even if later modules error) -->
+  <script src="self-explanation-experiment-study2/devtools.js"></script>
+
+  <!-- AudioRecorder: microphone capture for verbal protocols -->
+  <script src="self-explanation-experiment-study2/audio-recorder.js"></script>
+
+  <!-- HandSelector: card selection UI for token prompts -->
+  <script src="self-explanation-experiment-study2/hand-selector.js"></script>
+
+  <!-- SnapshotLoader: fail-closed fetch + validation of the v2 snapshot -->
+  <script src="self-explanation-experiment-study2/snapshot-loader.js"></script>
+
+  <!-- UI: shared rendering helpers, layout, and CSS injection -->
+  <script src="self-explanation-experiment-study2/ui.js"></script>
+
+  <!-- Tutorial: instruction screens and practice trials -->
+  <script src="self-explanation-experiment-study2/tutorial.js"></script>
+
+  <!-- Game: single-rule trial loop (gallery → classify → explain) -->
+  <script src="self-explanation-experiment-study2/game.js"></script>
+
+  <!-- Curriculum: rule selection and ordering across the session -->
+  <script src="self-explanation-experiment-study2/curriculum.js"></script>
+
+  <!-- Recap: end-of-session summary and debrief -->
+  <script src="self-explanation-experiment-study2/recap.js"></script>
+
+  <!-- App: top-level orchestrator — wires modules together and starts -->
+  <script src="self-explanation-experiment-study2/app.js"></script>
+
+</body>
+</html>

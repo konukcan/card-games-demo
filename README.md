@@ -99,3 +99,27 @@ The upstream `card-games` repo has analysis tooling, tests, model-compare code, 
 ## License & access
 
 This repo mirrors public artifacts of the research. The Cloudflare Worker token used for data saving is server-side only and not exposed in the deployed site.
+
+## Study #2 (rework, April 2026)
+
+Self-explanation pilot — Spec A frontend rework. Lives at
+`self-explanation-experiment-study2/` and `rule-gallery/gallery-save.js`
+(shared with study #1, additive change).
+
+**Live URLs (study #2):**
+
+- Explain condition: <https://konukcan.github.io/card-games-demo/self-explanation-experiment-study2/index.html?study2=1&seSnapshot=se2_2026_05_21_57bc357a&condition=explain&ruleScope=all10>
+- Silent condition:  <https://konukcan.github.io/card-games-demo/self-explanation-experiment-study2/index.html?study2=1&seSnapshot=se2_2026_05_21_57bc357a&condition=silent&ruleScope=all10>
+
+**Data flow:** Same two-target cascade as study #1 (DataPipe → OSF +
+Cloudflare Worker → card-games-staging GitHub). Study #2 writes to a
+namespaced subdir to avoid mixing with study #1:
+
+| Target | Study #1 path | Study #2 path |
+|---|---|---|
+| OSF (via DataPipe) | experiment `RWyWRsZqLgFu` | experiment `RWyWRsZqLgFu` (shared) |
+| card-games-staging | `results_gallery/se_*.json` | `results_gallery/study2/se2_*.json` |
+
+The `se_*` vs `se2_*` filename prefix, the dedicated `study2/` subdir,
+and the `experiment: "se_study2"` tag inside each payload combine to
+guarantee study #2 saves cannot collide with or overwrite study #1 saves.
