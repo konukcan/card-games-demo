@@ -26,6 +26,12 @@
        See self-explanation-experiment-study2/vendored/README.md. -->
   <script src="self-explanation-experiment-study2/vendored/cyborg-hunter.js"></script>
 
+  <!-- GuardFriction: active integrity layer (fullscreen enforcement, AI
+       refusal notices, content blurring during violations). Provides a
+       global `window.GuardFriction` API. Loaded after the core so the
+       core's IntegrityMonitor surface is available first. -->
+  <script src="self-explanation-experiment-study2/vendored/extension-guard-friction.js"></script>
+
   <script>
   /* Roundtable Proof-of-Humanity — passive session-level integrity collector,
      wired the same way as the cyborg-hunter red-teaming bench studies. rt.js

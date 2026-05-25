@@ -128,6 +128,100 @@ window.SEApp = (function () {
   }
 
   // ════════════════════════════════════════════════════
+  // GuardFriction — fullscreen + AI-refusal active layer
+  // ════════════════════════════════════════════════════
+
+  // _renderFullscreenEntryGate() — Renders a one-click gate screen that
+  // (a) requests fullscreen via the user's click gesture, then
+  // (b) starts GuardFriction monitoring.
+  // Returns a Promise resolving once the gate has been clicked (or skipped).
+  //
+  // Skip conditions (resolve immediately without any UI):
+  //   - GuardFriction library missing (extension script failed to load)
+  //   - URL `?gf=off` (manual override)
+  //   - navigator.webdriver (Playwright/headless — would fight the overlay)
+  //   - URL `?skipTutorial=1` (dev/test fast-path)
+  //
+  // Modes (via URL `?gf=`):
+  //   - default (no param)  — strict: requests fullscreen + monitors all
+  //   - `?gf=observe`        — observeOnly: monitor + log, no blocking overlay
+  //   - `?gf=off`            — skip entirely
+  function _gfShouldSkip() {
+    if (!window.GuardFriction) return true;
+    var p = new URLSearchParams(window.location.search);
+    if (p.get("gf") === "off") return true;
+    if (p.get("skipTutorial") === "1") return true;
+    if (navigator.webdriver) return true;
+    return false;
+  }
+
+  function _renderFullscreenEntryGate() {
+    return new Promise(function (resolve) {
+      if (_gfShouldSkip()) { resolve({ skipped: true }); return; }
+
+      var observeOnly =
+        (new URLSearchParams(window.location.search)).get("gf") === "observe";
+
+      var app = document.getElementById("app");
+      app.innerHTML =
+        '<div style="max-width:640px; margin:80px auto; padding:32px; ' +
+        'background:#fff; border:1px solid #e2e8f0; border-radius:10px; ' +
+        'text-align:center; font-family:system-ui, sans-serif; color:#1e293b;">' +
+        '<h2 style="margin:0 0 16px; font-size:20px;">Before you begin</h2>' +
+        '<p style="line-height:1.6; margin:8px 0 24px;">' +
+        'To keep the experiment fair for everyone, this study runs in ' +
+        '<strong>fullscreen mode</strong>. Please close any browser sidebars, ' +
+        'AI assistant tabs, or extension panels, then click below to enter ' +
+        'fullscreen and start the tutorial.' +
+        '</p>' +
+        '<button id="se-gf-enter-btn" class="se-btn-continue" ' +
+        'style="font-size:15px; padding:12px 28px;">' +
+        'Enter fullscreen and begin' +
+        '</button>' +
+        '<p style="font-size:12px; color:#64748b; margin:20px 0 0;">' +
+        'You can exit fullscreen at any time by pressing Esc, but doing so ' +
+        'mid-experiment will pause the session until you return to fullscreen.' +
+        '</p></div>';
+
+      var btn = document.getElementById("se-gf-enter-btn");
+      btn.addEventListener("click", function () {
+        // Within the user gesture: request fullscreen FIRST so the browser
+        // accepts the call. Then start monitoring (after a short delay so
+        // fullscreen-entry events have settled before baseline capture).
+        try { window.GuardFriction.requestFullscreen(); } catch (_e) {}
+
+        // Subscribe to violations BEFORE start() so we capture every event
+        // from t=0. Buffer them on window — read into the payload at save.
+        window._guardFrictionViolations = [];
+        try {
+          window.GuardFriction.onViolation(function (v) {
+            window._guardFrictionViolations.push({
+              phase: v.phase,
+              reason: v.reason,
+              t: v.t,
+              duration: v.duration || null
+            });
+          });
+        } catch (_e) {}
+
+        setTimeout(function () {
+          try {
+            var token = window.GuardFriction.start({
+              observeOnly: observeOnly,
+              debug: false
+            });
+            window._guardFrictionToken = token;
+            console.log("[GuardFriction] active. observeOnly=" + observeOnly);
+          } catch (e) {
+            console.warn("[GuardFriction] start() failed:", e);
+          }
+          resolve({ skipped: false, observeOnly: observeOnly });
+        }, 150);
+      });
+    });
+  }
+
+  // ════════════════════════════════════════════════════
   // Clear session state
   // ════════════════════════════════════════════════════
 
@@ -172,6 +266,26 @@ window.SEApp = (function () {
       // Library may be missing (CSP, bad path) — _bootIntegrityMonitor
       // returns null in that case and the rest of the flow is unaffected.
       window._integrityMonitor = _bootIntegrityMonitor();
+
+      // ── 0bis. AI refusal notices (GuardFriction) ──
+      // Adds meta tags + invisible alert region + DOM-walker markers that
+      // signal to AI agents reading the page (sidebar LLMs, browser-control
+      // agents, screen-reader-style scrapers) that they must not assist.
+      // Cheap, side-effect-free, runs even when fullscreen enforcement is
+      // off — orthogonal layer.
+      //
+      // Gated:
+      //   - Library missing (e.g. extension script failed to load) — skip silently
+      //   - URL param `?gf=off` — opt-out for manual dev/testing
+      //   - navigator.webdriver true (Playwright) — skip so tests don't fight
+      //     the GuardFriction overlay
+      try {
+        var _gfMode = (new URLSearchParams(window.location.search)).get("gf");
+        var _gfDisabled = _gfMode === "off" || navigator.webdriver;
+        if (window.GuardFriction && !_gfDisabled) {
+          window.GuardFriction.injectRefusalNotices();
+        }
+      } catch (_e) { /* no-op */ }
 
       // ── 0a. Guard: file:// protocol ──
       // Browsers block fetch() on file:// origins for security, which makes
@@ -338,6 +452,14 @@ window.SEApp = (function () {
         seSnapshotId: metadata.seSnapshotId,
         groupAssignment: metadata.groupAssignment,
       });
+
+      // ── 3b. Fullscreen entry gate (GuardFriction) ──
+      // Renders a one-click screen whose click both enters fullscreen and
+      // boots GuardFriction monitoring. Must happen BEFORE the tutorial so
+      // the gate runs at the first user-gesture point (browsers refuse
+      // requestFullscreen outside a user gesture). Silently skips in test
+      // contexts (navigator.webdriver, ?skipTutorial=1, ?gf=off).
+      await _renderFullscreenEntryGate();
 
       // ── 4. Tutorial ──
       // v2: no separate practice round — instruction screens + a mic test
@@ -805,14 +927,49 @@ window.SEApp = (function () {
       // R-stim/9.3: cyborg-hunter session report -> payload.
       // getSessionReport returns a deep copy of all collected session data
       // (paste/copy/tabAway/sidebar events, scores, AI extension hits, etc.).
+      //
+      // We write it in two places:
+      //   - payload.cyborgHunter            — SE-native convention (kept for
+      //     backward compat with any analysis code already reading it).
+      //   - payload.metadata.integritySession + integrityScore — the documented
+      //     card-games convention that cyborg-hunter's CLI report (`npx
+      //     cyborg-hunter report`) looks for first. With both, the CLI ingests
+      //     the data without warnings, no adapter needed.
       if (window._integrityMonitor &&
           typeof window._integrityMonitor.getSessionReport === "function") {
         try {
-          payload.cyborgHunter = window._integrityMonitor.getSessionReport();
+          var sessionReport = window._integrityMonitor.getSessionReport();
+          payload.cyborgHunter = sessionReport;
+          payload.metadata.integritySession = sessionReport;
+          payload.metadata.integrityScore = {
+            softScore: sessionReport.softScore,
+            softScoreThreshold: sessionReport.softScoreThreshold,
+            hardScore: sessionReport.hardScore,
+            anyHardTriggered: sessionReport.anyHardTriggered
+          };
         } catch (e) {
           console.warn("cyborg-hunter getSessionReport failed:", e);
         }
         try { window._integrityMonitor.destroy(); } catch (_e) {}
+      }
+
+      // ── GuardFriction → payload + stop ──
+      // Captures the violation log (every fullscreen-exit, tab-hide,
+      // window-blur, sidebar-open event during the session) and the final
+      // GuardFriction state. Silently no-ops when GuardFriction was skipped
+      // (test contexts, ?gf=off).
+      if (window.GuardFriction && window._guardFrictionToken) {
+        try {
+          payload.guardFriction = {
+            violations: window._guardFrictionViolations || [],
+            finalState: window.GuardFriction.getCurrentState()
+          };
+        } catch (e) {
+          console.warn("GuardFriction report capture failed:", e);
+        }
+        try {
+          window.GuardFriction.stop(window._guardFrictionToken);
+        } catch (_e) {}
       }
 
       var jsonString = JSON.stringify(payload);
