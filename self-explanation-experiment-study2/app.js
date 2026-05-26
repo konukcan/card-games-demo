@@ -238,6 +238,11 @@ window.SEApp = (function () {
     if (urlParams.get("clear") !== "1") return;
     console.log("SEApp: clearing storage (clear=1).");
     localStorage.removeItem("se_tutorial_done");
+    // Wipe consent cache too — without this, ?clear=1 doesn't truly reset
+    // the participant flow (consent screen would auto-skip).
+    if (typeof Study2Consent !== "undefined" && typeof Study2Consent.clear === "function") {
+      Study2Consent.clear();
+    }
     [localStorage, sessionStorage].forEach(function (store) {
       // Iterate keys in reverse so removeItem during iteration is safe.
       for (var i = store.length - 1; i >= 0; i--) {
@@ -355,6 +360,26 @@ window.SEApp = (function () {
         }
       }
 
+      // ── 0d. Consent (study #2 only) ──
+      // Stanford/CICL consent overlay (ported from rule-gallery). Runs AFTER
+      // URL param validation (so a misconfigured launch fails fast without
+      // making the participant read consent) but BEFORE session metadata
+      // generation (so a participant who closes the consent screen leaves
+      // no sessionId / startTime behind). Skips in:
+      //   - non-study-2 mode (v2 lifecycle has its own consent path)
+      //   - ?skipTutorial=1 (test fast-path)
+      //   - navigator.webdriver (Playwright)
+      //   - localStorage cache hit (browser already consented this study)
+      //     — handled inside Study2Consent.run() itself.
+      var consentResult = null;
+      var consentSkipParam = (new URLSearchParams(window.location.search)).get("skipTutorial") === "1";
+      if (SEConfig.isStudy2()
+          && typeof Study2Consent !== "undefined"
+          && !consentSkipParam
+          && !navigator.webdriver) {
+        consentResult = await Study2Consent.run();
+      }
+
       // ── 1. Initialize session metadata ──
       var sessionId = generateSessionId();
       var participantId = getParticipantId();
@@ -386,6 +411,12 @@ window.SEApp = (function () {
         accumulate: SEConfig.accumulate,
         checkpoints: SEConfig.checkpoints,
         curriculum: [],  // filled after curriculum is built
+        consent: consentResult                  // {consentedAt, cached} or null
+          ? {
+              consentedAt: consentResult.consentedAt,
+              cached: !!consentResult.cached     // true → consent was granted in a prior session this browser
+            }
+          : null,
         startTime: startTime,
         endTime: null,   // filled at finalization
         totalDurationMs: null,
@@ -453,14 +484,6 @@ window.SEApp = (function () {
         groupAssignment: metadata.groupAssignment,
       });
 
-      // ── 3b. Fullscreen entry gate (GuardFriction) ──
-      // Renders a one-click screen whose click both enters fullscreen and
-      // boots GuardFriction monitoring. Must happen BEFORE the tutorial so
-      // the gate runs at the first user-gesture point (browsers refuse
-      // requestFullscreen outside a user gesture). Silently skips in test
-      // contexts (navigator.webdriver, ?skipTutorial=1, ?gf=off).
-      await _renderFullscreenEntryGate();
-
       // ── 4. Tutorial ──
       // v2: no separate practice round — instruction screens + a mic test
       // on a real card. SETutorial.run() ignores its argument; we pass
@@ -512,6 +535,16 @@ window.SEApp = (function () {
           );
         });
       }
+
+      // ── 4c. Fullscreen entry gate (GuardFriction) ──
+      // Renders a one-click screen whose click both enters fullscreen and
+      // boots GuardFriction monitoring. Lives AFTER the comprehension check
+      // by design: participants only meet the integrity layer once they've
+      // demonstrated they understood the task, so attrition at the gate
+      // doesn't mix with attrition for the wrong reasons. Click is the
+      // user-gesture that lets requestFullscreen succeed. Silently skips
+      // in test contexts (navigator.webdriver, ?skipTutorial=1, ?gf=off).
+      await _renderFullscreenEntryGate();
 
       // ── 5. Main experiment ──
       // Loop through each rule in the curriculum sequentially. Each call

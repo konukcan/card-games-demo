@@ -1,0 +1,4982 @@
+{
+  "created_at": "2026-05-26T19:44:33Z",
+  "difficulty_ranking": [
+    {
+      "mean_mcc": -0.0245,
+      "rank": 1,
+      "rule_id": "colors_palindrome"
+    },
+    {
+      "mean_mcc": 0.0402,
+      "rank": 2,
+      "rule_id": "immediate_bracket_closure"
+    },
+    {
+      "mean_mcc": 0.1662,
+      "rank": 3,
+      "rule_id": "blacks_then_reds_start_black"
+    },
+    {
+      "mean_mcc": 0.1764,
+      "rank": 4,
+      "rule_id": "ap_step1_len3_adj"
+    },
+    {
+      "mean_mcc": 0.3248,
+      "rank": 5,
+      "rule_id": "halves_copy_ranks"
+    },
+    {
+      "mean_mcc": 0.3706,
+      "rank": 6,
+      "rule_id": "ranks_palindrome"
+    },
+    {
+      "mean_mcc": 0.4408,
+      "rank": 7,
+      "rule_id": "all_odd"
+    },
+    {
+      "mean_mcc": 0.4967,
+      "rank": 8,
+      "rule_id": "all_even"
+    },
+    {
+      "mean_mcc": 0.6151,
+      "rank": 9,
+      "rule_id": "two_pairs_ranks"
+    },
+    {
+      "mean_mcc": 0.8609,
+      "rank": 10,
+      "rule_id": "left_red_right_black"
+    }
+  ],
+  "end_requery_rules": [
+    "colors_palindrome",
+    "immediate_bracket_closure"
+  ],
+  "group_assignment": {
+    "X": [
+      "left_red_right_black",
+      "colors_palindrome",
+      "two_pairs_ranks",
+      "halves_copy_ranks",
+      "ranks_palindrome"
+    ],
+    "Y": [
+      "ap_step1_len3_adj",
+      "blacks_then_reds_start_black",
+      "immediate_bracket_closure",
+      "all_odd",
+      "all_even"
+    ]
+  },
+  "rules": [
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 3,
+          "modes_total": 3,
+          "per_mode_hands_caught": {
+            "mode_0": 3,
+            "mode_1": 1,
+            "mode_2": 5
+          },
+          "total_mode_weight": 3,
+          "weighted_coverage": 3
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "exact_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_2"
+          ],
+          [
+            "mode_0",
+            "mode_2"
+          ],
+          [
+            "mode_0",
+            "mode_2"
+          ],
+          [
+            "mode_1"
+          ],
+          [
+            "mode_2"
+          ],
+          [
+            "mode_2"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: ([c[\"suit\"] for c in hand[3:]] == [\"CLUBS\", \"SPADES\", \"CLUBS\"]) or ([c[\"suit\"] for c in hand[3:]] == [\"SPADES\", \"CLUBS\", \"SPADES\"])"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") == 3"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: all(COLOR[c[\"suit\"]] == \"red\" for c in hand[:3]) and any(c[\"suit\"] == \"CLUBS\" for c in hand)"
+          }
+        ]
+      },
+      "difficulty": 1,
+      "gallery": [
+        [
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "Q",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "2",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "J",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "J",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "Q",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "Q",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "Q",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "8",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "K",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          }
+        ]
+      ],
+      "group": "X",
+      "is_end_requery": false,
+      "mean_mcc": 0.8609,
+      "rule_answer": "Left three cards are red, right three are black",
+      "rule_id": "left_red_right_black",
+      "test_hands": [
+        {
+          "edit_description": "slot 3: rank 2->4; slot 4: suit CLUBS->SPADES; slot 5: rank 10->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "Q",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 3: rank 2->10; slot 4: suit CLUBS->SPADES; slot 5: rank 10->2",
+          "edit_distance": 2,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "Q",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "10",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 3: suit CLUBS->SPADES",
+          "edit_distance": 1,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "8",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "A",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "Q",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 0: rank 5->10, suit DIAMONDS->SPADES; slot 3: rank 2->5, suit SPADES->DIAMONDS; slot 4: rank 3->2; slot 5: rank 10->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "10",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "Q",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 3: suit SPADES->DIAMONDS; slot 5: rank 10->2",
+          "edit_distance": 2,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "Q",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 3: suit CLUBS->DIAMONDS",
+          "edit_distance": 1,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "K",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 5
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 10,
+          "modes_total": 10,
+          "per_mode_hands_caught": {
+            "mode_0": 6,
+            "mode_1": 6,
+            "mode_2": 5,
+            "mode_3": 6,
+            "mode_4": 4,
+            "mode_5": 6,
+            "mode_6": 6,
+            "mode_7": 6,
+            "mode_8": 5,
+            "mode_9": 3
+          },
+          "total_mode_weight": 23,
+          "weighted_coverage": 23
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if c[\"rank\"] == \"3\" and COLOR[c[\"suit\"]] == \"black\") >= 2"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sorted(Counter(c[\"rank\"] for c in hand).values()) == [1, 1, 1, 1, 2]"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] in FACE_RANKS for c in hand)"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: {\"CLUBS\", \"SPADES\"}.issubset({c[\"suit\"] for c in hand}) and max(Counter(c[\"rank\"] for c in hand).values()) >= 2 and any(RANK_VAL[c[\"rank\"]] >= RANK_VAL[\"J\"] for c in hand)"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(Counter(c[\"suit\"] for c in hand)[s] == 3 for s in [\"SPADES\", \"CLUBS\", \"DIAMONDS\"])"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"SPADES\" for c in hand) and any(c[\"suit\"] == \"CLUBS\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 13,
+            "representative_lambda": "lambda hand: max(Counter(c[\"rank\"] for c in hand).values()) >= 2"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"SPADES\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: COLOR[hand[0][\"suit\"]] == \"black\" or COLOR[hand[5][\"suit\"]] == \"black\""
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: max(Counter(c[\"suit\"] for c in hand).values()) >= 2"
+          }
+        ]
+      },
+      "difficulty": 2,
+      "gallery": [
+        [
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "J",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "K",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "K",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "Q",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "Q",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "8",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "J",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "8",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "Q",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "J",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "J",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          }
+        ]
+      ],
+      "group": "X",
+      "is_end_requery": true,
+      "mean_mcc": -0.0245,
+      "rule_answer": "The sequence of colors reads the same forwards and backwards",
+      "rule_id": "colors_palindrome",
+      "test_hands": [
+        {
+          "edit_description": "slot 2: rank 3->4; slot 3: suit HEARTS->SPADES; slot 5: rank 6->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "J",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 2: rank 3->5; slot 3: suit HEARTS->SPADES; slot 5: rank 6->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "J",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: rank 5->3; slot 2: rank 5->J, suit DIAMONDS->SPADES; slot 4: rank J->5, suit SPADES->DIAMONDS; slot 5: rank 4->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "J",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "8",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 2: rank K->4; slot 3: suit SPADES->CLUBS; slot 4: rank 10->3",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "10",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 2: rank K->5; slot 3: suit SPADES->CLUBS; slot 4: rank 10->3",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "10",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 1: suit SPADES->CLUBS; slot 2: suit SPADES->CLUBS; slot 5: rank 9->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "Q",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "9",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "J",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 4
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 10,
+          "modes_total": 10,
+          "per_mode_hands_caught": {
+            "mode_0": 3,
+            "mode_1": 6,
+            "mode_2": 6,
+            "mode_3": 3,
+            "mode_4": 3,
+            "mode_5": 6,
+            "mode_6": 6,
+            "mode_7": 3,
+            "mode_8": 3,
+            "mode_9": 6
+          },
+          "total_mode_weight": 16,
+          "weighted_coverage": 16
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_9"
+          ],
+          [
+            "mode_1",
+            "mode_2",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_9"
+          ],
+          [
+            "mode_1",
+            "mode_2",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_1",
+            "mode_2",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: all(count == 2 for count in Counter(c[\"rank\"] for c in hand).values())"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if c[\"suit\"] == \"HEARTS\") == 1"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: hand[0][\"rank\"] == hand[3][\"rank\"]"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: sorted(Counter(c['rank'] for c in hand).values()) == [1, 1, 2, 2]"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 4,
+            "representative_lambda": "lambda hand: sum(1 for v in Counter(c[\"rank\"] for c in hand).values() if v == 2) >= 2"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: [COLOR[c[\"suit\"]] for c in hand].count(\"red\") == 3"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") >= 3"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: sum(v // 2 for v in Counter(c[\"rank\"] for c in hand).values()) >= 2"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: len(set(c[\"rank\"] for c in hand)) < 6"
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") >= 2"
+          }
+        ]
+      },
+      "difficulty": 2,
+      "gallery": [
+        [
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "K",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "7",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "A",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "6",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "K",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "Q",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "Q",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          }
+        ]
+      ],
+      "group": "X",
+      "is_end_requery": false,
+      "mean_mcc": 0.6151,
+      "rule_answer": "Two different ranks each appear at least twice",
+      "rule_id": "two_pairs_ranks",
+      "test_hands": [
+        {
+          "edit_description": "slot 3: suit HEARTS->SPADES; slot 4: rank 4->9; slot 5: rank A->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "9",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "9",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "9",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 0: rank K->7; slot 4: rank K->7; slot 5: rank 3->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: suit HEARTS->CLUBS; slot 1: rank 3->7; slot 5: suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "K",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "K",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: suit HEARTS->SPADES; slot 4: rank K->7; slot 5: suit DIAMONDS->CLUBS",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "K",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: rank K->7; slot 1: rank 3->7; slot 5: rank 3->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "K",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: rank A->5; slot 3: rank 10->5; slot 5: suit HEARTS->DIAMONDS",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "9",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 4
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 5,
+          "modes_total": 5,
+          "per_mode_hands_caught": {
+            "mode_0": 3,
+            "mode_1": 6,
+            "mode_2": 6,
+            "mode_3": 3,
+            "mode_4": 3
+          },
+          "total_mode_weight": 14,
+          "weighted_coverage": 14
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "exact_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2"
+          ],
+          [
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4"
+          ],
+          [
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4"
+          ],
+          [
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: hand[0][\"rank\"] == hand[3][\"rank\"] and hand[1][\"rank\"] == hand[4][\"rank\"] and hand[2][\"rank\"] == hand[5][\"rank\"] and len({hand[0][\"rank\"], hand[1][\"rank\"], hand[2][\"rank\"]}) == 3"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: all(COLOR[hand[i][\"suit\"]] != COLOR[hand[i+3][\"suit\"]] for i in range(3))"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 9,
+            "representative_lambda": "lambda hand: sorted(Counter(c[\"rank\"] for c in hand).values()) == [2, 2, 2]"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"DIAMONDS\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c >= 2 for c in Counter(c[\"rank\"] for c in hand).values()) and len({COLOR[c[\"suit\"]] for c in hand}) > 1"
+          }
+        ]
+      },
+      "difficulty": 2,
+      "gallery": [
+        [
+          {
+            "rank": "Q",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "Q",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "7",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "K",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "A",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "A",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "8",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "2",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "K",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "K",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "8",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          }
+        ]
+      ],
+      "group": "X",
+      "is_end_requery": false,
+      "mean_mcc": 0.3248,
+      "rule_answer": "The rank sequence of the right half matches the left half exactly",
+      "rule_id": "halves_copy_ranks",
+      "test_hands": [
+        {
+          "edit_description": "slot 0: suit SPADES->DIAMONDS; slot 2: rank 9->2; slot 5: rank 9->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "4",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 1: rank 5->4; slot 4: rank 5->4, suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "4",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 0: rank 4->5; slot 3: rank 4->5; slot 4: suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 1: rank 2->10, suit SPADES->DIAMONDS; slot 2: suit SPADES->HEARTS; slot 4: suit HEARTS->CLUBS; slot 5: rank 10->2, suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "A",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "10",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "10",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 0: rank 2->9, suit SPADES->CLUBS; slot 2: suit SPADES->DIAMONDS; slot 5: rank 9->2, suit CLUBS->SPADES",
+          "edit_distance": 2,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "9",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "9",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "4",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 4: rank 2->10, suit HEARTS->DIAMONDS; slot 5: rank 10->2, suit DIAMONDS->HEARTS",
+          "edit_distance": 1,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "A",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "10",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "10",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 8,
+          "modes_total": 8,
+          "per_mode_hands_caught": {
+            "mode_0": 3,
+            "mode_1": 6,
+            "mode_2": 6,
+            "mode_3": 3,
+            "mode_4": 3,
+            "mode_5": 3,
+            "mode_6": 3,
+            "mode_7": 3
+          },
+          "total_mode_weight": 17,
+          "weighted_coverage": 17
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ],
+          [
+            "mode_1",
+            "mode_2"
+          ],
+          [
+            "mode_1",
+            "mode_2"
+          ],
+          [
+            "mode_1",
+            "mode_2"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: Counter(c[\"rank\"] for c in hand[:3]) == Counter(c[\"rank\"] for c in hand[3:])"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if c[\"suit\"] == \"SPADES\") == 1"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 8,
+            "representative_lambda": "lambda hand: sorted(Counter(c[\"rank\"] for c in hand).values()) == [2, 2, 2]"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: hand[2][\"rank\"] == hand[3][\"rank\"]"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(count == 2 for count in Counter(c[\"rank\"] for c in hand).values())"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: sum(1 for count in Counter(c[\"rank\"] for c in hand).values() if count >= 2) >= 2"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c1[\"rank\"] == c2[\"rank\"] and COLOR[c1[\"suit\"]] == COLOR[c2[\"suit\"]] for c1, c2 in combinations(hand, 2))"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"SPADES\" for c in hand)"
+          }
+        ]
+      },
+      "difficulty": 3,
+      "gallery": [
+        [
+          {
+            "rank": "Q",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "K",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "5",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "Q",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "8",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "6",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "K",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "K",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          }
+        ]
+      ],
+      "group": "X",
+      "is_end_requery": false,
+      "mean_mcc": 0.3706,
+      "rule_answer": "The sequence of ranks reads the same forwards and backwards",
+      "rule_id": "ranks_palindrome",
+      "test_hands": [
+        {
+          "edit_description": "slot 3: suit SPADES->CLUBS; slot 4: rank 2->4; slot 5: rank 4->2, suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "4",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "K",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "K",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 0: suit CLUBS->DIAMONDS; slot 4: rank 2->7, suit HEARTS->CLUBS; slot 5: rank 7->2, suit DIAMONDS->CLUBS",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 0: rank 9->8, suit HEARTS->DIAMONDS; slot 1: rank 8->2, suit DIAMONDS->HEARTS; slot 5: rank 9->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "8",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "8",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 0: rank 7->2; slot 5: rank 7->2, suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 0: suit SPADES->HEARTS; slot 2: rank 9->3; slot 3: rank 9->3; slot 5: suit HEARTS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 2: rank 9->6, suit CLUBS->HEARTS; slot 3: rank 9->6",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "6",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 2
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 14,
+          "modes_total": 14,
+          "per_mode_hands_caught": {
+            "mode_0": 6,
+            "mode_1": 6,
+            "mode_10": 6,
+            "mode_11": 6,
+            "mode_12": 6,
+            "mode_13": 3,
+            "mode_2": 3,
+            "mode_3": 6,
+            "mode_4": 3,
+            "mode_5": 3,
+            "mode_6": 6,
+            "mode_7": 3,
+            "mode_8": 3,
+            "mode_9": 3
+          },
+          "total_mode_weight": 23,
+          "weighted_coverage": 23
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_12",
+            "mode_13",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_12",
+            "mode_2",
+            "mode_3",
+            "mode_6"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_12",
+            "mode_13",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_12",
+            "mode_13",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_12",
+            "mode_2",
+            "mode_3",
+            "mode_6"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_12",
+            "mode_2",
+            "mode_3",
+            "mode_6"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: (lambda vals: (vals == sorted(vals) or vals == sorted(vals, reverse=True)) or (lambda s_vals: len(s_vals) > 0 and s_vals[-1] - s_vals[0] == len(s_vals) - 1)(sorted(list(set(vals))))) ([RANK_VAL[c[\"rank\"]] for c in hand])"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] in {\"8\", \"4\"} for c in hand)"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: any(RANK_VAL[hand[i+1][\"rank\"]] - RANK_VAL[hand[i][\"rank\"]] == 1 and RANK_VAL[hand[i+2][\"rank\"]] - RANK_VAL[hand[i+1][\"rank\"]] == 1 for i in range(4))"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] in {\"8\", \"A\"} for c in hand)"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 3,
+            "representative_lambda": "lambda hand: (lambda ranks: any(r + 1 in ranks and r + 2 in ranks for r in ranks))({RANK_VAL[c[\"rank\"]] for c in hand})"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 3,
+            "representative_lambda": "lambda hand: (lambda vals: len(vals) >= 3 and any(vals[i+2] - vals[i] == 2 for i in range(len(vals) - 2)))(sorted(set(RANK_VAL[c[\"rank\"]] for c in hand))) or {\"A\", \"2\", \"3\"}.issubset({c[\"rank\"] for c in hand})"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"CLUBS\" for c in hand) and any(c[\"suit\"] == \"SPADES\" for c in hand) and not any(c[\"rank\"] == \"J\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(abs(RANK_VAL[hand[i][\"rank\"]] - RANK_VAL[hand[i+1][\"rank\"]]) == 1 for i in range(5))"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"DIAMONDS\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(COLOR[c[\"suit\"]] == \"red\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_10",
+            "popularity": 3,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"SPADES\" for c in hand) and any(c[\"suit\"] == \"CLUBS\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_11",
+            "popularity": 3,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"CLUBS\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_12",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") <= 3"
+          },
+          {
+            "mode_id": "mode_13",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: max(Counter(c[\"suit\"] for c in hand).values()) >= 2"
+          }
+        ]
+      },
+      "difficulty": 3,
+      "gallery": [
+        [
+          {
+            "rank": "Q",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "K",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "A",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "10",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "8",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "Q",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "8",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "K",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "A",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          }
+        ]
+      ],
+      "group": "Y",
+      "is_end_requery": false,
+      "mean_mcc": 0.1764,
+      "rule_answer": "Three consecutive positions contain ranks that form a run of 3 (e.g., 5, 6, 7 in any order)",
+      "rule_id": "ap_step1_len3_adj",
+      "test_hands": [
+        {
+          "edit_description": "slot 2: rank 8->9; slot 3: rank 4->8; slot 5: rank 4->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "10",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "9",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "9",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "8",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 0: rank 8->2; slot 2: rank 8->5; slot 5: suit CLUBS->DIAMONDS",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 0: rank 4->A; slot 1: rank 3->5; slot 2: rank 2->4; slot 3: rank A->4",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "A",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 0: rank 4->A; slot 1: rank 3->5; slot 2: rank 2->5; slot 3: rank A->4",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "A",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "4",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "4",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 0: rank 8->3; slot 2: rank 8->5; slot 5: suit CLUBS->DIAMONDS",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 1: suit CLUBS->DIAMONDS; slot 3: rank 8->6; slot 5: rank 4->5",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "Q",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "9",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 12,
+          "modes_total": 12,
+          "per_mode_hands_caught": {
+            "mode_0": 4,
+            "mode_1": 3,
+            "mode_10": 5,
+            "mode_11": 2,
+            "mode_2": 1,
+            "mode_3": 1,
+            "mode_4": 5,
+            "mode_5": 6,
+            "mode_6": 6,
+            "mode_7": 5,
+            "mode_8": 2,
+            "mode_9": 2
+          },
+          "total_mode_weight": 14,
+          "weighted_coverage": 14
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_10",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ],
+          [
+            "mode_10",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_5",
+            "mode_6",
+            "mode_7"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") >= 2"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: len(set(c[\"suit\"] for c in hand)) >= 3"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: [COLOR[c[\"suit\"]] for c in hand] == sorted([COLOR[c[\"suit\"]] for c in hand])"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for i in range(5) if COLOR[hand[i][\"suit\"]] != COLOR[hand[i+1][\"suit\"]]) <= 1"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(count >= 3 for count in Counter(c[\"suit\"] for c in hand).values())"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(v[2] == v[0] + v[1] for v in (sorted([RANK_VAL[c[\"rank\"]] for c in combo]) for combo in combinations(hand, 3)))"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(abs(RANK_VAL[c1[\"rank\"]] - RANK_VAL[c2[\"rank\"]]) == 1 for c1, c2 in combinations(hand, 2))"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: COLOR[hand[0][\"suit\"]] == \"black\" and hand[0][\"rank\"] in [\"3\", \"7\"]"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: COLOR[hand[0][\"suit\"]]==\"black\" and any(COLOR[c[\"suit\"]]==\"black\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(COLOR[c[\"suit\"]] == \"black\" for c in hand[:3])"
+          },
+          {
+            "mode_id": "mode_10",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if RANK_VAL[c[\"rank\"]] % 2 != 0) >= 2"
+          },
+          {
+            "mode_id": "mode_11",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(COLOR[c[\"suit\"]] == \"black\" for c in hand)"
+          }
+        ]
+      },
+      "difficulty": 3,
+      "gallery": [
+        [
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "6",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "J",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "K",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "Q",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "Q",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "J",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "8",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "J",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "A",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          }
+        ]
+      ],
+      "group": "Y",
+      "is_end_requery": false,
+      "mean_mcc": 0.1662,
+      "rule_answer": "First card is black, and all black cards precede all red cards",
+      "rule_id": "blacks_then_reds_start_black",
+      "test_hands": [
+        {
+          "edit_description": "slot 4: rank J->2, suit HEARTS->DIAMONDS; slot 5: suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "10",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: suit SPADES->HEARTS; slot 4: rank 4->2; slot 5: rank 10->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 4: rank 3->2; slot 5: rank 10->2, suit HEARTS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "K",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "Q",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 0: rank 7->8; slot 1: rank 6->2; slot 5: rank Q->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "8",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 0: rank 7->10; slot 1: rank 6->2; slot 5: rank Q->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "10",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "A",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 3
+        },
+        {
+          "edit_description": "slot 0: rank 3->J; slot 3: rank J->5, suit CLUBS->SPADES; slot 4: rank 5->3, suit SPADES->CLUBS; slot 5: rank 8->3",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "J",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "9",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 4
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 12,
+          "modes_total": 12,
+          "per_mode_hands_caught": {
+            "mode_0": 3,
+            "mode_1": 3,
+            "mode_10": 6,
+            "mode_11": 3,
+            "mode_2": 3,
+            "mode_3": 3,
+            "mode_4": 3,
+            "mode_5": 4,
+            "mode_6": 5,
+            "mode_7": 5,
+            "mode_8": 5,
+            "mode_9": 6
+          },
+          "total_mode_weight": 15,
+          "weighted_coverage": 15
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_11",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_5",
+            "mode_9"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: (lambda counts: counts[\"HEARTS\"] == counts[\"DIAMONDS\"] and counts[\"SPADES\"] == counts[\"CLUBS\"])(Counter(c[\"suit\"] for c in hand))"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: all(hand[i][\"suit\"] != hand[i+1][\"suit\"] for i in range(5))"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: all((hand[i][\"suit\"] != \"HEARTS\" or hand[i+1][\"suit\"] == \"DIAMONDS\") and (hand[i][\"suit\"] != \"SPADES\" or hand[i+1][\"suit\"] == \"CLUBS\") for i in range(5))"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(COLOR[hand[i][\"suit\"]] != COLOR[hand[i+1][\"suit\"]] for i in range(5)) <= 1"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for count in Counter(c[\"suit\"] for c in hand).values() if count > 1) == 2"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(abs(RANK_VAL[c1[\"rank\"]] - RANK_VAL[c2[\"rank\"]]) == 1 for c1, c2 in combinations(hand, 2))"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(hand[i][\"suit\"] == \"HEARTS\" and hand[i+1][\"suit\"] == \"DIAMONDS\" for i in range(5))"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") >= 2"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"DIAMONDS\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: not any(c[\"rank\"] == \"K\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_10",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"HEARTS\" and c[\"rank\"] not in FACE_RANKS for c in hand)"
+          },
+          {
+            "mode_id": "mode_11",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: len(hand) == 6"
+          }
+        ]
+      },
+      "difficulty": 3,
+      "gallery": [
+        [
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "J",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "Q",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "J",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "9",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "Q",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "Q",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "A",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "A",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "J",
+            "suit": "DIAMONDS"
+          }
+        ],
+        [
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "J",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "Q",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "Q",
+            "suit": "CLUBS"
+          }
+        ]
+      ],
+      "group": "Y",
+      "is_end_requery": true,
+      "mean_mcc": 0.0402,
+      "rule_answer": "Suits form 3 adjacent bracket pairs: each pair is either Spades-Clubs or Hearts-Diamonds (every opener is immediately closed)",
+      "rule_id": "immediate_bracket_closure",
+      "test_hands": [
+        {
+          "edit_description": "slot 4: rank 9->2, suit SPADES->CLUBS; slot 5: rank Q->2, suit CLUBS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "J",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "Q",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 4: suit HEARTS->CLUBS; slot 5: rank J->2, suit DIAMONDS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "9",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "8",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 4: rank 9->3, suit SPADES->CLUBS; slot 5: rank Q->2, suit CLUBS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "J",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "Q",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 5
+        },
+        {
+          "edit_description": "slot 0: rank Q->K; slot 4: suit HEARTS->SPADES; slot 5: suit DIAMONDS->CLUBS",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "K",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "9",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 1: rank 5->K; slot 4: suit HEARTS->SPADES; slot 5: suit DIAMONDS->CLUBS",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "Q",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "K",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "9",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 0: rank 6->K; slot 2: rank Q->J; slot 5: rank Q->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "K",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "J",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "J",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "9",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 5
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 12,
+          "modes_total": 12,
+          "per_mode_hands_caught": {
+            "mode_0": 3,
+            "mode_1": 3,
+            "mode_10": 6,
+            "mode_11": 3,
+            "mode_2": 6,
+            "mode_3": 6,
+            "mode_4": 6,
+            "mode_5": 4,
+            "mode_6": 6,
+            "mode_7": 6,
+            "mode_8": 6,
+            "mode_9": 4
+          },
+          "total_mode_weight": 15,
+          "weighted_coverage": 15
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_11",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_11",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_10",
+            "mode_11",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_6",
+            "mode_7",
+            "mode_8"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_6",
+            "mode_7",
+            "mode_8"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: {'3', '5', '7'}.issubset(c['rank'] for c in hand) and {'DIAMONDS', 'SPADES'}.issubset(c['suit'] for c in hand) and all(c['rank'] in {'3', '5', '7', '9'} for c in hand) and sum(1 for v in Counter(c['rank'] for c in hand).values() if v >= 2) >= 2"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sorted(Counter(c[\"rank\"] for c in hand).values()) == [2, 2, 2]"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: (lambda counts:\n    (counts.get('3', 0) == 3 or (counts.get('7', 0) == 3 and counts.get('5', 0) == 0)) or\n    (counts.get('3', 0) == 1 and counts.get('5', 0) == 2 and counts.get('7', 0) == 2) or\n    (counts.get('3', 0) == 2 and counts.get('5', 0) == 2 and counts.get('7', 0) == 1) or\n    (counts.get('3', 0) == 2 and counts.get('7', 0) == 2 and counts.get('5', 0) == 1)\n)(Counter(c['rank'] for c in hand))"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: {2, 3}.issubset(Counter(c[\"rank\"] for c in hand).values())"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"black\") == 3"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] == \"3\" and COLOR[c[\"suit\"]] == \"red\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: sum(1 for count in Counter(c[\"rank\"] for c in hand).values() if count >= 2) >= 2"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] == \"7\" for c in hand) and any(c[\"rank\"] == \"3\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] == \"7\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if COLOR[c[\"suit\"]] == \"red\") >= 3"
+          },
+          {
+            "mode_id": "mode_10",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: 2 in Counter(c[\"suit\"] for c in hand).values()"
+          },
+          {
+            "mode_id": "mode_11",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: all(sum(1 for c in hand if c[\"rank\"] == r) == len({c[\"suit\"] for c in hand if c[\"rank\"] == r}) for r in {c[\"rank\"] for c in hand})"
+          }
+        ]
+      },
+      "difficulty": 2,
+      "gallery": [
+        [
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "9",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "HEARTS"
+          }
+        ],
+        [
+          {
+            "rank": "7",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "7",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "5",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          }
+        ],
+        [
+          {
+            "rank": "3",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "7",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "5",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "9",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "3",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "7",
+            "suit": "CLUBS"
+          }
+        ]
+      ],
+      "group": "Y",
+      "is_end_requery": false,
+      "mean_mcc": 0.4408,
+      "rule_answer": "Every card is an odd number (3, 5, 7, or 9 \u2014 no face cards)",
+      "rule_id": "all_odd",
+      "test_hands": [
+        {
+          "edit_description": "slot 0: rank 7->5; slot 2: suit HEARTS->CLUBS; slot 5: rank 7->5",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "5",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "9",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "5",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            }
+          ],
+          "source_exemplar_idx": 1
+        },
+        {
+          "edit_description": "slot 2: rank 5->3; slot 4: suit DIAMONDS->SPADES; slot 5: rank 7->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 2: rank 5->7; slot 4: suit DIAMONDS->SPADES; slot 5: rank 7->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 2
+        },
+        {
+          "edit_description": "slot 1: rank 9->7; slot 5: rank 7->2, suit CLUBS->SPADES",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "7",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "7",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "7",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 1: rank 5->9; slot 3: suit HEARTS->DIAMONDS; slot 5: rank 7->3",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "9",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "5",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 4
+        },
+        {
+          "edit_description": "slot 1: suit DIAMONDS->HEARTS; slot 3: rank 5->9; slot 5: rank 7->3",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "3",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "9",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "CLUBS"
+            }
+          ],
+          "source_exemplar_idx": 4
+        }
+      ]
+    },
+    {
+      "analysis": {
+        "coverage": {
+          "modes_caught": 11,
+          "modes_total": 11,
+          "per_mode_hands_caught": {
+            "mode_0": 6,
+            "mode_1": 6,
+            "mode_10": 3,
+            "mode_2": 6,
+            "mode_3": 3,
+            "mode_4": 6,
+            "mode_5": 6,
+            "mode_6": 5,
+            "mode_7": 3,
+            "mode_8": 4,
+            "mode_9": 3
+          },
+          "total_mode_weight": 12,
+          "weighted_coverage": 12
+        },
+        "dropped_lambda_count": 0,
+        "low_quality": false,
+        "selection_path": "greedy_tight",
+        "test_hand_catches": [
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_2",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_2",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_10",
+            "mode_2",
+            "mode_4",
+            "mode_5",
+            "mode_6",
+            "mode_7",
+            "mode_8",
+            "mode_9"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_6"
+          ],
+          [
+            "mode_0",
+            "mode_1",
+            "mode_2",
+            "mode_3",
+            "mode_4",
+            "mode_5",
+            "mode_8"
+          ]
+        ],
+        "wrong_modes": [
+          {
+            "mode_id": "mode_0",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: max(Counter(c[\"rank\"] for c in hand).values()) >= 2 and {\"10\", \"4\", \"2\"}.issubset({c[\"rank\"] for c in hand})"
+          },
+          {
+            "mode_id": "mode_1",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] == \"10\" for c in hand) and any(v >= 2 for v in Counter(c[\"rank\"] for c in hand if c[\"rank\"] not in FACE_RANKS and c[\"rank\"] != \"A\").values())"
+          },
+          {
+            "mode_id": "mode_2",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] == \"10\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_3",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: all(c[\"rank\"] in {\"2\", \"4\", \"6\", \"10\"} for c in hand)"
+          },
+          {
+            "mode_id": "mode_4",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"rank\"] == \"4\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_5",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for v in Counter(c[\"rank\"] for c in hand).values() if v > 1) == 1"
+          },
+          {
+            "mode_id": "mode_6",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: sum(1 for c in hand if c[\"suit\"] == \"SPADES\") >= 2"
+          },
+          {
+            "mode_id": "mode_7",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(COLOR[c[\"suit\"]] == \"red\" for c in hand)"
+          },
+          {
+            "mode_id": "mode_8",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(hand[i][\"rank\"] == hand[i+1][\"rank\"] for i in range(5))"
+          },
+          {
+            "mode_id": "mode_9",
+            "popularity": 2,
+            "representative_lambda": "lambda hand: max(Counter(c[\"rank\"] for c in hand).values()) >= 2"
+          },
+          {
+            "mode_id": "mode_10",
+            "popularity": 1,
+            "representative_lambda": "lambda hand: any(c[\"suit\"] == \"SPADES\" and RANK_VAL[c[\"rank\"]] % 2 == 0 for c in hand)"
+          }
+        ]
+      },
+      "difficulty": 2,
+      "gallery": [
+        [
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "6",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "8",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "6",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "10",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "2",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "6",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "2",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "2",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "6",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "HEARTS"
+          },
+          {
+            "rank": "8",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "10",
+            "suit": "DIAMONDS"
+          },
+          {
+            "rank": "2",
+            "suit": "SPADES"
+          }
+        ],
+        [
+          {
+            "rank": "10",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "4",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "10",
+            "suit": "CLUBS"
+          },
+          {
+            "rank": "2",
+            "suit": "SPADES"
+          },
+          {
+            "rank": "4",
+            "suit": "DIAMONDS"
+          }
+        ]
+      ],
+      "group": "Y",
+      "is_end_requery": false,
+      "mean_mcc": 0.4967,
+      "rule_answer": "Every card is an even number (2, 4, 6, 8, or 10 \u2014 no face cards)",
+      "rule_id": "all_even",
+      "test_hands": [
+        {
+          "edit_description": "slot 2: rank 8->3; slot 3: rank 8->10, suit CLUBS->DIAMONDS; slot 4: rank 10->2, suit DIAMONDS->CLUBS",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "4",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "10",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 4
+        },
+        {
+          "edit_description": "slot 0: rank 4->2, suit SPADES->CLUBS; slot 4: rank 10->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "8",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "8",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 4
+        },
+        {
+          "edit_description": "slot 2: rank 8->5; slot 3: rank 8->10, suit CLUBS->DIAMONDS; slot 4: rank 10->2, suit DIAMONDS->CLUBS",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "4",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "5",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "10",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 4
+        },
+        {
+          "edit_description": "slot 1: rank 6->3; slot 4: rank 6->2; slot 5: rank 6->2",
+          "edit_distance": 3,
+          "ground_truth": false,
+          "hand": [
+            {
+              "rank": "2",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "3",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "10",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "4",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 0
+        },
+        {
+          "edit_description": "slot 0: rank 4->6, suit SPADES->CLUBS; slot 4: rank 10->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "6",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "6",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "8",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "8",
+              "suit": "CLUBS"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 4
+        },
+        {
+          "edit_description": "slot 2: rank 6->8; slot 4: rank 10->6; slot 5: rank 4->2",
+          "edit_distance": 3,
+          "ground_truth": true,
+          "hand": [
+            {
+              "rank": "8",
+              "suit": "HEARTS"
+            },
+            {
+              "rank": "6",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "8",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "DIAMONDS"
+            },
+            {
+              "rank": "6",
+              "suit": "SPADES"
+            },
+            {
+              "rank": "2",
+              "suit": "SPADES"
+            }
+          ],
+          "source_exemplar_idx": 1
+        }
+      ]
+    }
+  ],
+  "schema_version": 3,
+  "snapshot_id": "se2_2026_05_26_5a302a55",
+  "source": {
+    "candidate_pools_manifest": "7e977d78ed5a0816",
+    "frozen_exemplars_hash": "7fb9efcfdba382bf",
+    "git_commit": "e43332e4b45d0cfcfa83246def0a58b003da4939",
+    "ground_truth_hash": "dad025f067d57762",
+    "groups_v1_hash": "61cf9b2ec3fe6abc",
+    "rule_summaries_hash": "e2870fb7ec67427d",
+    "stage4_hash": "72b34a1a572905a0"
+  }
+}

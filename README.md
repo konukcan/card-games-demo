@@ -108,8 +108,8 @@ Self-explanation pilot — Spec A frontend rework. Lives at
 
 **Live URLs (study #2):**
 
-- Explain condition: <https://konukcan.github.io/card-games-demo/self-explanation-experiment-study2/index.html?study2=1&seSnapshot=se2_2026_05_21_57bc357a&condition=explain&ruleScope=all10>
-- Silent condition:  <https://konukcan.github.io/card-games-demo/self-explanation-experiment-study2/index.html?study2=1&seSnapshot=se2_2026_05_21_57bc357a&condition=silent&ruleScope=all10>
+- Explain condition: <https://konukcan.github.io/card-games-demo/self-explanation-experiment-study2/index.html?study2=1&seSnapshot=se2_2026_05_26_5a302a55&condition=explain&ruleScope=all10>
+- Silent condition:  <https://konukcan.github.io/card-games-demo/self-explanation-experiment-study2/index.html?study2=1&seSnapshot=se2_2026_05_26_5a302a55&condition=silent&ruleScope=all10>
 
 **Data flow:** Same two-target cascade as study #1 (DataPipe → OSF +
 Cloudflare Worker → card-games-staging GitHub). Study #2 writes to a
