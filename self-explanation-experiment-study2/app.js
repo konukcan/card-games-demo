@@ -58,6 +58,14 @@ window.SEApp = (function () {
   var PROLIFIC_SCREENOUT_URL =
     "https://app.prolific.com/submissions/complete?cc=SE_SCREENOUT";
 
+  // DataPipe experiment ID for SE study #2 production data. Routes
+  // participant saves to OSF node 5dnrc (the dedicated SE study #2 component
+  // under scuvk), separating production data from pilot/test data which
+  // lived at scuvk root via the shared experiment id RWyWRsZqLgFu.
+  // Set as an option on GallerySave.saveResults — defaults to the shared
+  // id, so back-compat with rule-gallery study #1 saves is preserved.
+  var DATAPIPE_EXPERIMENT_ID_SE_STUDY2 = "S7yzMl8WGZ4M";
+
   // ════════════════════════════════════════════════════
   // Screenout — comprehension-fail re-entry prevention
   // ════════════════════════════════════════════════════
@@ -162,7 +170,10 @@ window.SEApp = (function () {
         forceLocal: SEConfig.save === "local",
         // Distinct subdir from regular saves so post-hoc analysis can find
         // screenouts at a glance without filtering all of results_gallery/study2/.
-        workerDir: "results_gallery/study2/screenouts"
+        workerDir: "results_gallery/study2/screenouts",
+        // Route DataPipe → OSF to the dedicated SE study #2 component
+        // (osf.io/5dnrc/), same destination as completed-session saves.
+        datapipeExperimentId: DATAPIPE_EXPERIMENT_ID_SE_STUDY2
       };
       await GallerySave.saveResults(
         filename, JSON.stringify(screenoutPayload), saveOptions
@@ -1170,10 +1181,13 @@ window.SEApp = (function () {
 
       var jsonString = JSON.stringify(payload);
       // Study #2 writes to a namespaced subdir of card-games-staging so its
-      // files don't mix with study #1's stream at results_gallery/.
+      // files don't mix with study #1's stream at results_gallery/. Also
+      // routes DataPipe → OSF to the dedicated study #2 component
+      // (osf.io/5dnrc/) via the SE-specific DataPipe experiment id.
       var saveOptions = { forceLocal: SEConfig.save === "local" };
       if (SEConfig.isStudy2()) {
         saveOptions.workerDir = "results_gallery/study2";
+        saveOptions.datapipeExperimentId = DATAPIPE_EXPERIMENT_ID_SE_STUDY2;
       }
       await GallerySave.saveResults(filename, jsonString, saveOptions);
 

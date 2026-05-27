@@ -11,6 +11,7 @@
 //   GallerySave.saveResults(filename, jsonString)
 //   GallerySave.saveResults(filename, jsonString, { forceLocal: true })
 //   GallerySave.saveResults(filename, jsonString, { workerDir: "results_gallery/study2" })
+//   GallerySave.saveResults(filename, jsonString, { datapipeExperimentId: "S7yzMl8WGZ4M" })
 //
 // Options:
 //   forceLocal — skip remote saves, go straight to download
@@ -18,6 +19,12 @@
 //                Defaults to "results_gallery" for back-compat with the
 //                original rule-gallery study. Study #2 passes a namespaced
 //                subdir so its files don't mix with study #1 writes.
+//   datapipeExperimentId — override the DataPipe experiment ID (which
+//                controls which OSF node receives the writes). Defaults to
+//                DATAPIPE_EXPERIMENT_ID below (rule-gallery / shared). Study
+//                #2's production URL passes the new SE-specific id so
+//                participant data lands on the dedicated OSF component
+//                (osf.io/5dnrc/) instead of mixing with rule-gallery data.
 
 (function () {
   "use strict";
@@ -57,12 +64,15 @@
   // ── Save targets ──
 
   // 1. DataPipe → OSF: POST the JSON data to the DataPipe API
-  async function saveToDataPipe(filename, jsonString) {
+  // `experimentId` selects which DataPipe experiment (and thus which OSF node)
+  // receives the writes; defaults to DATAPIPE_EXPERIMENT_ID if not provided.
+  async function saveToDataPipe(filename, jsonString, experimentId) {
+    const targetId = experimentId || DATAPIPE_EXPERIMENT_ID;
     const res = await fetch(DATAPIPE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        experimentID: DATAPIPE_EXPERIMENT_ID,
+        experimentID: targetId,
         filename: filename,
         data: jsonString
       })
@@ -110,6 +120,7 @@
   async function saveResults(filename, jsonString, options = {}) {
     const forceLocal = options.forceLocal || false;
     const workerDir = options.workerDir || null;  // null → use GITHUB_DIR default
+    const datapipeExperimentId = options.datapipeExperimentId || null;  // null → use DATAPIPE_EXPERIMENT_ID default
 
     if (!forceLocal) {
       let dataPipeOk = false;
@@ -117,7 +128,7 @@
 
       // Try DataPipe
       try {
-        await saveToDataPipe(filename, jsonString);
+        await saveToDataPipe(filename, jsonString, datapipeExperimentId);
         dataPipeOk = true;
       } catch (e) {
         console.warn("[GallerySave] DataPipe failed:", e.message);
