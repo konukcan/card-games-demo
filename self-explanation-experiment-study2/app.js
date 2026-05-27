@@ -49,6 +49,138 @@ window.SEApp = (function () {
   var PROLIFIC_COMPLETION_URL =
     "https://app.prolific.com/submissions/complete?cc=SE_COMPLETE";
 
+  // Prolific SCREENOUT URL — participants are redirected here when they fail
+  // the comprehension check (or any other pre-experiment screen-out). The cc
+  // is a DIFFERENT completion code than the normal one; create it as a
+  // secondary completion code on the Prolific study so Prolific closes the
+  // submission cleanly. Without this redirect, a screened-out participant's
+  // submission stays open on Prolific and they could re-claim the URL.
+  var PROLIFIC_SCREENOUT_URL =
+    "https://app.prolific.com/submissions/complete?cc=SE_SCREENOUT";
+
+  // ════════════════════════════════════════════════════
+  // Screenout — comprehension-fail re-entry prevention
+  // ════════════════════════════════════════════════════
+  //
+  // Three layers, defense in depth:
+  //   1. SAVE partial data with screenedOut:true so we have evidence the
+  //      participant attempted + failed (their PID + comprehension answers
+  //      land on OSF/Worker for post-hoc review).
+  //   2. REDIRECT to Prolific with cc=SE_SCREENOUT after a short countdown
+  //      so Prolific closes the submission natively (this is the actual
+  //      gate against re-entry).
+  //   3. LocalStorage marker (PID-scoped) so even if the redirect is blocked
+  //      or the participant force-closes the tab, a fresh boot from the same
+  //      browser + same PID is caught and re-shown the screenout.
+
+  function _screenoutKey() {
+    var pid = (SEConfig && SEConfig.PROLIFIC_PID) || "anon";
+    return "se_study2_screened_out:" + pid;
+  }
+
+  function _isAlreadyScreenedOut() {
+    try { return localStorage.getItem(_screenoutKey()) === "true"; }
+    catch (_e) { return false; }
+  }
+
+  function _markScreenedOut() {
+    try { localStorage.setItem(_screenoutKey(), "true"); }
+    catch (_e) {}
+  }
+
+  // Renders a screenout overlay + countdown + redirects to Prolific.
+  // `reasonHTML` is the user-facing explanation (HTML allowed).
+  // Skipped (no redirect) under test contexts so Playwright doesn't navigate
+  // to prolific.com mid-spec.
+  function _renderScreenoutAndRedirect(reasonHTML, redirectDelayMs) {
+    var skipRedirect = (function () {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        if (p.get("skipScreenoutRedirect") === "1") return true;
+      } catch (_e) {}
+      if (navigator.webdriver) return true;
+      return false;
+    })();
+    var delaySec = Math.max(1, Math.round((redirectDelayMs || 5000) / 1000));
+
+    var app = document.getElementById("app");
+    app.innerHTML =
+      '<div style="max-width:560px;margin:80px auto;padding:36px;' +
+      'background:#fff;border:1px solid #e2e8f0;border-radius:10px;' +
+      'text-align:center;font-family:system-ui,sans-serif;color:#1e293b;">' +
+      '<h2 style="margin:0 0 16px;color:#374151;">Thank you for your time</h2>' +
+      '<div style="line-height:1.7;color:#475569;">' + reasonHTML + '</div>' +
+      '<p id="se-screenout-countdown" style="margin-top:24px;color:#94a3b8;font-size:14px;">' +
+      (skipRedirect
+        ? '(dev mode: redirect skipped)'
+        : 'Returning you to Prolific in ' + delaySec + 's...') +
+      '</p></div>';
+
+    if (skipRedirect) return;
+
+    var remaining = delaySec;
+    var countdown = document.getElementById("se-screenout-countdown");
+    var tick = setInterval(function () {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(tick);
+        window.location.href = PROLIFIC_SCREENOUT_URL;
+      } else if (countdown) {
+        countdown.textContent = "Returning you to Prolific in " + remaining + "s...";
+      }
+    }, 1000);
+  }
+
+  // Saves a minimal screenout payload (PID + comprehension answers + reason)
+  // through the standard save cascade, then renders the screenout overlay.
+  // Marks localStorage so a refresh on the same PID is caught at boot.
+  async function _handleComprehensionFailScreenout(sessionContext) {
+    var ts = new Date().toISOString().replace(/[:.]/g, "-");
+    var screenoutPayload = {
+      experiment: "se_study2",
+      experimentTag: "se_study2_v1",
+      experimentVersion: EXPERIMENT_VERSION,
+      samplingScheme: SAMPLING_SCHEME,
+      snapshotId: (SEConfig && SEConfig.seSnapshot) || null,
+      screenedOut: true,
+      screenoutReason: "comprehension_failed",
+      screenoutAt: new Date().toISOString(),
+      comprehension: (typeof Study2Comprehension !== "undefined")
+        ? Study2Comprehension.getData() : null,
+      metadata: sessionContext.metadata || null
+    };
+
+    var filename =
+      "se2_" + sessionContext.sessionId + "_" + ts + "_screenout.json";
+
+    // Always mark localStorage FIRST — even if the save fails, the boot-time
+    // check still catches refreshes.
+    _markScreenedOut();
+
+    try {
+      var saveOptions = {
+        forceLocal: SEConfig.save === "local",
+        // Distinct subdir from regular saves so post-hoc analysis can find
+        // screenouts at a glance without filtering all of results_gallery/study2/.
+        workerDir: "results_gallery/study2/screenouts"
+      };
+      await GallerySave.saveResults(
+        filename, JSON.stringify(screenoutPayload), saveOptions
+      );
+      console.log("SEApp: screenout partial data saved as " + filename);
+    } catch (e) {
+      console.warn("SEApp: screenout save failed (continuing to redirect):", e);
+    }
+
+    _renderScreenoutAndRedirect(
+      "<p>Unfortunately you did not pass the comprehension check, so the " +
+      "study cannot continue. You will not be penalized — your Prolific " +
+      "submission will be returned to the queue or partially compensated " +
+      "per the researcher's settings.</p>",
+      5000
+    );
+  }
+
   // ════════════════════════════════════════════════════
   // Integrity monitor (cyborg-hunter)
   // ════════════════════════════════════════════════════
@@ -247,7 +379,8 @@ window.SEApp = (function () {
       // Iterate keys in reverse so removeItem during iteration is safe.
       for (var i = store.length - 1; i >= 0; i--) {
         var k = store.key(i);
-        if (k && k.indexOf("se_group_") === 0) {
+        if (k && (k.indexOf("se_group_") === 0
+                  || k.indexOf("se_study2_screened_out") === 0)) {
           store.removeItem(k);
         }
       }
@@ -322,6 +455,24 @@ window.SEApp = (function () {
 
       // ── 0b. Handle ?clear=1 ──
       handleClearParam();
+
+      // ── 0b.5 Boot-time screenout check ──
+      // If this PID was screened out on a previous attempt in this browser,
+      // immediately re-show the screenout overlay + redirect. This is the
+      // belt-and-suspenders layer behind Prolific's native submission close.
+      // Skips under test contexts (navigator.webdriver), and the user can
+      // override via ?clear=1 (which clears the marker via handleClearParam).
+      if (SEConfig.isStudy2()
+          && !navigator.webdriver
+          && _isAlreadyScreenedOut()) {
+        console.log("SEApp: previous screenout detected for this PID — blocking re-entry.");
+        _renderScreenoutAndRedirect(
+          "<p>Our records indicate you previously attempted this study and " +
+          "were not able to continue. Returning you to Prolific.</p>",
+          4000
+        );
+        return;
+      }
 
       // ── 0c. Boot-time param validation (design §10.7) ──
       //
@@ -527,9 +678,21 @@ window.SEApp = (function () {
           Study2Comprehension.start(
             function onPass() { resolve(); },
             function onFail() {
-              SEUI.showMessage(
-                "Thank you for your time. Unfortunately you did not pass the " +
-                "comprehension check, so the study cannot continue.", "se-message");
+              // Three-layer screenout:
+              //   1. Save partial data (PID + comprehension answers) so we
+              //      have evidence + can build the Prolific blocklist
+              //      post-hoc.
+              //   2. Set localStorage marker so a browser refresh on the
+              //      same PID is caught at boot.
+              //   3. Render overlay + redirect to Prolific with cc=SE_SCREENOUT
+              //      so Prolific closes the submission natively (the actual
+              //      gate against re-claim).
+              // Fire-and-forget — the redirect handles user-facing UX,
+              // and we throw to halt the outer flow.
+              _handleComprehensionFailScreenout({
+                sessionId: sessionId,
+                metadata: metadata
+              });
               reject(new Error("COMPREHENSION_FAILED"));
             }
           );
