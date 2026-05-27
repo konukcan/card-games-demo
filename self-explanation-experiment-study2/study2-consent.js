@@ -43,7 +43,7 @@
       + 'and/or grades in school.</p>'
 
       + '<p><b>Time involvement:</b> Your participation in this experiment will take '
-      + 'approximately 30-40 minutes.</p>'
+      + 'approximately 35 minutes.</p>'
 
       + '<p><b>Payment:</b> If recruitment materials indicate payment (e.g., Prolific or '
       + 'other recruitment), you will receive compensation as indicated.</p>'

@@ -275,6 +275,13 @@ window.SERecap = (function () {
       ageInput.style.padding = "8px";
       ageInput.style.fontSize = "15px";
       ageInput.style.boxSizing = "border-box";
+      // Hard 2-digit input clamp at keystroke level. HTML max=99 only fires
+      // on form submit; the Continue-enabler does the semantic check (18..99).
+      // This stops 888 etc. from even rendering in the field — better UX than
+      // accepting then complaining.
+      ageInput.addEventListener("input", function () {
+        if (this.value.length > 2) this.value = this.value.slice(0, 2);
+      });
       makeField("Age", ageInput);
 
       // ── Gender ──
@@ -354,13 +361,16 @@ window.SERecap = (function () {
       function updateContinueState() {
         var ageValue = Number(ageInput.value);
         var isAgeValid = ageInput.value !== "" && !isNaN(ageValue) && ageValue >= 18 && ageValue <= 99;
+        // The strategy + mindChange textareas are now OPTIONAL — required text
+        // forces people to type bullshit when they don't have a real answer,
+        // which contaminates the free-response data more than it adds. Lab
+        // policy 2026-05-26.
         var isComplete =
           experienceSelect.value !== "" &&
           isAgeValid &&
           genderSelect.value !== "" &&
           raceGroup.getValue() !== "" &&
-          ethnicityGroup.getValue() !== "" &&
-          strategyTextarea.value.trim().length >= 10;
+          ethnicityGroup.getValue() !== "";
 
         continueBtn.disabled = !isComplete;
       }

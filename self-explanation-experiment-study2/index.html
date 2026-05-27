@@ -45,6 +45,13 @@
     if (params.get("study2") !== "1") return;        // study #2 sessions only
     if (navigator.webdriver) return;                  // skip automated tests — no junk RT sessions
     var ROUNDTABLE_SITE_KEY = "pub-g8UmIPDFhjzGHNnngOWR";
+    // Per lab convention (Tobi 2026-05-26):
+    //   - tags carry experimenter/project/experiment/condition (orthogonal
+    //     filterable categoricals); user_id (PROLIFIC_PID) goes in data-user-id
+    //     and is NOT duplicated into tags.
+    //   - The `runId` we keep on window.SE_ROUNDTABLE_RUN_ID for app.js to
+    //     join on at save time — it's the same as data-user-id, but doesn't
+    //     need to be a tag.
     var runId = params.get("PROLIFIC_PID")
       || ("se2-" + new Date().toISOString().replace(/[:.]/g, "-"));
     window.SE_ROUNDTABLE_RUN_ID = runId;              // app.js reads this for the payload join
@@ -53,7 +60,11 @@
     s.src = "https://cdn.roundtable.ai/v1/rt.js";
     s.dataset.siteKey = ROUNDTABLE_SITE_KEY;
     s.dataset.userId = runId;
-    s.dataset.tags = "study:se2,condition:" + condition + ",runId:" + runId;
+    s.dataset.tags =
+      "experimenter:can," +
+      "project:self-explanations," +
+      "experiment:study2_pilot," +
+      "condition:" + condition;
     s.onerror = function (e) { console.error("[se-study2] Roundtable rt.js failed to load:", e); };
     s.onload = function () { console.log("[se-study2] Roundtable rt.js loaded; runId =", runId); };
     document.head.appendChild(s);
