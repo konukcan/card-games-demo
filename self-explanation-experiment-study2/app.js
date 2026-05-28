@@ -50,13 +50,17 @@ window.SEApp = (function () {
     "https://app.prolific.com/submissions/complete?cc=SE2_COMPLETE";
 
   // Prolific SCREENOUT URL — participants are redirected here when they fail
-  // the comprehension check (or any other pre-experiment screen-out). The cc
-  // is a DIFFERENT completion code than the normal one; create it as a
-  // secondary completion code on the Prolific study so Prolific closes the
-  // submission cleanly. Without this redirect, a screened-out participant's
-  // submission stays open on Prolific and they could re-claim the URL.
+  // the comprehension check. The screenout cc is Prolific-generated per study
+  // (each study gets a different opaque code like "C1H2IQ95"), passed via the
+  // `screenoutCode` URL parameter that Prolific appends to the study URL.
+  // Falls back to "SE2_SCREENOUT" for dev / smoke-test paths where no real
+  // Prolific study is involved.
+  function _getScreenoutCode() {
+    var p = new URLSearchParams(window.location.search);
+    return p.get("screenoutCode") || "SE2_SCREENOUT";
+  }
   var PROLIFIC_SCREENOUT_URL =
-    "https://app.prolific.com/submissions/complete?cc=SE2_SCREENOUT";
+    "https://app.prolific.com/submissions/complete?cc=" + _getScreenoutCode();
 
   // DataPipe experiment ID for SE study #2 production data. Routes
   // participant saves to OSF node 5dnrc (the dedicated SE study #2 component
