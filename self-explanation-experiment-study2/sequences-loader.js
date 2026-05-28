@@ -17,7 +17,7 @@
 (function () {
   "use strict";
 
-  var SEQUENCES_URL = "self-explanation-experiment/sequences_v1.json";
+  var SEQUENCES_URL = "self-explanation-experiment-study2/sequences_v1.json";
 
   var _cachedData = null;
 

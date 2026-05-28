@@ -356,7 +356,7 @@ window.SESnapshotLoader = (function () {
   //   self-explanation-experiment/snapshots/<id>.json
   // index.html uses <base href="../"> so this resolves to card-games/.
   function _snapshotUrlV3(snapshotId) {
-    return "self-explanation-experiment/snapshots/" + snapshotId + ".json";
+    return "self-explanation-experiment-study2/snapshots/" + snapshotId + ".json";
   }
 
   // ── _validateV3(snapshot) ──
