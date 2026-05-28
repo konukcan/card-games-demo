@@ -936,6 +936,12 @@ window.SEGame = (function () {
           promptType: "post_gallery"
         }
       );
+      // Tag each post-gallery guess with its rule_id so the analyst doesn't
+      // have to infer rule identity from array position. endRequeryGuesses
+      // already carries ruleId; matching the convention here.
+      if (postGalleryGuess) {
+        postGalleryGuess.ruleId = ruleData.ruleId;
+      }
     }
 
     // ── Phase 3: Build selector ──
