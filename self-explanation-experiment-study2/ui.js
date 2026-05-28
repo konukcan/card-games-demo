@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/ui.js
+// self-explanation-experiment/ui.js
 // Shared rendering helpers for the self-explanation experiment.
 //
 // Provides functions to build and update all UI components:

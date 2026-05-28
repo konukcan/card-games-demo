@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/game.js
+// self-explanation-experiment/game.js
 // Single-rule game flow orchestrator for the self-explanation experiment.
 //
 // Coordinates the full flow for one rule in the curriculum:

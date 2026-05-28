@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/app.js
+// self-explanation-experiment/app.js
 // Top-level session orchestrator for the self-explanation experiment.
 //
 // Coordinates the full experiment lifecycle:
@@ -47,7 +47,7 @@ window.SEApp = (function () {
   // experiment finishes so Prolific marks them as complete. The completion
   // code is specific to this study.
   var PROLIFIC_COMPLETION_URL =
-    "https://app.prolific.com/submissions/complete?cc=SE_COMPLETE";
+    "https://app.prolific.com/submissions/complete?cc=SE2_COMPLETE";
 
   // Prolific SCREENOUT URL — participants are redirected here when they fail
   // the comprehension check (or any other pre-experiment screen-out). The cc
@@ -56,7 +56,7 @@ window.SEApp = (function () {
   // submission cleanly. Without this redirect, a screened-out participant's
   // submission stays open on Prolific and they could re-claim the URL.
   var PROLIFIC_SCREENOUT_URL =
-    "https://app.prolific.com/submissions/complete?cc=SE_SCREENOUT";
+    "https://app.prolific.com/submissions/complete?cc=SE2_SCREENOUT";
 
   // DataPipe experiment ID for SE study #2 production data. Routes
   // participant saves to OSF node 5dnrc (the dedicated SE study #2 component
@@ -456,7 +456,7 @@ window.SEApp = (function () {
           "</pre>" +
           '<p style="max-width:560px; margin:12px auto; line-height:1.7;">' +
           "Then open " +
-          '<code>http://localhost:8080/self-explanation-experiment-study2/demo.html</code>' +
+          '<code>http://localhost:8080/self-explanation-experiment/demo.html</code>' +
           " in your browser." +
           "</p>",
           "error"
@@ -638,6 +638,17 @@ window.SEApp = (function () {
         metadata.studyMode = true;
         metadata.roundtableRunId = window.SE_ROUNDTABLE_RUN_ID || null;
         metadata.roundtableEnabled = !!window.SE_ROUNDTABLE_RUN_ID;
+        // Task 6: sequence provenance fields (pre-reg pins sequencesFileSha256).
+        metadata.sequenceIndex = curriculum.sequenceIndex !== undefined ? curriculum.sequenceIndex : null;
+        metadata.sequenceSignature = curriculum.sequenceSignature || null;
+        metadata.sequencesFileSha256 = curriculum.sequencesFileSha256 || null;
+        metadata.exemplarOrders = {};
+        for (var i = 0; i < curriculum.rules.length; i++) {
+          var r = curriculum.rules[i];
+          if (r.exemplarPermutation) {
+            metadata.exemplarOrders[r.id || r.rule_id || r.ruleId] = r.exemplarPermutation;
+          }
+        }
       }
 
       console.log("SEApp: curriculum built.", {

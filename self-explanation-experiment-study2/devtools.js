@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/devtools.js
+// self-explanation-experiment/devtools.js
 // Console DevTools for rapid experiment exploration during development.
 //
 // Usage (in browser console):

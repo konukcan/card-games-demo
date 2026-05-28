@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/tutorial.js
+// self-explanation-experiment/tutorial.js
 // Step-by-step tutorial module for the self-explanation experiment.
 //
 // Walks participants through the task with polished two-column slides

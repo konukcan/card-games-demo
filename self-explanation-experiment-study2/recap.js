@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/recap.js
+// self-explanation-experiment/recap.js
 // Post-experiment recap module: rule articulation and demographics.
 //
 // After the main curriculum, this module:

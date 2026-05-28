@@ -1,0 +1,134 @@
+{
+  "sequences": [
+    {
+      "index": 0,
+      "rule_order": [
+        "all_odd",
+        "left_red_right_black",
+        "all_even",
+        "colors_palindrome",
+        "two_pairs_ranks",
+        "halves_copy_ranks",
+        "ap_step1_len3_adj",
+        "ranks_palindrome",
+        "blacks_then_reds_start_black",
+        "immediate_bracket_closure"
+      ],
+      "signature": "fff"
+    },
+    {
+      "index": 1,
+      "rule_order": [
+        "colors_palindrome",
+        "left_red_right_black",
+        "ranks_palindrome",
+        "two_pairs_ranks",
+        "halves_copy_ranks",
+        "all_odd",
+        "ap_step1_len3_adj",
+        "all_even",
+        "blacks_then_reds_start_black",
+        "immediate_bracket_closure"
+      ],
+      "signature": "ffb"
+    },
+    {
+      "index": 2,
+      "rule_order": [
+        "halves_copy_ranks",
+        "blacks_then_reds_start_black",
+        "colors_palindrome",
+        "immediate_bracket_closure",
+        "ranks_palindrome",
+        "left_red_right_black",
+        "all_even",
+        "two_pairs_ranks",
+        "all_odd",
+        "ap_step1_len3_adj"
+      ],
+      "signature": "fbf"
+    },
+    {
+      "index": 3,
+      "rule_order": [
+        "two_pairs_ranks",
+        "ap_step1_len3_adj",
+        "blacks_then_reds_start_black",
+        "immediate_bracket_closure",
+        "colors_palindrome",
+        "all_even",
+        "ranks_palindrome",
+        "all_odd",
+        "halves_copy_ranks",
+        "left_red_right_black"
+      ],
+      "signature": "fbb"
+    },
+    {
+      "index": 4,
+      "rule_order": [
+        "two_pairs_ranks",
+        "blacks_then_reds_start_black",
+        "halves_copy_ranks",
+        "immediate_bracket_closure",
+        "ranks_palindrome",
+        "left_red_right_black",
+        "colors_palindrome",
+        "all_odd",
+        "ap_step1_len3_adj",
+        "all_even"
+      ],
+      "signature": "bff"
+    },
+    {
+      "index": 5,
+      "rule_order": [
+        "ap_step1_len3_adj",
+        "blacks_then_reds_start_black",
+        "all_odd",
+        "immediate_bracket_closure",
+        "all_even",
+        "ranks_palindrome",
+        "left_red_right_black",
+        "colors_palindrome",
+        "two_pairs_ranks",
+        "halves_copy_ranks"
+      ],
+      "signature": "bfb"
+    },
+    {
+      "index": 6,
+      "rule_order": [
+        "all_even",
+        "left_red_right_black",
+        "all_odd",
+        "halves_copy_ranks",
+        "ap_step1_len3_adj",
+        "ranks_palindrome",
+        "two_pairs_ranks",
+        "blacks_then_reds_start_black",
+        "immediate_bracket_closure",
+        "colors_palindrome"
+      ],
+      "signature": "bbf"
+    },
+    {
+      "index": 7,
+      "rule_order": [
+        "left_red_right_black",
+        "two_pairs_ranks",
+        "ranks_palindrome",
+        "ap_step1_len3_adj",
+        "colors_palindrome",
+        "blacks_then_reds_start_black",
+        "halves_copy_ranks",
+        "all_even",
+        "immediate_bracket_closure",
+        "all_odd"
+      ],
+      "signature": "bbb"
+    }
+  ],
+  "sha256": "b784369b788e8e0f68b58cc7f4723e644629c7333cd61a2e43e318f4eee75bfd",
+  "version": "v1"
+}

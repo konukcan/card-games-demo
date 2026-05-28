@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/audio-recorder.js
+// self-explanation-experiment/audio-recorder.js
 // Punctual audio recorder for hold-to-record verbal explanations.
 //
 // The participant holds spacebar (or a UI button) to record and releases

@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/study2-consent.js
+// self-explanation-experiment/study2-consent.js
 // Consent overlay for SE study #2.
 //
 // Ported from rule-gallery/gallery-consent.js — same CICL/Stanford template

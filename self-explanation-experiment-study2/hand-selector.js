@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/hand-selector.js
+// self-explanation-experiment/hand-selector.js
 // Dual-stack coin-flip hand selector for the self-explanation experiment.
 //
 // Manages two pre-ordered stacks (winning and losing hands), shares a single

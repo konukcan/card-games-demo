@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/curriculum.js
+// self-explanation-experiment/curriculum.js
 // v2 mature design: snapshot-driven curriculum.
 //
 // Loads an immutable SE snapshot via SESnapshotLoader (fail-closed),
@@ -373,6 +373,9 @@ window.SECurriculum = (function () {
     return pid === "anon" ? sessionStorage : localStorage;
   }
 
+  // DEPRECATED for SE Study #2 (2026-05-27): replaced by sequence-based
+  // rule ordering via SequencesLoader. Retained for back-compat with any
+  // non-study-2 caller (e.g. the legacy build() function below).
   function resolveGroupAssignment(snapshotId) {
     if (SEConfig.group === "X" || SEConfig.group === "Y") {
       console.log("SECurriculum: group override —", SEConfig.group);
@@ -611,113 +614,147 @@ window.SECurriculum = (function () {
   // Throws (via SESnapshotLoader.showFailScreen + throw) on:
   //   SNAPSHOT_NO_END_REQUERY — group mode and the assigned group has no
   //                             intersection with end_requery_rules.
-  function buildV3() {
-    return SESnapshotLoader.load().then(function (snapshot) {
-      // Participant id (same source as v2's build())
-      var pid = SEConfig.PROLIFIC_PID || "anon";
+  async function buildV3() {
+    var snapshot = await SESnapshotLoader.load();
 
-      var ruleScope = SEConfig.ruleScope || "all10";
-      var selectedRules;  // snapshot.rules[] entries for this participant
-      var group = null;
+    // Participant id (same source as v2's build())
+    var pid = SEConfig.PROLIFIC_PID || "anon";
 
-      if (ruleScope === "group") {
-        // Resolve group X/Y deterministically from the participant id.
-        // Priority: SEConfig.group URL override > djb2 hash of pid.
-        if (SEConfig.group === "X" || SEConfig.group === "Y") {
-          group = SEConfig.group;
-          console.log("SECurriculum.buildV3: group override —", group);
-        } else {
-          // _hashKey is djb2 → unsigned hex. Use a separate salt ("grp")
-          // from v2's sessionStorage key so the two rollouts are
-          // independent (a v3 participant doesn't inherit a v2 coin flip).
-          var hashVal = parseInt(_hashKey(pid + "grp"), 16);
-          group = (hashVal % 2 === 0) ? "X" : "Y";
-          console.log("SECurriculum.buildV3: group from hash —", group,
-            "(pid=" + pid + ")");
-        }
+    var ruleScope = SEConfig.ruleScope || "all10";
+    var selectedRules;  // snapshot.rules[] entries for this participant
+    var group = null;
+    var curriculum;
 
-        selectedRules = snapshot.rules.filter(function (r) {
-          return r.group === group;
-        });
-
-        if (selectedRules.length === 0) {
-          SESnapshotLoader.showFailScreen(
-            "SNAPSHOT_GROUP_EMPTY",
-            "This snapshot has no rules for the assigned participant group."
-          );
-          throw new Error("SNAPSHOT_GROUP_EMPTY");
-        }
-
-        // Filter end_requery_rules to those in the selected group.
-        var selectedIds = {};
-        for (var si = 0; si < selectedRules.length; si++) {
-          selectedIds[selectedRules[si].rule_id] = true;
-        }
-        var activeEndRequery = snapshot.end_requery_rules.filter(function (id) {
-          return selectedIds[id];
-        });
-
-        if (activeEndRequery.length === 0) {
-          SESnapshotLoader.showFailScreen(
-            "SNAPSHOT_NO_END_REQUERY",
-            "No end-requery rule found in the participant's assigned group."
-          );
-          throw new Error("SNAPSHOT_NO_END_REQUERY");
-        }
-
-        var ordering = Study2Orderings.assignOrdering("group", pid);
-        // ordering is an index permutation over [0..selectedRules.length-1]
-        // — reorder selectedRules by it.
-        var orderedRules = ordering
-          .slice(0, selectedRules.length)
-          .map(function (idx) { return selectedRules[idx]; });
-
-        var rules = orderedRules.map(function (r) {
-          return _buildV3RuleData(r);
-        });
-
-        console.log(
-          "SECurriculum: v3 build complete — group " + group +
-          ", " + rules.length + " rules: " +
-          rules.map(function (rd) { return rd.ruleId; }).join(", ")
-        );
-
-        return {
-          rules: rules,
-          endRequeryRuleIds: activeEndRequery,
-          ruleScope: ruleScope,
-          group: group,
-          seSnapshotId: snapshot.snapshot_id,
-        };
-
+    if (ruleScope === "group") {
+      // Resolve group X/Y deterministically from the participant id.
+      // Priority: SEConfig.group URL override > djb2 hash of pid.
+      if (SEConfig.group === "X" || SEConfig.group === "Y") {
+        group = SEConfig.group;
+        console.log("SECurriculum.buildV3: group override —", group);
       } else {
-        // ruleScope === "all10": use all 10 rules.
-        selectedRules = snapshot.rules.slice(); // copy
-
-        var ordering10 = Study2Orderings.assignOrdering("all10", pid);
-        var orderedRules10 = ordering10
-          .slice(0, selectedRules.length)
-          .map(function (idx) { return selectedRules[idx]; });
-
-        var rules10 = orderedRules10.map(function (r) {
-          return _buildV3RuleData(r);
-        });
-
-        console.log(
-          "SECurriculum: v3 build complete — all10, " +
-          rules10.length + " rules: " +
-          rules10.map(function (rd) { return rd.ruleId; }).join(", ")
-        );
-
-        return {
-          rules: rules10,
-          endRequeryRuleIds: snapshot.end_requery_rules.slice(),
-          ruleScope: ruleScope,
-          group: null,
-          seSnapshotId: snapshot.snapshot_id,
-        };
+        // _hashKey is djb2 → unsigned hex. Use a separate salt ("grp")
+        // from v2's sessionStorage key so the two rollouts are
+        // independent (a v3 participant doesn't inherit a v2 coin flip).
+        var hashVal = parseInt(_hashKey(pid + "grp"), 16);
+        group = (hashVal % 2 === 0) ? "X" : "Y";
+        console.log("SECurriculum.buildV3: group from hash —", group,
+          "(pid=" + pid + ")");
       }
-    });
+
+      selectedRules = snapshot.rules.filter(function (r) {
+        return r.group === group;
+      });
+
+      if (selectedRules.length === 0) {
+        SESnapshotLoader.showFailScreen(
+          "SNAPSHOT_GROUP_EMPTY",
+          "This snapshot has no rules for the assigned participant group."
+        );
+        throw new Error("SNAPSHOT_GROUP_EMPTY");
+      }
+
+      // Filter end_requery_rules to those in the selected group.
+      var selectedIds = {};
+      for (var si = 0; si < selectedRules.length; si++) {
+        selectedIds[selectedRules[si].rule_id] = true;
+      }
+      var activeEndRequery = snapshot.end_requery_rules.filter(function (id) {
+        return selectedIds[id];
+      });
+
+      if (activeEndRequery.length === 0) {
+        SESnapshotLoader.showFailScreen(
+          "SNAPSHOT_NO_END_REQUERY",
+          "No end-requery rule found in the participant's assigned group."
+        );
+        throw new Error("SNAPSHOT_NO_END_REQUERY");
+      }
+
+      var ordering = Study2Orderings.assignOrdering("group", pid);
+      // ordering is an index permutation over [0..selectedRules.length-1]
+      // — reorder selectedRules by it.
+      var orderedRules = ordering
+        .slice(0, selectedRules.length)
+        .map(function (idx) { return selectedRules[idx]; });
+
+      var rules = orderedRules.map(function (r) {
+        return _buildV3RuleData(r);
+      });
+
+      console.log(
+        "SECurriculum: v3 build complete — group " + group +
+        ", " + rules.length + " rules: " +
+        rules.map(function (rd) { return rd.ruleId; }).join(", ")
+      );
+
+      curriculum = {
+        rules: rules,
+        endRequeryRuleIds: activeEndRequery,
+        ruleScope: ruleScope,
+        group: group,
+        seSnapshotId: snapshot.snapshot_id,
+      };
+
+    } else {
+      // ruleScope === "all10": use all 10 rules, ordered via SequencesLoader.
+      //
+      // Hash-based sequence selection (SE Study #2): the participant's PID is
+      // hashed (SHA-256 mod 8) to deterministically pick one of the 8
+      // pre-computed sequences in sequences_v1.json. Rule order comes from
+      // seq.rule_order, which maps to snapshot.rules entries by rule_id.
+      //
+      // Legacy Study2Orderings.assignOrdering("all10", pid) is no longer
+      // called on this path; it remains available for any back-compat caller.
+      var sequencesData = await window.SequencesLoader.load();
+      var seq = await window.SequencesLoader.sequenceFor(pid, sequencesData);
+
+      // Pre-compute per-rule permutations in parallel before building rule data.
+      var permutations = await Promise.all(seq.rule_order.map(function (ruleId) {
+        return window.ExemplarShuffle.permutationFor(pid, ruleId);
+      }));
+
+      var rules10 = seq.rule_order.map(function (ruleId, idx) {
+        var ruleEntry = snapshot.rules.find(function (r) {
+          return r.rule_id === ruleId;
+        });
+        if (!ruleEntry) {
+          throw new Error(
+            "SECurriculum.buildV3: rule_id '" + ruleId +
+            "' from sequences_v1.json not found in snapshot '" +
+            snapshot.snapshot_id + "'"
+          );
+        }
+        var ruleData = _buildV3RuleData(ruleEntry);
+        var perm = permutations[idx];
+        var canonical = ruleData.exemplarHands;
+        ruleData.exemplarHands = perm.map(function (i) { return canonical[i]; });
+        ruleData.exemplarPermutation = perm;
+        return ruleData;
+      });
+
+      console.log(
+        "SECurriculum: v3 build complete — all10 (seq " + seq.index + "), " +
+        rules10.length + " rules: " +
+        rules10.map(function (rd) { return rd.ruleId; }).join(", ")
+      );
+
+      curriculum = {
+        rules: rules10,
+        endRequeryRuleIds: snapshot.end_requery_rules.slice(),
+        ruleScope: ruleScope,
+        group: null,
+        groupAssignment: null,  // not set on study #2 all10 path
+        sequenceIndex: seq.index,
+        sequenceSignature: seq.signature,
+        sequencesFileSha256: sequencesData.sha256,
+        seSnapshotId: snapshot.snapshot_id,
+      };
+    }
+
+    // Expose for testability (Playwright tests assert on this).
+    window._lastBuiltCurriculum = curriculum;
+
+    return curriculum;
   }
 
   // _buildV3RuleData(ruleEntry) — Convert a single v3 rules[] entry into

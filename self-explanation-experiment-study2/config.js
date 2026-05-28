@@ -1,4 +1,4 @@
-// self-explanation-experiment-study2/config.js
+// self-explanation-experiment/config.js
 // Central configuration module for the self-explanation experiment.
 //
 // All experiment parameters live here with sensible defaults.
