@@ -1,14 +1,17 @@
 // self-explanation-experiment/exemplar-shuffle.js
-// exemplar-shuffle.js — Deterministic per-participant, per-rule
-// permutation of the 6 gallery exemplars for SE Study #2.
+// exemplar-shuffle.js — Deterministic per-participant seeded shuffles
+// for SE Study #2:
+//   * permutationFor(pid, ruleId) — the 6-exemplar gallery permutation
+//   * ruleOrderFor(pid, ruleIds)  — the 10-rule presentation order
 //
-// Exposes window.ExemplarShuffle.permutationFor(pid, ruleId): Promise<int[]>.
+// Both use SHA-256 + mulberry32 + Fisher-Yates with different seed strings,
+// so the rule-order shuffle is independent of any per-rule exemplar shuffle.
 //
 // Pipeline:
-//   1. seed = SHA-256(pid + ":" + ruleId)   (32 bytes)
+//   1. seed = SHA-256(<seed string>)         (32 bytes)
 //   2. state = first 4 bytes of seed as uint32
-//   3. mulberry32 PRNG seeded with state   (small, fast, well-distributed)
-//   4. Fisher-Yates shuffle on [0, 1, 2, 3, 4, 5] using mulberry32 outputs
+//   3. mulberry32 PRNG seeded with state     (small, fast, well-distributed)
+//   4. Fisher-Yates shuffle on the input array using mulberry32 outputs
 //
 // Why this construction: simple, deterministic, no third-party deps.
 
@@ -35,7 +38,7 @@
     return view.getUint32(0, false);  // big-endian first 4 bytes
   }
 
-  // Fisher-Yates: in-place shuffle using a provided RNG function.
+  // Fisher-Yates: in-place-on-copy shuffle using a provided RNG function.
   function fisherYates(arr, rng) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -51,8 +54,26 @@
     return fisherYates([0, 1, 2, 3, 4, 5], rng);
   }
 
+  // ruleOrderFor: shuffle the rule_ids array into a uniformly random
+  // presentation order, seeded by `pid + ":rules"`. The ":rules" suffix
+  // is deliberately unlike any valid rule_id, so this seed never collides
+  // with permutationFor's `pid + ":" + ruleId` seeds.
+  //
+  // Invariant: rule_ids in this codebase are snake_case slugs (e.g.,
+  // "colors_palindrome", "all_odd"); none equals the literal string
+  // "rules". If a future rule were ever named "rules", its exemplar-shuffle
+  // seed would collide with this rule-order seed for any participant,
+  // producing identical RNG state. The snapshot rule_id list is small and
+  // human-curated, so this is enforced by review rather than by code.
+  async function ruleOrderFor(prolificPid, ruleIds) {
+    var seed = await _seedFromDigest(prolificPid + ":rules");
+    var rng = mulberry32(seed);
+    return fisherYates(ruleIds, rng);
+  }
+
   window.ExemplarShuffle = {
     permutationFor: permutationFor,
+    ruleOrderFor: ruleOrderFor,
     _mulberry32: mulberry32,
   };
 })();

@@ -642,10 +642,11 @@ window.SEApp = (function () {
         metadata.studyMode = true;
         metadata.roundtableRunId = window.SE_ROUNDTABLE_RUN_ID || null;
         metadata.roundtableEnabled = !!window.SE_ROUNDTABLE_RUN_ID;
-        // Task 6: sequence provenance fields (pre-reg pins sequencesFileSha256).
-        metadata.sequenceIndex = curriculum.sequenceIndex !== undefined ? curriculum.sequenceIndex : null;
-        metadata.sequenceSignature = curriculum.sequenceSignature || null;
-        metadata.sequencesFileSha256 = curriculum.sequencesFileSha256 || null;
+        // Rule-presentation order: the per-PID-shuffled array of 10 rule_ids
+        // in the order they were presented to this participant. Pre-reg
+        // specifies "uniformly random rule order per participant" — the
+        // ruleOrder field is the auditable artifact of that shuffle.
+        metadata.ruleOrder = Array.isArray(curriculum.ruleOrder) ? curriculum.ruleOrder.slice() : null;
         metadata.exemplarOrders = {};
         for (var i = 0; i < curriculum.rules.length; i++) {
           var r = curriculum.rules[i];

@@ -1,4 +1,4 @@
-// self-explanation-experiment/snapshot-loader.js
+// self-explanation-experiment-study2/snapshot-loader.js
 // Fail-closed snapshot fetch + validation for the v2 mature design.
 //
 // Per design §7.3, the experiment refuses to start if any of:
@@ -353,7 +353,7 @@ window.SESnapshotLoader = (function () {
 
   // ── Build the schema_v3 snapshot URL from its id ──
   // Spec-C pipeline writes schema_v3 snapshots to a flat directory:
-  //   self-explanation-experiment/snapshots/<id>.json
+  //   self-explanation-experiment-study2/snapshots/<id>.json
   // index.html uses <base href="../"> so this resolves to card-games/.
   function _snapshotUrlV3(snapshotId) {
     return "self-explanation-experiment-study2/snapshots/" + snapshotId + ".json";

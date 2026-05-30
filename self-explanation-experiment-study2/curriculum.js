@@ -696,32 +696,31 @@ window.SECurriculum = (function () {
       };
 
     } else {
-      // ruleScope === "all10": use all 10 rules, ordered via SequencesLoader.
+      // ruleScope === "all10": use all 10 rules, presented in a uniformly
+      // random per-PID order via ExemplarShuffle.ruleOrderFor.
       //
-      // Hash-based sequence selection (SE Study #2): the participant's PID is
-      // hashed (SHA-256 mod 8) to deterministically pick one of the 8
-      // pre-computed sequences in sequences_v1.json. Rule order comes from
-      // seq.rule_order, which maps to snapshot.rules entries by rule_id.
-      //
-      // Legacy Study2Orderings.assignOrdering("all10", pid) is no longer
-      // called on this path; it remains available for any back-compat caller.
-      var sequencesData = await window.SequencesLoader.load();
-      var seq = await window.SequencesLoader.sequenceFor(pid, sequencesData);
+      // Each PID gets one of 10! ≈ 3.6 million orderings, seeded by
+      // SHA-256(PID + ":rules"). Determinism per PID guarantees reload
+      // stability. The shuffle is independent of condition (which is set
+      // by the Prolific study, not by hash).
 
-      // Pre-compute per-rule permutations in parallel before building rule data.
-      var permutations = await Promise.all(seq.rule_order.map(function (ruleId) {
+      var snapshotRuleIds = snapshot.rules.map(function (r) { return r.rule_id; });
+      var ruleOrder = await window.ExemplarShuffle.ruleOrderFor(pid, snapshotRuleIds);
+
+      // Pre-compute per-rule exemplar permutations in parallel before
+      // building rule data.
+      var permutations = await Promise.all(ruleOrder.map(function (ruleId) {
         return window.ExemplarShuffle.permutationFor(pid, ruleId);
       }));
 
-      var rules10 = seq.rule_order.map(function (ruleId, idx) {
+      var rules10 = ruleOrder.map(function (ruleId, idx) {
         var ruleEntry = snapshot.rules.find(function (r) {
           return r.rule_id === ruleId;
         });
         if (!ruleEntry) {
           throw new Error(
             "SECurriculum.buildV3: rule_id '" + ruleId +
-            "' from sequences_v1.json not found in snapshot '" +
-            snapshot.snapshot_id + "'"
+            "' not found in snapshot '" + snapshot.snapshot_id + "'"
           );
         }
         var ruleData = _buildV3RuleData(ruleEntry);
@@ -733,7 +732,7 @@ window.SECurriculum = (function () {
       });
 
       console.log(
-        "SECurriculum: v3 build complete — all10 (seq " + seq.index + "), " +
+        "SECurriculum: v3 build complete — all10 (random per-PID order), " +
         rules10.length + " rules: " +
         rules10.map(function (rd) { return rd.ruleId; }).join(", ")
       );
@@ -743,10 +742,8 @@ window.SECurriculum = (function () {
         endRequeryRuleIds: snapshot.end_requery_rules.slice(),
         ruleScope: ruleScope,
         group: null,
-        groupAssignment: null,  // not set on study #2 all10 path
-        sequenceIndex: seq.index,
-        sequenceSignature: seq.signature,
-        sequencesFileSha256: sequencesData.sha256,
+        groupAssignment: null,
+        ruleOrder: ruleOrder,
         seSnapshotId: snapshot.snapshot_id,
       };
     }
