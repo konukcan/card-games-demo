@@ -185,7 +185,7 @@ window.SEConfig = (function () {
 
     // ── Gallery phase ──
     // galleryTime: how long (in seconds) the exemplar gallery is displayed
-    galleryTime: param("galleryTime", 15),
+    galleryTime: param("galleryTime", 10),
 
     // ── Re-engagement ──
     // If true, the gallery is briefly removed and re-shown during the gallery
