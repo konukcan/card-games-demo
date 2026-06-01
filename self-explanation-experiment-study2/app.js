@@ -753,6 +753,12 @@ window.SEApp = (function () {
       // Study #2 per-rule accumulators
       var allPostGalleryGuesses = [];
       var allGalleryStudyMs = [];
+      // Per-phase integrity reports captured around gallery / post-gallery
+      // query / end re-query phases. Each entry mirrors a classification
+      // trial: { ruleId, rulePosition, phase, integrityTrial }. Saved as
+      // payload.phaseTrials so the CH renderer can place per-phase mouse
+      // trajectories and tab-aways on the timeline.
+      var allPhaseTrials = [];
 
       var totalRules = curriculum.rules.length;
       var blockRestDone = false;  // guard: only one block-rest for all10
@@ -796,6 +802,22 @@ window.SEApp = (function () {
           allGalleryStudyMs.push(
             typeof gameResult.galleryStudyMs === "number" ? gameResult.galleryStudyMs : null
           );
+          if (gameResult.galleryIntegrityTrial) {
+            allPhaseTrials.push({
+              ruleId: ruleData.ruleId,
+              rulePosition: rulePosition,
+              phase: "gallery",
+              integrityTrial: gameResult.galleryIntegrityTrial
+            });
+          }
+          if (gameResult.postGalleryIntegrityTrial) {
+            allPhaseTrials.push({
+              ruleId: ruleData.ruleId,
+              rulePosition: rulePosition,
+              phase: "post_gallery_query",
+              integrityTrial: gameResult.postGalleryIntegrityTrial
+            });
+          }
         }
 
         // ── Rule-transition / block-rest (C2 / study #2) ──
@@ -926,6 +948,12 @@ window.SEApp = (function () {
 
           SEUI.clearApp();
           var erApp = document.getElementById("app");
+          if (window._integrityMonitor) {
+            window._integrityMonitor.startTrial({
+              trialId: erRuleId + "-erq",
+              phase: "end_requery"
+            });
+          }
           var erResult = await SEUI.renderRuleQuery(
             erRuleData.exemplarHands,
             erApp,
@@ -934,6 +962,18 @@ window.SEApp = (function () {
               promptType: "end_requery"
             }
           );
+          var erIntegrityTrial = null;
+          if (window._integrityMonitor) {
+            erIntegrityTrial = window._integrityMonitor.endTrial();
+          }
+          if (erIntegrityTrial) {
+            allPhaseTrials.push({
+              ruleId: erRuleId,
+              rulePosition: null,
+              phase: "end_requery",
+              integrityTrial: erIntegrityTrial
+            });
+          }
           endRequeryGuesses.push({
             ruleId: erRuleId,
             response: erResult.response,
@@ -1093,6 +1133,7 @@ window.SEApp = (function () {
         payload.postGalleryGuesses = allPostGalleryGuesses;
         payload.endRequeryGuesses = endRequeryGuesses;
         payload.galleryStudyMs = allGalleryStudyMs;
+        payload.phaseTrials = allPhaseTrials;
         payload.comprehension = (typeof Study2Comprehension !== "undefined")
           ? Study2Comprehension.getData() : null;
 

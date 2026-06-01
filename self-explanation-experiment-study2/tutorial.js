@@ -988,8 +988,9 @@ window.SETutorial = (function () {
 
     if (urlParams.get("skipTutorial") === "1") {
       console.log("SETutorial: skipped via skipTutorial=1 URL param.");
-      // Still init mic for non-silent conditions so the game works
-      if (!SEConfig.isSilent()) {
+      // Study #2 is typed-only — no mic. Study #1 non-silent needs mic
+      // for the game's hold-to-record prompts.
+      if (!SEConfig.isStudy2() && !SEConfig.isSilent()) {
         await SEAudio.init();
       }
       localStorage.setItem(STORAGE_KEY, "done");

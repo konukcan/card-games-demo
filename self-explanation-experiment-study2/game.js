@@ -912,6 +912,12 @@ window.SEGame = (function () {
       : SEConfig.nRules;
 
     // ── Phase 1: Self-paced gallery ──
+    if (window._integrityMonitor) {
+      window._integrityMonitor.startTrial({
+        trialId: ruleData.ruleId + "-gallery",
+        phase: "gallery"
+      });
+    }
     var studyMs = await SEUI.renderStudy2Gallery(
       ruleData.exemplarHands,
       app,
@@ -921,13 +927,24 @@ window.SEGame = (function () {
         totalRules: nRules
       }
     );
+    var galleryIntegrityTrial = null;
+    if (window._integrityMonitor) {
+      galleryIntegrityTrial = window._integrityMonitor.endTrial();
+    }
 
     // ── Phase 2: Post-gallery rule-query (explain condition only) ──
     SEUI.clearApp();
     app = document.getElementById("app");
 
     var postGalleryGuess = null;
+    var postGalleryIntegrityTrial = null;
     if (SEConfig.isExplain()) {
+      if (window._integrityMonitor) {
+        window._integrityMonitor.startTrial({
+          trialId: ruleData.ruleId + "-pgq",
+          phase: "post_gallery_query"
+        });
+      }
       postGalleryGuess = await SEUI.renderRuleQuery(
         ruleData.exemplarHands,
         app,
@@ -936,6 +953,9 @@ window.SEGame = (function () {
           promptType: "post_gallery"
         }
       );
+      if (window._integrityMonitor) {
+        postGalleryIntegrityTrial = window._integrityMonitor.endTrial();
+      }
       // Tag each post-gallery guess with its rule_id so the analyst doesn't
       // have to infer rule identity from array position. endRequeryGuesses
       // already carries ruleId; matching the convention here.
@@ -972,7 +992,9 @@ window.SEGame = (function () {
     return {
       trials: trials,
       postGalleryGuess: postGalleryGuess,
-      galleryStudyMs: studyMs
+      galleryStudyMs: studyMs,
+      galleryIntegrityTrial: galleryIntegrityTrial,
+      postGalleryIntegrityTrial: postGalleryIntegrityTrial
     };
   }
 
