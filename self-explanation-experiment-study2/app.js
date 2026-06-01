@@ -1354,6 +1354,16 @@ window.SEApp = (function () {
   // This is the only side-effect in this module — everything else is
   // triggered from within start().
   document.addEventListener("DOMContentLoaded", function () {
+    // Warm the card-image cache as early as possible so the first gallery
+    // doesn't render with blank card frames on a cold browser cache. Fire-
+    // and-forget: the participant clicks through consent → comprehension
+    // → tutorial for ~30-60s, which is more than enough time for the
+    // browser to fetch every PNG in stim/ (52 files, ~10-30KB each).
+    // Failures (offline / 404) resolve to `undefined` per CardEx.preload
+    // implementation — they never block start().
+    if (window.CardEx && typeof CardEx.preloadImages === "function") {
+      CardEx.preloadImages(52);
+    }
     start();
   });
 
