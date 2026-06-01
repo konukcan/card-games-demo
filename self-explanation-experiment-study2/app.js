@@ -313,22 +313,37 @@ window.SEApp = (function () {
       app.innerHTML =
         '<div style="max-width:640px; margin:80px auto; padding:32px; ' +
         'background:#fff; border:1px solid #e2e8f0; border-radius:10px; ' +
-        'text-align:center; font-family:system-ui, sans-serif; color:#1e293b;">' +
-        '<h2 style="margin:0 0 16px; font-size:20px;">Before you begin</h2>' +
-        '<p style="line-height:1.6; margin:8px 0 24px;">' +
-        'To keep the experiment fair for everyone, this study runs in ' +
-        '<strong>fullscreen mode</strong>. Please close any browser sidebars, ' +
-        'AI assistant tabs, or extension panels, then click below to enter ' +
-        'fullscreen and start the tutorial.' +
+        'text-align:left; font-family:system-ui, sans-serif; color:#1e293b;">' +
+        '<h2 style="margin:0 0 16px; font-size:20px; text-align:center;">' +
+        'Before you begin</h2>' +
+        '<p style="line-height:1.6; margin:8px 0 16px;">' +
+        'This study asks you to figure out patterns <strong>using only your ' +
+        'own observation</strong> of the cards shown on screen. Submissions ' +
+        'showing signs of external assistance will be rejected, and rejected ' +
+        'submissions are not paid.' +
         '</p>' +
+        '<p style="line-height:1.6; margin:8px 0 8px;">Please do not:</p>' +
+        '<ul style="line-height:1.6; margin:0 0 16px; padding-left:24px;">' +
+        '<li>Use AI assistants, chatbots, or language models</li>' +
+        '<li>Copy or transfer card information outside this page</li>' +
+        '<li>Look up information in external sources</li>' +
+        '<li>Use any external tools to generate your responses</li>' +
+        '</ul>' +
+        '<p style="line-height:1.6; margin:8px 0 16px;">' +
+        'Your activity during the study is <strong>closely monitored</strong> ' +
+        'for these signals.' +
+        '</p>' +
+        '<p style="line-height:1.6; margin:8px 0 24px;">' +
+        'To minimize distractions, the study also runs in ' +
+        '<strong>fullscreen mode</strong>. Please close any browser sidebars, ' +
+        'AI assistant tabs, or extension panels before continuing.' +
+        '</p>' +
+        '<div style="text-align:center;">' +
         '<button id="se-gf-enter-btn" class="se-btn-continue" ' +
         'style="font-size:15px; padding:12px 28px;">' +
         'Enter fullscreen and begin' +
         '</button>' +
-        '<p style="font-size:12px; color:#64748b; margin:20px 0 0;">' +
-        'You can exit fullscreen at any time by pressing Esc, but doing so ' +
-        'mid-experiment will pause the session until you return to fullscreen.' +
-        '</p></div>';
+        '</div></div>';
 
       var btn = document.getElementById("se-gf-enter-btn");
       btn.addEventListener("click", function () {
