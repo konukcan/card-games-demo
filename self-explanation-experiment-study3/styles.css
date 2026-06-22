@@ -1298,7 +1298,10 @@ body.se-study3 .se-btn-lose:hover:not(:disabled) { background: #b06a3c; box-shad
 .se-feedback.fb-losing  { border: 2px solid var(--lose) !important; background: var(--lose-soft) !important; border-radius: 12px; }
 
 /* Verdict — two lines + a self-paced Next, below the focal hand. */
-.se-verdict { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
+.se-verdict { margin-top: 14px; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 20px; }
+/* Two text lines stacked; the Next button sits to their right, vertically
+   centered — keeps the verdict 2 lines tall so the card above doesn't shrink. */
+.se-verdict-text { display: flex; flex-direction: column; gap: 5px; text-align: left; }
 /* Both lines share the page font + one size so the verdict reads as a unit. */
 .se-verdict-line1, .se-verdict-line2 { font-size: 16px; color: var(--ink); line-height: 1.5; }
 .se-verdict-bubble { display: inline-block; padding: 3px 14px; border-radius: 999px; font-weight: 700; font-size: 15px; }
@@ -1310,7 +1313,7 @@ body.se-study3 .se-btn-lose:hover:not(:disabled) { background: #b06a3c; box-shad
 .se-verdict-word { font-weight: 700; }
 .se-verdict.correct .se-verdict-mark, .se-verdict.correct .se-verdict-word { color: var(--ok); }
 .se-verdict.incorrect .se-verdict-mark, .se-verdict.incorrect .se-verdict-word { color: var(--no); }
-.se-verdict-next { margin-top: 8px; background: var(--ink); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.12s; }
+.se-verdict-next { flex-shrink: 0; white-space: nowrap; background: var(--ink); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.12s; }
 .se-verdict-next:hover { background: #46382c; transform: translateY(-1px); }
 
 /* Record-column item — R3/R4 hybrid (study #3 feedback). Category-coloured

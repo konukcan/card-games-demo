@@ -808,12 +808,14 @@ window.SEUI = (function () {
     var verdict = makeEl("div", "se-verdict", focalEl.parentNode || focalEl);
     verdict.classList.add(correct ? "correct" : "incorrect");
     verdict.innerHTML =
-      '<div class="se-verdict-line1">This hand is a ' +
-        '<span class="se-verdict-bubble ' + category + '">' + catWord + '</span> hand.</div>' +
-      '<div class="se-verdict-line2">You guessed: ' +
-        '<span class="se-verdict-guess">' + guessWord + '</span> ' +
-        '<span class="se-verdict-mark">' + (correct ? "\u2713" : "\u2717") + '</span> ' +
-        '<span class="se-verdict-word">' + (correct ? "Correct" : "Incorrect") + '.</span></div>';
+      '<div class="se-verdict-text">' +
+        '<div class="se-verdict-line1">This hand is a ' +
+          '<span class="se-verdict-bubble ' + category + '">' + catWord + '</span> hand.</div>' +
+        '<div class="se-verdict-line2">You guessed: ' +
+          '<span class="se-verdict-guess">' + guessWord + '</span> ' +
+          '<span class="se-verdict-mark">' + (correct ? "\u2713" : "\u2717") + '</span> ' +
+          '<span class="se-verdict-word">' + (correct ? "Correct" : "Incorrect") + '.</span></div>' +
+      '</div>';
 
     var next = document.createElement("button");
     next.className = "se-verdict-next";
