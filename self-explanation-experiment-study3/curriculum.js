@@ -1,0 +1,848 @@
+// self-explanation-experiment/curriculum.js
+// v2 mature design: snapshot-driven curriculum.
+//
+// Loads an immutable SE snapshot via SESnapshotLoader (fail-closed),
+// resolves the participant's group X/Y assignment, filters the snapshot's
+// 10 selected_rules to the 5 in that group, randomizes per-participant
+// order, and builds RuleData (with `fixedTrialPool` instead of winStack/
+// loseStack) for each rule.
+//
+// Depends on:
+//   window.SEConfig          — adversarialStrategy, strategyVariant, group
+//   window.SESnapshotLoader  — fetch + validate the snapshot
+//   window.GalleryRules      — rule object lookup by id (.eval, .name, .answer)
+//
+// Legacy helpers (tierDistribution, selectRules, fetchFrozenExemplars,
+// buildStacksFromDiagnosticity, etc.) are retained below the v2 build()
+// because the catalog browser and other tooling still call them. D2 will
+// audit and remove dead paths once the v2 flow is stable.
+//
+// Exported as window.SECurriculum.
+
+window.SECurriculum = (function () {
+  "use strict";
+
+  // ════════════════════════════════════════════════════
+  // Utility helpers
+  // ════════════════════════════════════════════════════
+
+  // shuffle(arr) — Fisher-Yates in-place shuffle, returns the array.
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // pickRandom(arr, n) — Pick n random elements from arr without replacement.
+  // Returns a new array of length min(n, arr.length).
+  function pickRandom(arr, n) {
+    var copy = arr.slice();
+    shuffle(copy);
+    return copy.slice(0, n);
+  }
+
+  // ════════════════════════════════════════════════════
+  // Tier distribution
+  // ════════════════════════════════════════════════════
+
+  // tierDistribution(nRules) — Determines how many rules come from each
+  // difficulty tier [tier1, tier2, tier3].
+  //
+  // Strategy: at least 1 easy rule (tier 1), distribute the rest across
+  // tiers 2 and 3 with a bias toward harder rules.
+  //   4 rules → [1, 1, 2]
+  //   5 rules → [1, 2, 2]
+  //   6 rules → [2, 2, 2]
+  //   3 rules → [1, 1, 1]
+  //   Generic: 1 from tier 1, split remainder between tiers 2 and 3.
+  function tierDistribution(nRules) {
+    if (nRules <= 0) return [0, 0, 0];
+    if (nRules === 1) return [1, 0, 0];
+    if (nRules === 2) return [1, 0, 1];
+    if (nRules === 3) return [1, 1, 1];
+
+    // For 4+: 1 from tier 1, split the rest between tiers 2 and 3.
+    // Give the extra to tier 3 when the remainder is odd.
+    var remaining = nRules - 1;
+    var t2 = Math.floor(remaining / 2);
+    var t3 = remaining - t2;
+    return [1, t2, t3];
+  }
+
+  // ════════════════════════════════════════════════════
+  // Rejection-sampling fallback for hand generation
+  // ════════════════════════════════════════════════════
+
+  // rejectionSample(evalFn, wantWin, count, maxAttempts) — Generate hands
+  // that either satisfy (wantWin=true) or violate (wantWin=false) the rule.
+  // Returns an array of { hand, difficultyScore } objects.
+  //
+  // Uses CardEx.sampleHand(6) to draw random 6-card hands, then tests them
+  // with evalFn. The difficultyScore is a simple index-based proxy:
+  // earlier-found hands get lower scores (assumed "easier" since they're
+  // more common in random sampling).
+  function rejectionSample(evalFn, wantWin, count, maxAttempts) {
+    var results = [];
+    var attempts = 0;
+
+    while (results.length < count && attempts < maxAttempts) {
+      attempts++;
+      var hand = CardEx.sampleHand(6);
+      var passes = evalFn(hand);
+
+      if ((wantWin && passes) || (!wantWin && !passes)) {
+        results.push({
+          hand: hand,
+          // Lower index = found earlier in sampling = higher base rate = "easier"
+          difficultyScore: results.length / count
+        });
+      }
+    }
+
+    if (results.length < count) {
+      console.warn(
+        "SECurriculum: rejection sampling only found " + results.length +
+        "/" + count + " hands after " + maxAttempts + " attempts" +
+        " (wantWin=" + wantWin + ")"
+      );
+    }
+
+    return results;
+  }
+
+  // ════════════════════════════════════════════════════
+  // Stack builders
+  // ════════════════════════════════════════════════════
+
+  // buildStacksFromDiagnosticity(diagData, nTrials) — Build win and lose
+  // stacks from pre-scored diagnosticity test_hands.
+  //
+  // Each test_hand has { hand, ground_truth, p_accept, confidence }.
+  // - Separate into winning (ground_truth=true) and losing (ground_truth=false).
+  // - Sort by confidence descending: highest confidence = easiest to classify,
+  //   so the stack goes easy-to-hard.
+  // - Take the first nTrials items from each stack.
+  function buildStacksFromDiagnosticity(diagData, nTrials) {
+    var testHands = diagData.test_hands || [];
+
+    var winHands = [];
+    var loseHands = [];
+
+    for (var i = 0; i < testHands.length; i++) {
+      var th = testHands[i];
+      var item = {
+        hand: th.hand,
+        difficultyScore: 1 - th.confidence // higher confidence = lower difficulty
+      };
+      if (th.ground_truth) {
+        winHands.push(item);
+      } else {
+        loseHands.push(item);
+      }
+    }
+
+    // Sort by confidence descending (easiest first) — that means sort by
+    // difficultyScore ascending (lowest difficulty first).
+    function byDifficulty(a, b) { return a.difficultyScore - b.difficultyScore; }
+    winHands.sort(byDifficulty);
+    loseHands.sort(byDifficulty);
+
+    return {
+      winStack: winHands.slice(0, nTrials),
+      loseStack: loseHands.slice(0, nTrials)
+    };
+  }
+
+  // buildStacksByRejection(evalFn, nTrials) — Fallback stack builder using
+  // rejection sampling when diagnosticity data is unavailable.
+  function buildStacksByRejection(evalFn, nTrials) {
+    var MAX_ATTEMPTS = 50000;
+    return {
+      winStack: rejectionSample(evalFn, true, nTrials, MAX_ATTEMPTS),
+      loseStack: rejectionSample(evalFn, false, nTrials, MAX_ATTEMPTS)
+    };
+  }
+
+  // ════════════════════════════════════════════════════
+  // Data fetchers
+  // ════════════════════════════════════════════════════
+
+  // fetchFrozenExemplars() — Fetch and parse frozen-exemplars.json.
+  // Returns a Map from rule ID to the frozen catalogue entry.
+  function fetchFrozenExemplars() {
+    return fetch("rule-gallery/frozen-exemplars.json")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to fetch frozen-exemplars.json: " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        // Build a lookup map: ruleId → catalogue entry
+        var map = {};
+        var catalogue = data.catalogue || [];
+        for (var i = 0; i < catalogue.length; i++) {
+          map[catalogue[i].id] = catalogue[i];
+        }
+        console.log("SECurriculum: loaded " + catalogue.length + " frozen exemplar sets");
+        return map;
+      });
+  }
+
+  // fetchDiagnosticity() — Fetch and parse diagnosticity_results.json.
+  // Returns the rules object (ruleId → { difficulty, test_hands }) or null
+  // if the fetch fails (this data is optional).
+  function fetchDiagnosticity() {
+    return fetch("rule-gallery/diagnosticity_results.json")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Failed to fetch diagnosticity_results.json: " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        console.log("SECurriculum: loaded diagnosticity data");
+        return data.rules || {};
+      })
+      .catch(function (err) {
+        // Diagnosticity data is optional — log and continue without it.
+        console.warn("SECurriculum: diagnosticity data unavailable, using fallback.", err);
+        return null;
+      });
+  }
+
+  // ════════════════════════════════════════════════════
+  // Rule selection
+  // ════════════════════════════════════════════════════
+
+  // hasSufficientStacks(ruleId, diagMap, nTrials) — Returns true if this rule
+  // can support `nTrials` classification trials given the available data.
+  //
+  // Three cases:
+  //   1. Rule has no entry in diagMap (or diagMap is null): we'll fall back
+  //      to rejection sampling, which generates fresh hands → eligible.
+  //   2. Rule has a diagMap entry: it must contain at least nTrials winning
+  //      AND at least nTrials losing test_hands. Otherwise the dual-stack
+  //      selector hits maxPosition early and throws (see hand-selector.js).
+  //   3. Rule has an entry but with insufficient hands → ineligible. Better
+  //      to skip the rule than to crash mid-trial.
+  function hasSufficientStacks(ruleId, diagMap, nTrials) {
+    if (!diagMap || !diagMap[ruleId]) return true;
+    var th = diagMap[ruleId].test_hands || [];
+    var wins = 0, loses = 0;
+    for (var i = 0; i < th.length; i++) {
+      if (th[i].ground_truth) wins++;
+      else loses++;
+    }
+    return wins >= nTrials && loses >= nTrials;
+  }
+
+  // selectRules(frozenMap, diagMap, nRules, nTrials) — Select rules from
+  // GalleryRules, filtered to those present in the frozen exemplars map AND
+  // backed by enough diagnosticity data (or no diagnosticity entry, in which
+  // case rejection sampling fills in).
+  //
+  // Returns an array of GalleryRules rule objects, sorted by tier
+  // (easy-to-hard) for the fixed curriculum progression.
+  function selectRules(frozenMap, diagMap, nRules, nTrials) {
+    // GalleryRules.groups is [group1[], group2[], group3[]] where each group
+    // is an array of rule objects with .id, .group, .eval, etc.
+    var groups = GalleryRules.groups;
+
+    // Filter each tier: must have frozen exemplars AND enough diagnosticity
+    // hands (when diagnosticity data covers the rule).
+    function eligible(r) {
+      return frozenMap[r.id] && hasSufficientStacks(r.id, diagMap, nTrials);
+    }
+    var tier1 = groups[0].filter(eligible);
+    var tier2 = groups[1].filter(eligible);
+    var tier3 = groups[2].filter(eligible);
+
+    var dist = tierDistribution(nRules);
+    console.log(
+      "SECurriculum: tier distribution [" + dist.join(", ") +
+      "] from available [" + tier1.length + ", " + tier2.length + ", " + tier3.length + "]"
+    );
+
+    // Randomly pick the required number from each tier
+    var selected = []
+      .concat(pickRandom(tier1, dist[0]))
+      .concat(pickRandom(tier2, dist[1]))
+      .concat(pickRandom(tier3, dist[2]));
+
+    // Sort by tier (group) so the session progresses easy → hard
+    selected.sort(function (a, b) { return a.group - b.group; });
+
+    return selected;
+  }
+
+  // selectPracticeRule was removed in v2 (D2): tutorial.run() ignores its
+  // argument and the v2 snapshot doesn't carry a separate practice-rule
+  // entry. If a future variant wants a practice round, it should use a
+  // hard-coded tutorial rule (e.g., all_red) rather than re-introducing
+  // the diagnosticity-based selection.
+
+  // ════════════════════════════════════════════════════
+  // RuleData builder
+  // ════════════════════════════════════════════════════
+
+  // buildRuleData(rule, frozenMap, diagMap) — Assemble the full RuleData
+  // object for a single rule, including exemplar hands and classification
+  // stacks.
+  //
+  // RuleData structure:
+  //   ruleId: string
+  //   rule: GalleryRules rule object (has .eval, .id, .group, .name, .answer)
+  //   difficulty: 1|2|3 (from rule.group)
+  //   exemplarHands: Card[][] (sliced to SEConfig.nExemplars from hands_primary)
+  //   winStack: [{ hand, difficultyScore }] ordered easy→hard
+  //   loseStack: [{ hand, difficultyScore }] ordered easy→hard
+  function buildRuleData(rule, frozenMap, diagMap) {
+    var frozen = frozenMap[rule.id];
+
+    // Exemplar hands: take the first nExemplars from frozen hands_primary
+    var exemplarHands = (frozen.hands_primary || []).slice(0, SEConfig.nExemplars);
+
+    // Build classification stacks (win and lose)
+    var stacks;
+    if (diagMap && diagMap[rule.id] && diagMap[rule.id].test_hands &&
+        diagMap[rule.id].test_hands.length > 0) {
+      // Primary path: use pre-scored diagnosticity hands
+      stacks = buildStacksFromDiagnosticity(diagMap[rule.id], SEConfig.nTrials);
+    } else {
+      // Fallback: generate hands via rejection sampling
+      console.warn(
+        "SECurriculum: no diagnosticity data for '" + rule.id +
+        "', falling back to rejection sampling."
+      );
+      stacks = buildStacksByRejection(rule.eval, SEConfig.nTrials);
+    }
+
+    return {
+      ruleId: rule.id,
+      rule: rule,
+      difficulty: rule.group,
+      exemplarHands: exemplarHands,
+      winStack: stacks.winStack,
+      loseStack: stacks.loseStack
+    };
+  }
+
+  // ════════════════════════════════════════════════════
+  // Public API
+  // ════════════════════════════════════════════════════
+
+  // ════════════════════════════════════════════════════
+  // v2 mature design: snapshot-driven build
+  // ════════════════════════════════════════════════════
+
+  // resolveGroupAssignment(snapshotId) — Resolve the participant's group
+  // X/Y assignment.
+  //
+  // Priority:
+  //   1. SEConfig.group (URL-param override, dev only)
+  //   2. sessionStorage (per (PROLIFIC_PID, snapshot_id)) — survives reloads
+  //      but isolated to this browser session
+  //   3. Fresh fair coin flip → persisted to sessionStorage
+  //
+  // Per design §9.5 — keyed by Prolific PID + snapshot id so a participant
+  // who reopens the same study URL doesn't accidentally land in the other
+  // group, but a different study (different snapshot) gets a fresh roll.
+  // _hashKey(s) — djb2 → hex. Keeps the storage key deterministic for
+  // returning participants without exposing the raw PROLIFIC_PID in client
+  // storage (R3/5.3). djb2 is non-cryptographic; the goal is obfuscation
+  // of PII at-rest in client storage, not authentication. Two distinct
+  // PIDs colliding to the same key would only mean those participants
+  // share a group-assignment slot — same risk as the snapshot's bucket.
+  function _hashKey(s) {
+    var h = 5381;
+    for (var i = 0; i < s.length; i++) {
+      h = ((h << 5) + h) + s.charCodeAt(i);
+      h = h & 0xFFFFFFFF;
+    }
+    return (h >>> 0).toString(16);
+  }
+
+  // _groupStore(pid) — pick the right Storage backend for the PID type.
+  //
+  // R4/4.1: real Prolific PIDs need localStorage so a tab-close-and-reopen
+  // doesn't re-roll group X/Y (which would produce two saved sessions
+  // under one PID with mismatched groupAssignment fields). For dev/test
+  // ("anon"), keep sessionStorage so each fresh tab gets a fresh roll.
+  function _groupStore(pid) {
+    return pid === "anon" ? sessionStorage : localStorage;
+  }
+
+  // DEPRECATED for SE Study #2 (2026-05-27): replaced by sequence-based
+  // rule ordering via SequencesLoader. Retained for back-compat with any
+  // non-study-2 caller (e.g. the legacy build() function below).
+  function resolveGroupAssignment(snapshotId) {
+    if (SEConfig.group === "X" || SEConfig.group === "Y") {
+      console.log("SECurriculum: group override —", SEConfig.group);
+      return SEConfig.group;
+    }
+    var pid = SEConfig.PROLIFIC_PID || "anon";
+    // R3/5.3: hash the PID before storing it in client storage.
+    var key = "se_group_" + _hashKey(pid) + "_" + snapshotId;
+    var store = _groupStore(pid);
+    var existing = store.getItem(key);
+    if (existing === "X" || existing === "Y") {
+      console.log(
+        "SECurriculum: group from " +
+        (store === localStorage ? "localStorage" : "sessionStorage") +
+        " —", existing
+      );
+      return existing;
+    }
+    var fresh = Math.random() < 0.5 ? "X" : "Y";
+    store.setItem(key, fresh);
+    console.log("SECurriculum: fresh group roll —", fresh);
+    return fresh;
+  }
+
+  // resolvePoolKey(strategy) — v2: all strategies are flat
+  // (snapshot.trial_pools[rule_id][strategy] = { winning, losing }).
+  // Throws on unknown strategy. Returns null because there's no leaf-key
+  // sub-path in v2 (kept null for callers that still pass the result to
+  // flattenPool's poolKey arg, which now ignores it).
+  function resolvePoolKey(strategy) {
+    var resolved = SESnapshotLoader._resolveLeafKey(strategy);
+    if (resolved.kind === "unsupported") {
+      throw new Error("STRATEGY_UNKNOWN: " + resolved.reason);
+    }
+    return null;
+  }
+
+  // flattenPool(pool, _poolKeyUnused, ruleId) — Convert a strategy's leaf
+  // into a flat array of trial items the hand-selector will shuffle. v2:
+  // the leaf is always {winning, losing} (paired/independent collapsed in
+  // B3). _poolKeyUnused arg retained so existing callers don't break.
+  //
+  // Throws SNAPSHOT_POOL_EMPTY:<ruleId> if the leaf is missing or empty.
+  function flattenPool(pool, _poolKeyUnused, ruleId) {
+    if (!pool) {
+      throw new Error("SNAPSHOT_POOL_EMPTY:" + ruleId + " (no pool object)");
+    }
+    if (typeof pool !== "object" ||
+        !Array.isArray(pool.winning) || !Array.isArray(pool.losing)) {
+      throw new Error("SNAPSHOT_POOL_EMPTY:" + ruleId +
+        " (pool is not {winning[], losing[]})");
+    }
+    var items = [];
+    for (var j = 0; j < pool.winning.length; j++) {
+      items.push(Object.assign({}, pool.winning[j], {
+        ground_truth: true, hand_role: "winning",
+      }));
+    }
+    for (var k = 0; k < pool.losing.length; k++) {
+      items.push(Object.assign({}, pool.losing[k], {
+        ground_truth: false, hand_role: "losing",
+      }));
+    }
+    if (items.length === 0) {
+      throw new Error("SNAPSHOT_POOL_EMPTY:" + ruleId + " (yielded 0 items)");
+    }
+    return items;
+  }
+
+  // computeTrialPoolId(snapshotId, ruleId, strategy, variant) — Stable hash
+  // for joining trial records to pool definitions across participants. Uses
+  // a simple djb2 hash; collisions are not a concern for the small space
+  // (10 rules × 4 strategies × ~4 variants × N snapshots).
+  function computeTrialPoolId(snapshotId, ruleId, strategy, variant) {
+    var s = snapshotId + "|" + ruleId + "|" + strategy + "|" + (variant || "default");
+    var h = 5381;
+    for (var i = 0; i < s.length; i++) {
+      h = ((h << 5) + h) + s.charCodeAt(i);
+      h = h & 0xFFFFFFFF;
+    }
+    return "tp_" + (h >>> 0).toString(16);
+  }
+
+  // buildRuleDataFromSnapshot(rule, snapshot) — Assemble RuleData for one
+  // rule from the snapshot.
+  //
+  // v2 changes (Issue 3 + 4):
+  //   - strategyVariant retired; computeTrialPoolId still receives "" so
+  //     hash continuity is preserved across schema versions.
+  //   - difficulty now reads from ruleEntry.difficulty (D1/D2/D3 int from
+  //     v2 selected_rules), not the legacy quadrant label.
+  function buildRuleDataFromSnapshot(ruleEntry, snapshot) {
+    var ruleId = ruleEntry.rule_id;
+    var strategy = SEConfig.adversarialStrategy;
+    var pool = snapshot.trial_pools[ruleId][strategy];
+    resolvePoolKey(strategy);                  // throws on unknown
+    var fixedPool = flattenPool(pool, null, ruleId);
+
+    // GalleryRules provides .eval (tutorial / catalog) + .name / .answer
+    // (recap). Optional — a rule_id not in GalleryRules still runs if
+    // the snapshot is valid.
+    var galleryRule = null;
+    if (window.GalleryRules && Array.isArray(GalleryRules.all)) {
+      for (var gi = 0; gi < GalleryRules.all.length; gi++) {
+        if (GalleryRules.all[gi].id === ruleId) {
+          galleryRule = GalleryRules.all[gi];
+          break;
+        }
+      }
+    }
+
+    return {
+      ruleId: ruleId,
+      rule: galleryRule,
+      difficulty: ruleEntry.difficulty,        // v2: D1/D2/D3 int
+      exemplarHands: snapshot.exemplars[ruleId] || [],
+      fixedTrialPool: fixedPool,
+      adversarialStrategy: strategy,
+      strategyVariant: "",                     // Issue 3 — preserve hash continuity
+      strategyMethod: null,                    // legacy field, retained at null
+      trialPoolId: computeTrialPoolId(
+        snapshot.snapshot_id, ruleId, strategy, ""
+      ),
+      fallbackUsed: null,
+      groupAssignment: ruleEntry.group,
+      // v1 fields retained as null for backward-compat with logging code
+      winStack: null,
+      loseStack: null,
+    };
+  }
+
+  // build() — v2 entry point. Loads the snapshot, resolves group, picks
+  // rules for that group, builds RuleData for each. Returns:
+  //   {
+  //     rules: RuleData[],            // v2 with fixedTrialPool
+  //     practiceRule: null,           // v1 path; D2 resolves
+  //     seSnapshotId, analysisSnapshotId, groupAssignment,
+  //     adversarialStrategy, strategyVariant
+  //   }
+  function build() {
+    return SESnapshotLoader.load().then(function (snapshot) {
+      var groupAssignment = resolveGroupAssignment(snapshot.snapshot_id);
+      var rulesForGroup = snapshot.selected_rules.filter(function (r) {
+        return r.group === groupAssignment;
+      });
+
+      if (rulesForGroup.length === 0) {
+        var available = Array.from(new Set(
+          snapshot.selected_rules.map(function (r) { return r.group; })
+        ));
+        console.error(
+          "SECurriculum: SNAPSHOT_GROUP_EMPTY — group", groupAssignment,
+          "available groups:", available
+        );
+        // Use the loader's dedicated fail screen so all SNAPSHOT_*
+        // surfaces share the same DOM shape (.se-fail-screen) and the
+        // same XSS-safe rendering path.
+        SESnapshotLoader.showFailScreen(
+          "SNAPSHOT_GROUP_EMPTY",
+          "This snapshot has no rules for the assigned participant group."
+        );
+        throw new Error("SNAPSHOT_GROUP_EMPTY");
+      }
+
+      shuffle(rulesForGroup); // per-participant order randomization
+
+      // Respect ?nRules slicing for dev/test convenience. In production the
+      // snapshot's group size IS the curriculum length (typically 5); the
+      // URL param only kicks in if it's smaller, in which case we trim the
+      // already-shuffled array. Logged so the resulting CSV's `nRules`
+      // metadata reflects what actually ran.
+      if (typeof SEConfig.nRules === "number" && SEConfig.nRules > 0 &&
+          SEConfig.nRules < rulesForGroup.length) {
+        console.log(
+          "SECurriculum: trimming to ?nRules=" + SEConfig.nRules +
+          " (snapshot group size was " + rulesForGroup.length + ")"
+        );
+        rulesForGroup = rulesForGroup.slice(0, SEConfig.nRules);
+      }
+
+      // buildRuleDataFromSnapshot may throw SNAPSHOT_POOL_EMPTY:<rule_id>
+      // or STRATEGY_UNKNOWN. Surface those via the loader's dedicated fail
+      // screen so the participant sees a consistent SNAPSHOT_* code instead
+      // of the generic "Something went wrong" from app.js's outer catch.
+      var rules;
+      try {
+        rules = rulesForGroup.map(function (r) {
+          return buildRuleDataFromSnapshot(r, snapshot);
+        });
+      } catch (err) {
+        var emsg = err && err.message ? err.message : String(err);
+        console.error("SECurriculum: rule build failed —", emsg);
+        // Render a fail screen if the loader's contract is broken late
+        var code = emsg.split(":")[0] || "SNAPSHOT_POOL_INVALID";
+        SESnapshotLoader.showFailScreen(code, emsg);
+        throw err;
+      }
+
+      console.log(
+        "SECurriculum: v2 build complete — group " + groupAssignment + ", " +
+        rules.length + " rules: " +
+        rules.map(function (rd) { return rd.ruleId; }).join(", ")
+      );
+
+      return {
+        rules: rules,
+        practiceRule: null,                       // tutorial.run() ignores it
+        seSnapshotId: snapshot.snapshot_id,
+        analysisSnapshotId: snapshot.analysis_snapshot_id || null,
+        groupAssignment: groupAssignment,
+        adversarialStrategy: SEConfig.adversarialStrategy,
+        strategyVariant: "",                      // v2: variant retired (Issue 3)
+      };
+    });
+  }
+
+  // ════════════════════════════════════════════════════
+  // v3 entry point: schema_v3 snapshot-driven curriculum
+  // ════════════════════════════════════════════════════
+
+  // buildV3() — v3 entry point. Loads a schema_v3 snapshot via
+  // SESnapshotLoader.load(), resolves ruleScope (all10 vs group),
+  // orders rules via Study2Orderings, and builds a RuleData for each.
+  //
+  // Returns a plain object (synchronously serialisable — no functions)
+  // so it can be passed through page.evaluate() in Playwright tests:
+  //   {
+  //     rules:             RuleData[],
+  //     practiceRule:      Study2Orderings.PRACTICE_RULE,
+  //     endRequeryRuleIds: string[],
+  //     ruleScope:         "all10" | "group",
+  //     group:             "X" | "Y" | null,
+  //     seSnapshotId:      string,
+  //   }
+  //
+  // Throws (via SESnapshotLoader.showFailScreen + throw) on:
+  //   SNAPSHOT_NO_END_REQUERY — group mode and the assigned group has no
+  //                             intersection with end_requery_rules.
+  async function buildV3() {
+    var snapshot = await SESnapshotLoader.load();
+
+    // Participant id (same source as v2's build())
+    var pid = SEConfig.PROLIFIC_PID || "anon";
+
+    // Study #3 pool snapshot? Each rule carries a {winning,losing} test_hand_pool
+    // → seeded variable split (binomial, sum fixed). Legacy study #2 snapshots
+    // carry fixed test_hands → isPool false, no draw.
+    var isPool = snapshot.rules.length > 0 && !!snapshot.rules[0].test_hand_pool;
+    var splitBounds = (isPool && typeof SEConfig.splitBounds === "function")
+      ? SEConfig.splitBounds() : null;
+
+    var ruleScope = SEConfig.ruleScope || "all10";
+    var selectedRules;  // snapshot.rules[] entries for this participant
+    var group = null;
+    var curriculum;
+
+    if (ruleScope === "group") {
+      // Resolve group X/Y deterministically from the participant id.
+      // Priority: SEConfig.group URL override > djb2 hash of pid.
+      if (SEConfig.group === "X" || SEConfig.group === "Y") {
+        group = SEConfig.group;
+        console.log("SECurriculum.buildV3: group override —", group);
+      } else {
+        // _hashKey is djb2 → unsigned hex. Use a separate salt ("grp")
+        // from v2's sessionStorage key so the two rollouts are
+        // independent (a v3 participant doesn't inherit a v2 coin flip).
+        var hashVal = parseInt(_hashKey(pid + "grp"), 16);
+        group = (hashVal % 2 === 0) ? "X" : "Y";
+        console.log("SECurriculum.buildV3: group from hash —", group,
+          "(pid=" + pid + ")");
+      }
+
+      selectedRules = snapshot.rules.filter(function (r) {
+        return r.group === group;
+      });
+
+      if (selectedRules.length === 0) {
+        SESnapshotLoader.showFailScreen(
+          "SNAPSHOT_GROUP_EMPTY",
+          "This snapshot has no rules for the assigned participant group."
+        );
+        throw new Error("SNAPSHOT_GROUP_EMPTY");
+      }
+
+      // Filter end_requery_rules to those in the selected group.
+      var selectedIds = {};
+      for (var si = 0; si < selectedRules.length; si++) {
+        selectedIds[selectedRules[si].rule_id] = true;
+      }
+      var activeEndRequery = snapshot.end_requery_rules.filter(function (id) {
+        return selectedIds[id];
+      });
+
+      if (activeEndRequery.length === 0) {
+        SESnapshotLoader.showFailScreen(
+          "SNAPSHOT_NO_END_REQUERY",
+          "No end-requery rule found in the participant's assigned group."
+        );
+        throw new Error("SNAPSHOT_NO_END_REQUERY");
+      }
+
+      var ordering = Study2Orderings.assignOrdering("group", pid);
+      // ordering is an index permutation over [0..selectedRules.length-1]
+      // — reorder selectedRules by it.
+      var orderedRules = ordering
+        .slice(0, selectedRules.length)
+        .map(function (idx) { return selectedRules[idx]; });
+
+      var grpIds = orderedRules.map(function (r) { return r.rule_id; });
+      var grpCounts = isPool
+        ? await window.ExemplarShuffle.trialCountsFor(pid, grpIds, splitBounds[0], splitBounds[1])
+        : null;
+      var grpDrawn = await Promise.all(orderedRules.map(function (r, idx) {
+        if (!isPool) return null;
+        return window.ExemplarShuffle.trialSampleFor(
+          pid, r.rule_id, r.test_hand_pool.winning, r.test_hand_pool.losing, grpCounts[idx]);
+      }));
+      var rules = orderedRules.map(function (r, idx) {
+        var rd = _buildV3RuleData(r, grpDrawn[idx]);
+        rd.trialWinningCount = grpCounts ? grpCounts[idx] : null;
+        return rd;
+      });
+
+      console.log(
+        "SECurriculum: v3 build complete — group " + group +
+        ", " + rules.length + " rules: " +
+        rules.map(function (rd) { return rd.ruleId; }).join(", ")
+      );
+
+      curriculum = {
+        rules: rules,
+        endRequeryRuleIds: activeEndRequery,
+        ruleScope: ruleScope,
+        group: group,
+        seSnapshotId: snapshot.snapshot_id,
+      };
+
+    } else {
+      // ruleScope === "all10": use all 10 rules, presented in a uniformly
+      // random per-PID order via ExemplarShuffle.ruleOrderFor.
+      //
+      // Each PID gets one of 10! ≈ 3.6 million orderings, seeded by
+      // SHA-256(PID + ":rules"). Determinism per PID guarantees reload
+      // stability. The shuffle is independent of condition (which is set
+      // by the Prolific study, not by hash).
+
+      var snapshotRuleIds = snapshot.rules.map(function (r) { return r.rule_id; });
+      var ruleOrder = await window.ExemplarShuffle.ruleOrderFor(pid, snapshotRuleIds);
+
+      // Pre-compute per-rule exemplar permutations in parallel before
+      // building rule data.
+      var permutations = await Promise.all(ruleOrder.map(function (ruleId) {
+        return window.ExemplarShuffle.permutationFor(pid, ruleId);
+      }));
+
+      // Study #3: draw the per-rule winning counts (sum = 3N, e.g. 30/30) and
+      // sample each rule's 6 hands from its pool — all seeded by pid. Study #2
+      // (isPool false) keeps the fixed test_hands and skips this.
+      var counts10 = isPool
+        ? await window.ExemplarShuffle.trialCountsFor(pid, ruleOrder, splitBounds[0], splitBounds[1])
+        : null;
+      var drawn10 = await Promise.all(ruleOrder.map(function (ruleId, idx) {
+        if (!isPool) return null;
+        var re = snapshot.rules.find(function (r) { return r.rule_id === ruleId; });
+        return window.ExemplarShuffle.trialSampleFor(
+          pid, ruleId, re.test_hand_pool.winning, re.test_hand_pool.losing, counts10[idx]);
+      }));
+      var rules10 = ruleOrder.map(function (ruleId, idx) {
+        var ruleEntry = snapshot.rules.find(function (r) {
+          return r.rule_id === ruleId;
+        });
+        if (!ruleEntry) {
+          throw new Error(
+            "SECurriculum.buildV3: rule_id '" + ruleId +
+            "' not found in snapshot '" + snapshot.snapshot_id + "'"
+          );
+        }
+        var ruleData = _buildV3RuleData(ruleEntry, drawn10[idx]);
+        ruleData.trialWinningCount = counts10 ? counts10[idx] : null;
+        var perm = permutations[idx];
+        var canonical = ruleData.exemplarHands;
+        ruleData.exemplarHands = perm.map(function (i) { return canonical[i]; });
+        ruleData.exemplarPermutation = perm;
+        return ruleData;
+      });
+
+      console.log(
+        "SECurriculum: v3 build complete — all10 (random per-PID order), " +
+        rules10.length + " rules: " +
+        rules10.map(function (rd) { return rd.ruleId; }).join(", ")
+      );
+
+      curriculum = {
+        rules: rules10,
+        endRequeryRuleIds: snapshot.end_requery_rules.slice(),
+        ruleScope: ruleScope,
+        group: null,
+        groupAssignment: null,
+        ruleOrder: ruleOrder,
+        seSnapshotId: snapshot.snapshot_id,
+      };
+    }
+
+    // Expose for testability (Playwright tests assert on this).
+    window._lastBuiltCurriculum = curriculum;
+
+    return curriculum;
+  }
+
+  // _buildV3RuleData(ruleEntry) — Convert a single v3 rules[] entry into
+  // the RuleData shape that hand-selector.createFromPool expects.
+  //
+  // fixedTrialPool item shape matches what createFromPool reads (see
+  // hand-selector.js lines 208-228):
+  //   { hand, ground_truth, hand_role, hand_id,
+  //     edit_distance, edit_description, source_exemplar_idx }
+  // Fields that v3 doesn't carry (p_accept_emp, entropy_bits, etc.) are
+  // omitted — createFromPool treats missing keys as null via `|| null`.
+  function _buildV3RuleData(ruleEntry, drawnHands) {
+    // Study #3 passes `drawnHands` — the seeded 6-hand draw (k winning + 6-k
+    // losing) from the rule's test_hand_pool. Study #2 (legacy) has no draw and
+    // falls back to the fixed test_hands array. Both item shapes carry the same
+    // fields, so the mapping below is identical.
+    var srcHands = drawnHands || ruleEntry.test_hands || [];
+    var fixedTrialPool = srcHands.map(function (th, i) {
+      return {
+        hand:               th.hand,
+        ground_truth:       !!th.ground_truth,
+        hand_role:          th.ground_truth ? "winning" : "losing",
+        hand_id:            ruleEntry.rule_id + "_th" + i,
+        edit_distance:      th.edit_distance != null ? th.edit_distance : null,
+        edit_description:   th.edit_description || null,
+        source_exemplar_idx: th.source_exemplar_idx != null
+          ? th.source_exemplar_idx : null,
+      };
+    });
+
+    return {
+      ruleId:            ruleEntry.rule_id,
+      rule:              null,                   // GalleryRules not consulted in v3
+      difficulty:        ruleEntry.difficulty,
+      ruleAnswer:        ruleEntry.rule_answer,
+      exemplarHands:     ruleEntry.gallery,      // 6 hands, already the right shape
+      fixedTrialPool:    fixedTrialPool,
+      groupAssignment:   ruleEntry.group,
+      isEndRequery:      !!ruleEntry.is_end_requery,
+      // v2 compat fields — null in v3 (no adversarial strategy concept)
+      adversarialStrategy: null,
+      strategyVariant:   null,
+      strategyMethod:    null,
+      trialPoolId:       null,
+      fallbackUsed:      null,
+      winStack:          null,
+      loseStack:         null,
+    };
+  }
+
+  // ── Export public API ──
+  return {
+    build: build,
+    buildV3: buildV3,
+    // exported for unit testing / D2 cleanup audits
+    _resolveGroupAssignment: resolveGroupAssignment,
+    _resolvePoolKey: resolvePoolKey,
+    _flattenPool: flattenPool,
+    _computeTrialPoolId: computeTrialPoolId,
+    _buildV3RuleData: _buildV3RuleData,
+  };
+
+})();

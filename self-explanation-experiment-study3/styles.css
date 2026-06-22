@@ -1,0 +1,2573 @@
+/* self-explanation-experiment/styles.css
+ * Polished stylesheet for the self-explanation experiment.
+ *
+ * Design language: Warm Workshop (Phase 3 design-shotgun, variant C v3).
+ *   - Warm off-white page background, cream panels
+ *   - Rounded corners + soft drop shadows for tactile presence
+ *   - Terracotta as primary accent; sage as secondary signal
+ *   - Rounded humanist sans-serif typography
+ *
+ * Layout overview (classification phase):
+ *   - Header bar with progress indicator
+ *   - Two-column grid:
+ *     - Main column (left ~65-70%):
+ *         gallery (vertical stack, compact) → focal hand → prompt/recording → buttons
+ *     - History column (right ~30-35%):
+ *         "Your Classifications" header, classified hands stacking vertically
+ *
+ * Layout overview (gallery study phase):
+ *   - Full-width gallery with larger cards
+ *   - Circular countdown ring + continue button
+ *
+ * Layout overview (tutorial):
+ *   - Centred cream card with two-column slides (text + illustration)
+ *   - Progress bar, step counter, back/next navigation
+ *
+ * Colour palette (Warm Workshop):
+ *   --page-bg          #FAF7F2  — warm off-white page
+ *   --panel-bg         #FDFBF7  — cream panel surface
+ *   --panel-bg-warm    #FCF8F0  — even-row gallery tint
+ *   --panel-bg-warmer  #F8F1E6  — odd-row gallery tint
+ *   --ink              #2D241C  — primary text (warm near-black)
+ *   --muted            #8A7A6A  — secondary text, labels
+ *   --hairline         #E8DFD3  — soft borders / dividers
+ *   --terracotta       #D97757  — primary accent (selection, progress, CTAs)
+ *   --terracotta-soft  rgba(217, 119, 87, 0.12) — selection halo
+ *   --sage             #7FA67D  — recording-active, "winning" affordance
+ *   --sage-soft        rgba(127, 166, 125, 0.15) — sage halo
+ *   --win              #7FA67D  — Winning button
+ *   --lose             #D07070  — Losing button (warm coral)
+ */
+
+:root {
+  --page-bg: #FAF7F2;
+  --panel-bg: #FDFBF7;
+  --panel-bg-warm: #FCF8F0;
+  --panel-bg-warmer: #F8F1E6;
+  --ink: #2D241C;
+  --muted: #8A7A6A;
+  --muted-light: #B6A998;
+  --hairline: #E8DFD3;
+  --terracotta: #D97757;
+  --terracotta-soft: rgba(217, 119, 87, 0.12);
+  --terracotta-strong: #C5613F;
+  --sage: #7FA67D;
+  --sage-soft: rgba(127, 166, 125, 0.15);
+  --win: #7FA67D;
+  --lose: #D07070;
+  --lose-soft: rgba(208, 112, 112, 0.12);
+  /* Study #3 feedback: category text colours + correctness pair (green/red).
+     Category text defaults to sage/coral; the body.se-study3 scope flips it. */
+  --catwin-text: #4d6b4c;
+  --catlose-text: #9c4b4b;
+  --ok: #4f9a64;   /* correctness — correct (green) */
+  --no: #cf5b5b;   /* correctness — incorrect (red) */
+  --shadow-soft: 0 2px 8px rgba(75, 55, 35, 0.05), 0 1px 2px rgba(75, 55, 35, 0.04);
+  --shadow-raised: 0 4px 16px rgba(75, 55, 35, 0.08), 0 2px 4px rgba(75, 55, 35, 0.06);
+  --shadow-lift: 0 8px 24px rgba(75, 55, 35, 0.12), 0 3px 6px rgba(75, 55, 35, 0.08);
+}
+
+/* ─── Reset & Base ─── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  background: var(--page-bg);
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+/* ─── Header ─── */
+
+.se-header {
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--hairline);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.se-header-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--ink);
+}
+
+/* Small decorative card icon before the title, matching the warm-palette accent */
+.se-header-title::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 20px;
+  background: linear-gradient(135deg, #E89870 25%, var(--terracotta) 75%);
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border: 1px solid var(--terracotta-strong);
+}
+
+.se-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.se-header-rule-label {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ─── Progress Bar (top-level, below header) ─── */
+
+.se-progress-track {
+  width: 100%;
+  height: 4px;
+  background: var(--hairline);
+  flex-shrink: 0;
+}
+
+.se-progress-track-fill {
+  height: 100%;
+  background: var(--terracotta);
+  transition: width 0.4s ease;
+  width: 0%;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ─── App Container ─── */
+
+#app {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Fill the full viewport — the experiment page has no separate header
+     bar, so we don't subtract any chrome here. Children that want to
+     fill remaining vertical space (e.g. the writeup panel) use flex:1. */
+  min-height: 100vh;
+  box-sizing: border-box;
+  gap: 12px;
+}
+
+/* Viewport lock: lock #app to an exact viewport height (height, not
+   min-height) so the flex chain below it can't be pushed past 100vh by
+   oversized child content (e.g. the gallery's pre-scaled card markup
+   before the rAF scaling pass runs). Without this, the panel + gallery
+   + stack chain all grow to wrap their raw content and the page scrolls.
+   Used by:
+     - renderEndOfRoundWriteup (writeup screen)
+     - runGalleryPhase (gallery study screen)
+   The class is cleared on Continue and on every clearApp(). */
+#app.se-fit-viewport {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* When the gallery sits as a direct child of a viewport-locked #app
+   (i.e. the gallery study screen), flex-fill it into the leftover space
+   above the Continue button so cards take up as much room as possible.
+   The writeup screen wraps its gallery inside .se-writeup-gallery so this
+   selector doesn't fire there — that path has its own flex-fill rules. */
+#app.se-fit-viewport > .se-gallery {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+}
+/* The "WINNING HANDS" header is redundant once the new study prompt
+   above the gallery already says these are winning hands. */
+#app.se-fit-viewport > .se-gallery .se-gallery-label {
+  display: none;
+}
+/* Override the 65vh inline-style cap that renderGallery hardcodes on the
+   stack. With the wrapper flex-filling, we want the stack to grow to fill
+   that space too. min-height keeps cards readable on short viewports. */
+#app.se-fit-viewport > .se-gallery .se-gallery-stack {
+  flex: 1;
+  max-height: none;
+  min-height: 220px;
+}
+
+/* ─── Section Panels (shared panel look) ─── */
+
+.se-panel {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   Two-Column Classification Layout
+   ═══════════════════════════════════════════════ */
+
+.se-classification-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.se-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0; /* prevent overflow */
+}
+
+.se-history-column {
+  background: var(--panel-bg);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--hairline);
+  padding: 16px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  position: sticky;
+  top: 16px;
+  /* Styled scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) transparent;
+}
+
+.se-history-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.se-history-column::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.se-history-column::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 3px;
+}
+
+.se-history-column::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-light);
+}
+
+.se-history-column-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.se-history-column-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Viewport-fit: the classification screen fills the height. The gallery is
+   the sole flex-growing element — it absorbs the slack so the column fills
+   the viewport; the focal panel stays at its natural content height. */
+#app.se-fit-viewport > .se-classification-layout {
+  height: 100%;
+  align-items: stretch;
+}
+#app.se-fit-viewport > .se-classification-layout > .se-main-column {
+  height: 100%;
+  min-height: 0;
+}
+#app.se-fit-viewport > .se-classification-layout > .se-history-column {
+  max-height: none;
+  min-height: 0;
+}
+#app.se-fit-viewport .se-main-column > .se-gallery {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#app.se-fit-viewport .se-main-column > .se-gallery .se-gallery-stack {
+  flex: 1;
+  max-height: none;
+  min-height: 120px;
+}
+/* Focal panel sits at its natural content height — not flex-stretched —
+   and is capped/centered so the box hugs the hand instead of spanning the
+   whole column. */
+#app.se-fit-viewport .se-main-column > .se-focal-prompt-panel {
+  flex: 0 0 auto;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Focal hand fits the panel width: the 6 cards share the row width and keep
+   the card aspect ratio, so the hand never overflows the panel. The capped
+   width stops the cards getting oversized on a wide screen. */
+#app.se-fit-viewport .se-focal-prompt-panel .se-focal {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+#app.se-fit-viewport .se-focal-prompt-panel .se-focal > * {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+#app.se-fit-viewport .se-focal-prompt-panel .se-focal .card-wrapper {
+  flex: 1 1 0;
+  min-width: 0;
+  height: auto !important;
+  width: auto !important;
+  aspect-ratio: 71 / 100;
+}
+
+/* Individual hand in history column — small cards (~45px) */
+.se-history-item {
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 6px 8px;
+  position: relative;
+  background: var(--panel-bg-warm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.se-history-item .card-wrapper {
+  height: 45px !important;
+  width: 32px !important;
+}
+
+/* Colour-coded borders for feedback-on mode (warm sage/coral) */
+.se-history-item.winning {
+  border-color: var(--sage);
+  background: var(--sage-soft);
+}
+
+.se-history-item.losing {
+  border-color: var(--lose);
+  background: rgba(208, 112, 112, 0.08);
+}
+
+.se-history-item.neutral {
+  border-color: var(--hairline);
+}
+
+/* Response label for feedback-off mode */
+.se-history-item-response {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* Overlay for checkmark / cross in history */
+.se-history-item-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  pointer-events: none;
+  border-radius: 6px;
+}
+
+.se-history-item-overlay.correct {
+  color: var(--sage);
+  background: rgba(127, 166, 125, 0.12);
+}
+
+.se-history-item-overlay.incorrect {
+  color: var(--lose);
+  background: rgba(208, 112, 112, 0.12);
+}
+
+/* ─── Gallery Panel ─── */
+
+.se-gallery {
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 16px 22px 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.se-gallery-label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+/* ── Gallery: vertical stack layout (default for classification) ── */
+
+.se-gallery-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* Height is set by context: during gallery study phase the parent
+     has ample room; during classification the gallery adapts to the
+     main column. flex:1 on each row distributes space evenly. */
+}
+
+.se-gallery-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+/* Alternating row backgrounds — warm cream alternates */
+.se-gallery-row:nth-child(odd) {
+  background: var(--panel-bg-warm);
+}
+
+.se-gallery-row:nth-child(even) {
+  background: var(--panel-bg-warmer);
+}
+
+/* ── Gallery: 3-column grid layout (for gallery study phase) ── */
+
+.se-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  justify-items: center;
+}
+
+/* Each gallery hand in grid mode has a subtle cream-card feel */
+.se-gallery-hand {
+  background: var(--panel-bg-warm);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 6px 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.se-gallery-hand:hover {
+  border-color: var(--terracotta);
+  box-shadow: 0 2px 8px var(--terracotta-soft);
+}
+
+/* Gallery card sizing is handled adaptively by JS (two-pass measurement).
+   No fixed !important overrides here — the JS sets dimensions directly
+   on .card-wrapper elements after measuring available space. */
+
+/* ─── Gallery Study Prompt ─── */
+/* Soft instruction sitting above the gallery during the study phase.
+   Goal: invite slow looking; not a directive header. */
+.se-study-prompt {
+  max-width: 640px;
+  margin: 0 auto 6px;
+  padding: 0 12px;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ─── Game Heading ─── */
+
+.se-game-heading {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 4px 0;
+}
+
+/* ─── Focal Hand Panel ─── */
+
+/* ─── Unified focal+prompt panel wrapper ─── */
+/* Single panel chrome holds the focal hand AND the prompt+recording box,
+   so they read as one task surface. The children below are made transparent
+   to inherit the wrapper's chrome.
+   NOTE on overflow: we deliberately do NOT use overflow:hidden here, so the
+   selected-card lift/scale + halo can render unclipped above the cards. The
+   inner recording-box gets matching bottom-rounded corners (below) so its
+   recording-active background still looks clean at the panel's rounded edges. */
+.se-focal-prompt-panel {
+  width: 100%;
+  background: var(--panel-bg);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raised);
+  border: 1px solid var(--hairline);
+}
+
+/* Focal panel becomes a transparent inner section now that the parent owns chrome. */
+.se-focal-panel {
+  width: 100%;
+  background: transparent;
+  border-radius: 0;
+  padding: 16px 24px 12px;
+  box-shadow: none;
+  border: none;
+  text-align: center;
+}
+
+.se-focal-panel-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+/* ─── Peer banner ───
+   "Another participant said this hand is WINNING/LOSING." Sits above the
+   focal hand in the peer condition. Soft framing, with the claim word
+   styled as a small coloured chip so it reads at a glance. */
+.se-peer-banner {
+  font-size: 14px;
+  color: var(--ink);
+  text-align: center;
+  margin: 0 auto 12px;
+  padding: 10px 16px;
+  max-width: 520px;
+  background: var(--panel-bg-warm, var(--panel-bg));
+  border: 1px dashed var(--hairline);
+  border-radius: 10px;
+  line-height: 1.4;
+}
+.se-peer-claim {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+.se-peer-claim--winning {
+  color: var(--win);
+  background: rgba(127, 166, 125, 0.16);
+}
+.se-peer-claim--losing {
+  color: var(--lose);
+  background: rgba(208, 112, 112, 0.16);
+}
+
+.se-focal {
+  display: inline-block;
+  padding: 6px 12px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  transition: border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
+}
+
+/* Focal cards are larger (~100px) */
+.se-focal .card-wrapper {
+  height: 100px !important;
+  width: 71px !important;
+}
+
+/* ─── Multi-card selection affordance (token conditions only) ─── */
+/* The instruction copy above the focal cards. Only rendered when
+   the focal hand is in selectable mode (Phase 4 chunk 4). */
+.se-focal-instructions {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin: 0 auto 12px;
+  line-height: 1.5;
+  max-width: 540px;
+  text-align: center;
+}
+
+/* Cards are clickable when in selectable mode. position:relative so the
+   selected-state z-index can stack above unselected neighbors when scaled. */
+.se-focal-prompt-panel .se-focal .card-wrapper {
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.se-focal-prompt-panel .se-focal .card-wrapper:hover:not(.se-selected):not(.se-locked) {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(75, 55, 35, 0.12);
+}
+
+/* Selected card: emphasis through lift + scale + warm drop shadow + a
+   terracotta wash overlay on the card itself. The overlay (via ::before)
+   tints the card with a translucent warm wash so the selected state reads
+   as a clear visual change in the card itself, not just a frame around it. */
+.se-focal-prompt-panel .se-focal .card-wrapper.se-selected,
+.se-focal-prompt-panel .se-focal .card-wrapper.se-selected:hover {
+  transform: scale(1.07);
+  box-shadow:
+    0 8px 22px rgba(217, 119, 87, 0.42),
+    0 3px 8px rgba(217, 119, 87, 0.28);
+  z-index: 5;
+}
+
+.se-focal-prompt-panel .se-focal .card-wrapper.se-selected::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  background: rgba(217, 149, 87, 0.32);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Brighten and saturate the card image itself when selected, so the card
+   looks "lit up" relative to its dimmer neighbours. */
+.se-focal-prompt-panel .se-focal .card-wrapper.se-selected img {
+  filter: brightness(1.05) saturate(1.15);
+}
+
+/* Locked: no further changes once recording has started. */
+.se-focal-prompt-panel .se-focal .card-wrapper.se-locked {
+  cursor: default;
+}
+.se-focal-prompt-panel .se-focal .card-wrapper.se-locked:hover {
+  transform: translateY(0);
+  box-shadow: none;
+}
+.se-focal-prompt-panel .se-focal .card-wrapper.se-selected.se-locked,
+.se-focal-prompt-panel .se-focal .card-wrapper.se-selected.se-locked:hover {
+  transform: scale(1.07);
+  box-shadow:
+    0 8px 22px rgba(217, 119, 87, 0.42),
+    0 3px 8px rgba(217, 119, 87, 0.28);
+  z-index: 5;
+}
+
+/* Recording gate fail: brief shake + colored status text */
+.se-prompt-recording-box.se-gate-fail {
+  animation: se-gate-shake 0.4s ease;
+}
+@keyframes se-gate-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+.se-rec-status.se-gate-warn {
+  color: var(--lose);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════
+   Integrated Prompt + Recording Box
+   ═══════════════════════════════════════════════ */
+
+/* When the prompt-recording-box lives inside the unified focal+prompt panel,
+   it has no chrome of its own — only a top divider attaching it to the focal
+   area above. The bottom corners are explicitly rounded to match the parent
+   panel (since the parent no longer uses overflow:hidden). */
+.se-focal-prompt-panel .se-prompt-recording-box {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-top: 1px dashed var(--hairline);
+  border-radius: 0 0 14px 14px;
+  overflow: visible;
+  transition: background-color 0.25s, border-color 0.25s;
+  box-shadow: none;
+}
+
+/* Recording-active: tinted background + sage divider color */
+.se-focal-prompt-panel .se-prompt-recording-box.recording {
+  background: var(--sage-soft);
+  border-top-color: var(--sage);
+}
+
+/* Post-recording confirmation state: terracotta tint + replay widget.
+   This is what the participant sees after toggling Space to stop. The
+   strong colour change differentiates it from the idle "Press Space to
+   record" state so they can't miss that the recording actually saved. */
+.se-focal-prompt-panel .se-prompt-recording-box.recorded {
+  background: var(--terracotta-soft);
+  border-top-color: var(--terracotta);
+}
+.se-prompt-recording-box.recorded .se-rec-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--sage);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+}
+.se-prompt-recording-box.recorded .se-rec-timer {
+  color: var(--terracotta-strong);
+  font-weight: 600;
+}
+.se-prompt-recording-box.recorded .se-rec-status.recorded {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+.se-rec-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--terracotta);
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.se-rec-replay:hover {
+  background: var(--terracotta-strong);
+  transform: translateY(-1px);
+}
+.se-rec-replay:active { transform: translateY(0); }
+.se-rec-replay.playing {
+  background: var(--sage);
+  animation: se-rec-replay-pulse 1.2s ease-in-out infinite;
+}
+.se-rec-replay-icon { font-size: 11px; line-height: 1; }
+@keyframes se-rec-replay-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 166, 125, 0.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(127, 166, 125, 0); }
+}
+.se-rec-rerecord-hint {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ─── Live mic waveform (Phase 4 chunk 6) ─── */
+/* The waveform canvas sits inside the prompt-recording-box, below the
+   icon/timer/status row. Hidden until the box enters .recording state. */
+.se-prompt-recording-box .se-rec-waveform {
+  display: none;
+  width: 100%;
+  height: 40px;
+  padding: 0 22px 14px;
+  box-sizing: border-box;
+}
+.se-prompt-recording-box.recording .se-rec-waveform {
+  display: block;
+}
+.se-prompt-recording-box .se-rec-waveform canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.se-prompt-recording-box .se-prompt-section {
+  padding: 14px 22px 10px;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.se-prompt-recording-box .se-prompt-section strong {
+  color: var(--terracotta-strong);
+}
+
+.se-prompt-recording-box .se-prompt-divider {
+  height: 1px;
+  background: var(--hairline);
+  margin: 0 22px;
+}
+
+.se-prompt-recording-box .se-recording-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 22px 14px;
+  font-size: 14px;
+  color: var(--muted);
+  min-height: 44px;
+}
+
+/* ─── Prompt (standalone, for non-recording contexts) ─── */
+
+.se-prompt {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 4px 0 8px;
+  padding: 10px 20px;
+  line-height: 1.55;
+}
+
+.se-prompt strong {
+  color: var(--terracotta-strong);
+}
+
+/* ─── Recording Indicator (standalone, for waitForRecording screens) ─── */
+
+.se-recording-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px 24px;
+  margin: 4px auto;            /* C2 — center horizontally within parent */
+  max-width: 640px;
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  min-height: 52px;
+  transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
+  box-shadow: var(--shadow-soft);
+}
+
+.se-recording-indicator.recording {
+  background: var(--sage-soft);
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(127, 166, 125, 0.18), var(--shadow-soft);
+}
+
+/* Mic icon container */
+.se-rec-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Pulsing sage dot when recording (warm palette) */
+.se-rec-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sage);
+  animation: se-pulse 1s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(127, 166, 125, 0.45);
+}
+
+@keyframes se-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Timer display */
+.se-rec-timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 44px;
+  color: var(--ink);
+}
+
+/* Status message */
+.se-rec-status {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.se-rec-status.ready {
+  color: var(--sage);
+  font-weight: 600;
+}
+
+/* ─── Buttons ─── */
+
+.se-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.se-btn {
+  padding: 14px 36px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  color: #ffffff;
+  min-width: 140px;
+  min-height: 48px;
+  letter-spacing: 0.02em;
+}
+
+.se-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.se-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.se-btn-win {
+  background: var(--win);
+  box-shadow: 0 2px 8px rgba(127, 166, 125, 0.25);
+}
+
+.se-btn-win:hover:not(:disabled) {
+  background: #6F9670;
+  box-shadow: 0 4px 12px rgba(127, 166, 125, 0.35);
+}
+
+.se-btn-lose {
+  background: var(--lose);
+  box-shadow: 0 2px 8px rgba(208, 112, 112, 0.25);
+}
+
+.se-btn-lose:hover:not(:disabled) {
+  background: #B85F5F;
+  box-shadow: 0 4px 12px rgba(208, 112, 112, 0.35);
+}
+
+/* Agree / Disagree — peer condition.
+   Distinct palette from Win/Lose so participants don't conflate the two
+   choice spaces. Agree uses terracotta (the project's primary accent);
+   Disagree uses a neutral slate. Both inherit hover behaviour from .se-btn. */
+.se-btn-agree {
+  background: var(--terracotta);
+  box-shadow: 0 2px 8px rgba(217, 119, 87, 0.25);
+}
+.se-btn-agree:hover:not(:disabled) {
+  background: var(--terracotta-strong);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.35);
+}
+.se-btn-disagree {
+  background: #6E6A66;
+  box-shadow: 0 2px 8px rgba(110, 106, 102, 0.25);
+}
+.se-btn-disagree:hover:not(:disabled) {
+  background: #56524F;
+  box-shadow: 0 4px 12px rgba(110, 106, 102, 0.35);
+}
+
+.se-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Only grey out buttons that don't have a specific colour class */
+.se-btn:disabled:not(.se-btn-win):not(.se-btn-lose):not(.se-btn-agree):not(.se-btn-disagree) {
+  background: #d1d5db;
+  color: #9ca3af;
+}
+
+/* ─── Continue Button ─── */
+
+.se-btn-continue {
+  display: block;              /* C2 — block so margin auto centers */
+  padding: 12px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1.5px solid var(--terracotta);
+  border-radius: 100px;
+  background: var(--panel-bg);
+  color: var(--terracotta-strong);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  margin: 8px auto;            /* C2 — center horizontally within parent */
+  min-height: 48px;
+  font-family: inherit;
+}
+
+.se-btn-continue:hover:not(:disabled) {
+  background: var(--terracotta);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+}
+
+.se-btn-continue:disabled {
+  color: #9ca3af;
+  border-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ─── History Panel (legacy horizontal strip, kept for compatibility) ─── */
+
+.se-history {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.se-history-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.se-history-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  align-items: flex-start;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.se-history-strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.se-history-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.se-history-strip::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.se-history-strip::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Individual hand in history strip */
+.se-history-hand {
+  flex-shrink: 0;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  padding: 4px 5px;
+  position: relative;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.se-history-hand .card-wrapper {
+  height: 45px !important;
+  width: 32px !important;
+}
+
+.se-history-hand.winning {
+  border-color: #4ade80;
+  background: #f0fdf4;
+}
+
+.se-history-hand.losing {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.se-history-hand.neutral {
+  border-color: #d1d5db;
+}
+
+.se-history-response-label {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.se-history-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  pointer-events: none;
+  border-radius: 6px;
+}
+
+.se-history-overlay.correct {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.se-history-overlay.incorrect {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   End-of-round typed rule writeup (Phase 4 chunk 7)
+   ═══════════════════════════════════════════════════════ */
+
+.se-writeup-panel {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 24px 32px 22px;
+  box-shadow: var(--shadow-raised);
+  /* Fill the remaining vertical space inside #app exactly — no scroll,
+     no whitespace. The gallery inside takes flex:1 to absorb whatever
+     room is left over after the prompt + textarea + footer claim theirs. */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.se-writeup-sublabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.se-writeup-banner-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.se-writeup-gallery {
+  margin: 0 auto 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--hairline);
+  /* Grow to fill the leftover space in the writeup panel — this is what
+     gives us bigger cards on tall viewports. min-height:0 is required so
+     this flex child can actually shrink below its content height when the
+     viewport is short. */
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+/* Inside the writeup panel, the gallery sits flush — no extra chrome,
+   no shadow (the parent panel already has them). Also flex through so
+   the stack inside can fill available height. */
+.se-writeup-gallery .se-gallery {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.se-writeup-prompt {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 12px;
+  line-height: 1.4;
+  letter-spacing: -0.2px;
+}
+
+.se-writeup-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: inset 0 1px 2px rgba(75, 55, 35, 0.04);
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.se-writeup-textarea:focus {
+  outline: none;
+  border-color: var(--terracotta);
+  box-shadow: inset 0 1px 2px rgba(75, 55, 35, 0.04),
+              0 0 0 3px var(--terracotta-soft);
+}
+.se-writeup-textarea::placeholder {
+  color: var(--muted-light);
+  font-style: italic;
+}
+
+.se-writeup-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  gap: 16px;
+}
+
+.se-writeup-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* In the writeup screen the stack flex-grows inside the gallery, which
+   itself flex-grows inside the panel. That cascade lets the cards expand
+   into otherwise-wasted whitespace below the textarea. min-height keeps
+   the cards readable on short viewports; max-height:none overrides the
+   65vh inline-style that renderGallery hardcodes. */
+.se-writeup-gallery .se-gallery-stack {
+  flex: 1;
+  min-height: 220px;
+  max-height: none;
+}
+
+/* Hide the inner "WINNING HANDS" green label inside the writeup gallery
+   since the panel-level "These were the winning hands" header already says it. */
+.se-writeup-gallery .se-gallery-label {
+  display: none;
+}
+
+/* ─── Feedback on Focal Hand ─── */
+
+/* Study #3 scope: flip the category palette to blue/terracotta. Buttons,
+   gallery and history pick this up through var(--win)/var(--lose)/var(--sage),
+   so study #2 (no .se-study3 on body) keeps its sage/coral. */
+body.se-study3 {
+  --win: #3B7DBF; --lose: #C77B4A;
+  --sage: #3B7DBF; --sage-soft: rgba(59, 125, 191, 0.15);
+  --lose-soft: rgba(199, 123, 74, 0.15);
+  --catwin-text: #2f5e8f; --catlose-text: #9a5a32;
+}
+/* keep the hardcoded category tints + button hovers in step with the flip */
+body.se-study3 .se-history-item.losing { background: rgba(199, 123, 74, 0.13); }
+body.se-study3 .se-btn-win { box-shadow: 0 2px 8px rgba(59, 125, 191, 0.25); }
+body.se-study3 .se-btn-win:hover:not(:disabled) { background: #336da8; box-shadow: 0 4px 12px rgba(59, 125, 191, 0.35); }
+body.se-study3 .se-btn-lose { box-shadow: 0 2px 8px rgba(199, 123, 74, 0.25); }
+body.se-study3 .se-btn-lose:hover:not(:disabled) { background: #b06a3c; box-shadow: 0 4px 12px rgba(199, 123, 74, 0.35); }
+
+/* Subtle category tint on the focal hand while feedback shows (warm, not harsh). */
+.se-feedback { position: relative; }
+.se-feedback.fb-winning { border: 2px solid var(--win) !important; background: var(--sage-soft) !important; border-radius: 12px; }
+.se-feedback.fb-losing  { border: 2px solid var(--lose) !important; background: var(--lose-soft) !important; border-radius: 12px; }
+
+/* Verdict — two lines + a self-paced Next, below the focal hand. */
+.se-verdict { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
+/* Both lines share the page font + one size so the verdict reads as a unit. */
+.se-verdict-line1, .se-verdict-line2 { font-size: 16px; color: var(--ink); line-height: 1.5; }
+.se-verdict-bubble { display: inline-block; padding: 3px 14px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+.se-verdict-bubble.winning { background: var(--sage-soft); color: var(--catwin-text); border: 1px solid var(--win); }
+.se-verdict-bubble.losing  { background: var(--lose-soft); color: var(--catlose-text); border: 1px solid var(--lose); }
+.se-verdict-guess { font-weight: 700; color: var(--ink); }
+/* Inline (not flex) so line 2 wraps as words if narrow, never per-token. */
+.se-verdict-mark { font-size: 17px; font-weight: 800; vertical-align: -1px; margin: 0 2px; }
+.se-verdict-word { font-weight: 700; }
+.se-verdict.correct .se-verdict-mark, .se-verdict.correct .se-verdict-word { color: var(--ok); }
+.se-verdict.incorrect .se-verdict-mark, .se-verdict.incorrect .se-verdict-word { color: var(--no); }
+.se-verdict-next { margin-top: 8px; background: var(--ink); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.12s; }
+.se-verdict-next:hover { background: #46382c; transform: translateY(-1px); }
+
+/* Record-column item — R3/R4 hybrid (study #3 feedback). Category-coloured
+   background (via .winning/.losing), corner ✓/✗, + two text lines. */
+.se-history-item-corner { position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; box-shadow: 0 1px 3px rgba(45, 36, 28, 0.18); }
+.se-history-item-corner.correct { background: var(--ok); }
+.se-history-item-corner.incorrect { background: var(--no); }
+.se-history-item-truth { font-size: 10px; text-align: center; margin-top: 4px; line-height: 1.3; color: var(--muted); }
+.se-history-item-truth b.winning { color: var(--catwin-text); font-weight: 800; }
+.se-history-item-truth b.losing  { color: var(--catlose-text); font-weight: 800; }
+.se-history-item-guess { font-size: 10px; text-align: center; line-height: 1.3; color: var(--muted); }
+.se-history-item-guess b.correct   { color: var(--ok); font-weight: 800; }
+.se-history-item-guess b.incorrect { color: var(--no); font-weight: 800; }
+/* Study #3 record column: wider track than study #2's 280px so the full hand
+   + the two text lines fit comfortably (no width override on the column itself —
+   that fought the grid and cut the cards). Grid + fit-viewport keep it adaptive. */
+body.se-study3 .se-classification-layout { grid-template-columns: 1fr 300px; }
+
+/* ─── Checkpoint ─── */
+
+.se-checkpoint {
+  text-align: center;
+  padding: 28px 32px;
+  margin: 12px auto;           /* C2 — center horizontally within parent */
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  max-width: 640px;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+}
+
+.se-checkpoint h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: #1e40af;
+}
+
+.se-checkpoint p {
+  margin: 0;
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* ─── Message ─── */
+
+.se-message {
+  text-align: center;
+  font-size: 18px;
+  color: #374151;
+  padding: 48px 24px;
+  line-height: 1.7;
+  max-width: 600px;
+}
+
+.se-message.info {
+  color: #1e40af;
+}
+
+.se-message.success {
+  color: #2d7a4a;
+}
+
+.se-message.error {
+  color: #991b1b;
+}
+
+/* ─── Inline Progress Bar (within #app, used by renderProgressBar) ─── */
+
+.se-progress {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.se-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--hairline);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.se-progress-fill {
+  height: 100%;
+  background: var(--terracotta);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.se-progress-label {
+  text-align: right;
+  font-size: 12px;
+  color: var(--muted-light);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════
+   Tutorial Styles
+   Editorial Warm aesthetic (chunk 10 / variant A).
+   Source Serif Pro for display + body, Inter for small-caps labels and
+   the Next button. Generous magazine-style hierarchy. Cards still come
+   from CardEx so participants see the same faces in the tutorial that
+   they will see in the live game.
+   ═══════════════════════════════════════════════ */
+
+/* Pull in Source Serif Pro from Google Fonts. font-display:swap means the
+   browser falls back to Georgia while the web font loads, so participants
+   on slow networks never see a blank slide. */
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap");
+
+:root {
+  --tutorial-serif: "Source Serif Pro", "Source Serif", Georgia, "Times New Roman", serif;
+}
+
+.se-tutorial-wrapper {
+  /* Top-anchored with tight vertical padding so the slide+wrapper
+     together fit the viewport exactly on a 900px screen (slide
+     min-height + wrapper padding = 100vh). The wrapper itself fills
+     the viewport so transition slides (which don't viewport-lock the
+     slide itself) can centre vertically via auto margins. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+/* The main slide card — warm cream panel that fills the viewport, so the
+   handoff to the practice round (also viewport-locked) is seamless.
+   Min-height stays generous so the slide presence feels consistent across
+   the tutorial; max-height is removed so slides can grow if their inner
+   illustration is naturally tall (gallery), while shorter slides
+   (Classifying, Feedback) don't accumulate floating whitespace. */
+.se-tutorial-slide {
+  max-width: 1080px;
+  width: 100%;
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(75, 55, 35, 0.07), 0 2px 6px rgba(75, 55, 35, 0.05);
+  overflow: hidden;
+  animation: se-tutorialFadeIn 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 32px);
+  max-height: calc(100vh - 32px);
+  box-sizing: border-box;
+}
+
+/* Body slides that contain a self-sized illustration (mock focal frame,
+   mic frame) don't need to lock to the viewport — let them shrink to
+   content + breathing room so the trial frame sits immediately below the
+   prose without a sea of empty space. The wrapper still centres the
+   slide vertically on the page. */
+.se-tutorial-slide.is-compact {
+  min-height: 0;
+  max-height: none;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* Transition slides (Practice Intro, Ready, Mic-required fallback) don't
+   need to fill the viewport — they're a thoughtful pause between sections.
+   We unlock the height and let the content size itself, then centre the
+   whole slide vertically on the page background. */
+.se-tutorial-slide.is-transition {
+  min-height: 0;
+  max-height: none;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+@keyframes se-tutorialFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide body grows to fill the slide; nav row sits below at fixed height.
+   Top-anchored content (justify-content: flex-start) so light slides don't
+   float in the middle of the viewport. Generous magazine-style padding. */
+.se-tutorial-slide-body {
+  flex: 1;
+  min-height: 0;
+  padding: 56px 64px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* When the slide is centred-only (Practice Intro, Ready, Mic-required
+   fallback) we don't need the heavy magazine padding — let the centred
+   child use the full vertical space and float in the middle. */
+.se-tutorial-slide-body:has(> .se-tutorial-centered:only-child) {
+  padding: 48px 64px 48px;
+  justify-content: center;
+}
+
+/* Stacked layout (chunk 10 revision): prose on top, illustration below.
+   The element under focus on each slide (cards, focal hand, recording
+   widget) gets the full slide width, so it can be considerably bigger
+   than in a side-by-side layout. Prose is constrained to a comfortable
+   reading column and centred horizontally. */
+.se-tutorial-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Single-column (centred) for short slides — Practice Intro, Ready,
+   Microphone Required fallback. Vertically centred in the slide so the
+   short prose floats in the middle rather than huddling at the top with
+   a sea of empty space below. */
+.se-tutorial-centered {
+  max-width: 640px;
+  margin: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.se-tutorial-centered > h2 { order: 2; }
+.se-tutorial-centered > .se-tutorial-text { order: 3; display: contents; }
+.se-tutorial-centered > .se-tutorial-highlight { order: 4; }
+/* Eyebrow renders inside .se-tutorial-text but with display:contents
+   above, it becomes a sibling of h2 — order:1 lifts it ABOVE the heading. */
+.se-tutorial-centered .se-tutorial-eyebrow { order: 1; }
+/* Default order for paragraphs in centred slides: between heading and emblem. */
+.se-tutorial-centered .se-tutorial-text > p,
+.se-tutorial-centered > p { order: 3; }
+/* Emblem stays after prose. */
+.se-tutorial-centered .se-tutorial-emblem  { order: 5; }
+
+/* ── Typography ──
+   Editorial serif for prose, sans-serif (inherited) for small-caps labels.
+   Constrained reading column so line length stays in the comfortable
+   60–80 char range when the slide width opens up to the full 1080px. */
+.se-tutorial-text {
+  font-family: var(--tutorial-serif);
+  max-width: 680px;
+  width: 100%;
+}
+.se-tutorial-text h2 {
+  font-family: var(--tutorial-serif);
+  font-size: 46px;
+  font-weight: 600;
+  line-height: 1.0;
+  margin: 0 0 16px;
+  color: var(--ink);
+  letter-spacing: -0.6px;
+}
+.se-tutorial-text p {
+  font-family: var(--tutorial-serif);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+/* Lead paragraph — used on the Welcome+Notation slide. Larger, with a
+   terracotta drop cap that matches variant A's editorial mood. */
+.se-tutorial-text .lead {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.se-tutorial-text .lead::first-letter {
+  float: left;
+  font-family: var(--tutorial-serif);
+  font-size: 64px;
+  line-height: 0.85;
+  padding: 4px 10px 0 0;
+  color: var(--terracotta);
+  font-weight: 600;
+}
+/* Centred-slide variant — keep heading slightly larger than body slides
+   since it has the whole slide to itself, but use the same scale family. */
+.se-tutorial-centered h2 {
+  font-family: var(--tutorial-serif);
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1.0;
+  margin: 0 0 22px;
+  color: var(--ink);
+  letter-spacing: -0.6px;
+}
+.se-tutorial-centered p {
+  font-family: var(--tutorial-serif);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0 0 8px;
+  max-width: 540px;
+}
+
+/* Illustration container — sits below the prose, full slide-body width,
+   centred. TRANSPARENT (variant A floats illustrations on the slide bg
+   with just a small caption above; mini-gallery and mock-focal bring
+   their own panels via .se-gallery / .se-focal-panel).
+   flex:1 so it claims the remaining vertical space — the gallery uses
+   that height to size cards via its rAF pass.
+   justify-content: center lets static-size illustrations (focal hand,
+   mic widget) float in the middle of the available space rather than
+   leaving a gap below. The mini-gallery still flex-grows because its
+   .se-gallery has flex:1 (see .se-tutorial-mini-gallery rules). */
+.se-tutorial-illustration {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Pull-quote highlight (variant A signature). Italic serif, terracotta
+   left-rule, warm cream tinted background. Reads as a "quiet voice" not
+   a banner. The left-rule extends slightly beyond the panel for that
+   editorial pull-quote stamp. */
+.se-tutorial-highlight {
+  background: var(--panel-bg-warm);
+  border-left: 3px solid var(--terracotta);
+  padding: 14px 22px;
+  margin: 16px 0 0;
+  border-radius: 0 8px 8px 0;
+  font-family: var(--tutorial-serif);
+  font-style: italic;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.se-tutorial-highlight p {
+  margin: 0;
+  font-style: italic;
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+.se-tutorial-highlight strong {
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Navigation row at the bottom of the slide. Generous magazine-style
+   padding and a hairline divider above. */
+.se-tutorial-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 56px 24px;
+  border-top: 1px solid var(--hairline);
+  flex-shrink: 0;
+}
+
+.se-tutorial-nav-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons — fully rounded pill, sans-serif (Inter inherited from body)
+   for clean small caps. Terracotta primary, hairline secondary. */
+.se-tutorial-btn {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: 100px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  transition: background-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.se-tutorial-btn-primary {
+  background: var(--terracotta);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(217, 119, 87, 0.28);
+}
+
+.se-tutorial-btn-primary:hover:not(:disabled) {
+  background: var(--terracotta-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 119, 87, 0.36);
+}
+
+.se-tutorial-btn-secondary {
+  background: var(--panel-bg);
+  color: var(--terracotta-strong);
+  border: 1.5px solid var(--terracotta);
+}
+
+.se-tutorial-btn-secondary:hover:not(:disabled) {
+  background: var(--terracotta);
+  color: #fff;
+}
+
+.se-tutorial-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Step indicator — small caps with letter-spacing, sans-serif so it reads
+   as a label not as prose. (Variant A signature.) */
+.se-tutorial-step-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline progress bar at bottom of slide. 2px keeps it editorial —
+   reads as a margin-rule indicator, not a bandwidth-style fill. */
+.se-tutorial-progress {
+  height: 2px;
+  background: transparent;
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+.se-tutorial-progress::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--hairline);
+}
+
+.se-tutorial-progress-fill {
+  height: 100%;
+  background: var(--terracotta);
+  transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Tutorial illustration — mini gallery mockup.
+   Same flex-fill chain as the live game's gallery study screen
+   (#app.se-fit-viewport). Without this the stack collapses to its
+   natural ~67px-per-row height and cards end up tiny. */
+.se-tutorial-mini-gallery {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.se-tutorial-mini-gallery .se-gallery {
+  padding: 10px 12px 8px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  max-width: 920px;
+  width: fit-content;
+}
+
+.se-tutorial-mini-gallery .se-gallery-label {
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+/* Override the inline maxHeight that renderGallery sets (65vh) so the
+   stack flex-grows to fill the gallery panel — but cap it so the gallery
+   doesn't blow past the viewport. min-height keeps cards readable on
+   short viewports. Card dimensions themselves come from renderGallery's
+   rAF measurement — we don't force them. */
+.se-tutorial-mini-gallery .se-gallery-stack {
+  flex: 1 !important;
+  max-height: 70vh !important;
+  min-height: 360px;
+}
+/* "How a Round Works" mini-gallery — shrunk so the added text on this slide
+   (the rule-feature line moved from Welcome + the new explain-condition
+   paragraph) has room and the whole slide fits one viewport. Direct min/max
+   override on the stack (zoom didn't help — the inner !important min-height
+   was still applying scaled, which was too tall). */
+.se-howaround-mini.se-tutorial-mini-gallery {
+  zoom: 0.75;
+}
+
+/* Compact preview gallery — used in the "Judging a Hand" intro slide, where
+   the gallery is a small still preview above the focal-hand mock. Tighter
+   panel + row padding so the small cards render cleanly (not clipped). */
+.se-tutorial-preview-gallery .se-gallery {
+  padding: 8px 12px 10px;
+}
+.se-tutorial-preview-gallery .se-gallery-row {
+  padding: 2px 6px;
+}
+/* Uniform scale-up of the whole preview gallery so cards + label + row
+   padding + gaps all grow together. 1.37 ≈ 560px target visual height. */
+.se-tutorial-preview-gallery {
+  zoom: 1.37;
+}
+/* "Judging a Hand" slide: the explanatory text sits BESIDE the gallery so the
+   gallery keeps the full row height and stays legible; the hand-to-judge mock
+   sits below, full width. */
+.se-judging-top-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  max-width: 840px;
+  margin: 0 auto;
+}
+.se-judging-text-col {
+  flex: 0 0 380px;
+  font-family: var(--tutorial-serif);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  text-align: left;
+}
+.se-judging-text-col p { margin: 0 0 14px; }
+.se-judging-text-col p:last-child { margin-bottom: 0; }
+.se-judging-gallery-col {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* "Judging a Hand" preview: smaller focal cards + tighter frame than the
+   standalone mock — the hand can be smaller here than in the real rounds. The
+   doubled-up class selector outranks the base .se-tutorial-trial-frame rule. */
+/* Width-aligns the presentation card with the topRow above: the box's left
+   edge sits at the text-col's left edge, and the right edge sits at the
+   gallery's right edge. The cards inside fill the box width (with the card
+   aspect ratio preserved), so the hand reaches both edges. */
+.se-tutorial-trial-frame.se-tutorial-preview-frame {
+  padding: 4px 0 8px;
+  max-width: 680px;
+}
+.se-tutorial-trial-frame.se-tutorial-preview-frame .se-tutorial-mock-focal .se-focal-panel {
+  padding: 8px 14px 4px;
+}
+.se-tutorial-trial-frame.se-tutorial-preview-frame .se-tutorial-mock-focal .se-focal {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+.se-tutorial-trial-frame.se-tutorial-preview-frame .se-tutorial-mock-focal .se-focal > * {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+.se-tutorial-trial-frame.se-tutorial-preview-frame .se-tutorial-mock-focal .se-focal .card-wrapper {
+  flex: 1 1 0;
+  min-width: 0;
+  height: auto !important;
+  width: auto !important;
+  aspect-ratio: 71 / 100;
+}
+.se-tutorial-trial-frame.se-tutorial-preview-frame .se-buttons {
+  margin: 6px 0 0;
+}
+
+/* Tutorial illustration — mock focal hand. With the stacked layout the
+   illustration column has the full slide width, so cards can be bigger. */
+.se-tutorial-mock-focal .se-focal-panel {
+  padding: 24px 32px;
+}
+
+.se-tutorial-mock-focal .se-focal .card-wrapper {
+  height: 180px !important;
+  width: 129px !important;
+}
+
+.se-tutorial-mock-focal .se-buttons {
+  margin: 14px 0 0;
+}
+
+.se-tutorial-mock-focal .se-btn {
+  padding: 11px 26px;
+  font-size: 15px;
+  min-width: 120px;
+  min-height: 44px;
+}
+
+/* Tutorial mock feedback — large focal so the green winning frame and
+   check overlay read as the centerpiece. */
+.se-tutorial-mock-feedback .se-focal .card-wrapper {
+  height: 180px !important;
+  width: 129px !important;
+}
+
+/* ─── Card frame (Welcome slide example hand) ───
+   Wraps the example 6-card hand on the Welcome slide in the same warm
+   panel chrome the live game uses around its hands. Width matches the
+   trial-frame and mic-frame on later slides so all four framed elements
+   sit at the same horizontal anchor across the tutorial. */
+.se-tutorial-card-frame {
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raised);
+  padding: 16px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  align-self: center;
+  width: 100%;
+  max-width: 760px;
+}
+
+/* ─── Trial frame (Classifying + Feedback slides) ───
+   Mirrors the live `.se-focal-prompt-panel` chrome so participants meet
+   the same warm-cream rounded card on the tutorial slides that they'll
+   see during the real trial. Wraps the mock focal hand + Win/Lose
+   buttons (or the feedback overlay) as one composed surface. */
+.se-tutorial-trial-frame {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raised);
+  align-self: center;
+  padding: 8px 0 20px;
+  /* Keep the feedback green/red wash and any focal hover glow contained
+     inside the frame so cards never visually escape the panel chrome. */
+  overflow: hidden;
+}
+/* Inside the frame the inner mock focal panel becomes transparent so
+   the outer frame owns the visible chrome. Card width is sized so all
+   6 cards + gaps fit comfortably inside the 660px frame minus padding. */
+.se-tutorial-trial-frame .se-tutorial-mock-focal .se-focal-panel,
+.se-tutorial-trial-frame .se-tutorial-mock-feedback .se-focal-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 14px 18px 8px;
+}
+/* Cards: 6 cards * 90 = 540, + 5 * 6px gaps = 30, + .se-focal padding
+   of 24px → ~594px total, fits inside 760 - 36 (frame padding) = 724. */
+.se-tutorial-trial-frame .se-tutorial-mock-focal .se-focal .card-wrapper,
+.se-tutorial-trial-frame .se-tutorial-mock-feedback .se-focal .card-wrapper {
+  height: 126px !important;
+  width: 90px !important;
+}
+/* Buttons inside the frame sit centered with a touch of breathing room
+   above so they read as part of the same surface as the cards. */
+.se-tutorial-trial-frame .se-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 14px 0 0;
+}
+/* Live classify-practice slides: the buttons sit just below the focal
+   panel inside the trial frame (the frame is the direct parent here, not
+   a .se-tutorial-mock-focal wrapper). Same spacing as above. */
+.se-tutorial-trial-frame > .se-buttons {
+  margin: 4px 0 18px;
+}
+
+/* ─── Writing-the-Rule frame (explain-condition slide, FIX 1) ───
+   Mirrors the trial-frame chrome; previews the post-gallery rule-query
+   screen with an inert textarea so the slide reads as the real thing. */
+.se-tutorial-writing-frame {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--panel-bg-warm);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raised);
+  align-self: stretch;
+  padding: 20px 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.se-tutorial-writing-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  font-family: var(--tutorial-serif);
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--hairline);
+  border-radius: 8px;
+  resize: none;
+}
+.se-tutorial-writing-textarea::placeholder { color: var(--muted); }
+
+/* ─── Feedback frame (woven feedback slide, FIX 1+2) ───
+   Shows the two classified practice hands with a ✓/✗ verdict mark.
+   Wrapped in the same warm trial-frame chrome family. */
+.se-tutorial-feedback-frame {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--panel-bg-warm);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raised);
+  align-self: stretch;
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.se-tutorial-feedback-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+/* The classified hand, framed green (correct) or red (incorrect) — same
+   colour language as the live history column / feedback overlay. */
+.se-tutorial-feedback-hand {
+  border-radius: 10px;
+  padding: 6px 8px;
+  border: 2px solid var(--hairline);
+}
+.se-tutorial-feedback-hand.is-correct {
+  border-color: var(--win);
+  background: rgba(46, 125, 50, 0.06);
+}
+.se-tutorial-feedback-hand.is-incorrect {
+  border-color: var(--lose);
+  background: rgba(192, 57, 43, 0.06);
+}
+.se-tutorial-feedback-mark {
+  font-size: 26px;
+  line-height: 1;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ─── Mic test frame (How-to-Play slide) ───
+   Wraps a real focal hand AND the recording widget in one panel that
+   mirrors the live `.se-focal-prompt-panel`. Participants test the mic
+   in the same visual context they'll see in the actual trial flow. */
+.se-tutorial-mic-frame {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow-raised);
+  overflow: hidden;
+  align-self: center;
+}
+/* Inside the frame, the mock focal panel becomes transparent — the
+   outer frame owns the visible chrome (matches the live look). */
+.se-tutorial-mic-frame .se-tutorial-mock-focal .se-focal-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 14px 18px 10px;
+}
+/* Cards inside the mic frame: same dimensions as the trial frame so all
+   three framed slides (Classifying, Feedback, How-to-Play) read as one
+   coherent surface. */
+.se-tutorial-mic-frame .se-tutorial-mock-focal .se-focal .card-wrapper {
+  height: 126px !important;
+  width: 90px !important;
+}
+/* Recording strip below the focal panel — flat on the warm tint, no
+   inner pill, separated from the focal area by a dashed hairline (same
+   pattern the live .se-focal-prompt-panel uses between focal cards and
+   the prompt+recording strip). The strip explicitly fills the frame
+   width so the warm tint reaches both side edges and the centered
+   recording cluster sits on the true horizontal centerline of the panel
+   (not the centerline of a content-sized inner box). */
+.se-tutorial-mic-frame .se-tutorial-mic-test {
+  border-top: 1px dashed var(--hairline);
+  background: var(--panel-bg-warm);
+  padding: 14px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+/* Inside the mic frame, drop the pill chrome on the recording indicator
+   so the mic icon + timer + status text sit flat on the warm tint as a
+   single centered horizontal cluster (matches the live trial). */
+.se-tutorial-mic-frame .se-recording-indicator {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 2px 0;
+  margin: 0;
+  min-height: 0;
+  border-radius: 0;
+  gap: 10px;
+}
+.se-tutorial-mic-frame .se-recording-indicator.recording {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+.se-tutorial-mic-test-status {
+  text-align: center;
+  font-size: 14px;
+  min-height: 20px;
+  margin: 0;
+}
+.se-tutorial-mock-feedback .se-focal-panel {
+  padding: 22px 30px;
+}
+
+/* Tutorial suit row on the Welcome slide. Each suit sits in a small
+   chip — tinted cream background, hairline border, glyph + label —
+   which reads as a "spec sheet" element rather than a flat list of
+   icons. Matches the keyhint-callout pattern used on How-to-Play. */
+.se-tutorial-suits {
+  display: flex;
+  gap: 10px;
+  margin: 6px 0 16px;
+  font-size: 14px;
+  font-family: var(--tutorial-serif);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.se-tutorial-suits > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-bg-warm);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 6px 14px 6px 12px;
+}
+.se-tutorial-suits .suit-black { color: var(--ink); font-size: 18px; line-height: 1; }
+.se-tutorial-suits .suit-red   { color: #C0392B;    font-size: 18px; line-height: 1; }
+.se-tutorial-text .suit-red {
+  /* Red emphasis inside flowing prose ("Diamonds and Hearts are red"). */
+  color: #C0392B;
+}
+
+/* Small-caps caption above an illustration (e.g. "EXAMPLE OF A SIX-CARD HAND").
+   Sans-serif (Inter) so it reads as a label, with letter-spacing. */
+.se-tutorial-illustration-caption {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+/* Win/Lose colour emphasis used in classification + feedback explanations.
+   Pulls from the live --win / --lose tokens so participants see the same
+   palette they'll meet in the trial flow. */
+.se-tutorial-emph-win  { color: var(--win);  font-weight: 600; }
+.se-tutorial-emph-lose { color: var(--lose); font-weight: 600; }
+.se-tutorial-check     { color: var(--win);  font-weight: 700; }
+.se-tutorial-cross     { color: var(--lose); font-weight: 700; }
+
+/* Mic-test labels and status messages (was inline-styled with cool slate
+   and bright greens — now uses the warm palette). */
+.se-tutorial-mic-test-label {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.se-tutorial-mic-test-warn    { color: var(--muted); }
+.se-tutorial-mic-test-success { color: var(--win); font-weight: 600; }
+
+/* "Microphone Required" fallback text — keep red for warning urgency
+   but in a warmer hue than the original cold #991b1b. */
+.se-tutorial-error-text {
+  color: #B14040;
+}
+
+/* In-slide divider used in combined token+type instructions. */
+.se-tutorial-divider {
+  max-width: 80%;
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Recording-instruction note block at the bottom of condition slides
+   (legacy class; superseded by .se-tutorial-keyhint). */
+.se-tutorial-recording-note {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Keyboard-hint callout — used on the How-to-Play slide to explain the
+   spacebar recording control. Sits at the bottom of the prose stack as a
+   small two-column block: glyphic spacebar key on the left, terse
+   instruction on the right. Reads as a keyboard tip not as more prose. */
+.se-tutorial-keyhint {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--panel-bg-warm);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+.se-tutorial-keyhint-keys {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.se-tutorial-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--panel-bg);
+  border: 1px solid var(--hairline);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 6px 10px 5px;
+  box-shadow: 0 1px 0 rgba(75, 55, 35, 0.06);
+}
+.se-tutorial-key-space {
+  min-width: 86px;
+  padding: 6px 14px 5px;
+}
+.se-tutorial-keyhint-text {
+  font-family: var(--tutorial-serif);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.se-tutorial-keyhint-text strong { font-weight: 700; }
+
+/* "You will also periodically be asked" label — used in combined token+type
+   conditions where a second instruction follows. Replaces the old hr divider
+   with a small-caps "also" label that joins the second prompt to the first. */
+.se-tutorial-also {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-right: 6px;
+}
+
+/* Eyebrow label above heading on transition slides (Practice Intro, Ready).
+   Sans-serif small caps in muted ink — the same family as the step label
+   in the footer, so the slide reads as a deliberate pause not as
+   sparse content. */
+.se-tutorial-eyebrow {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin: 0 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Small terracotta rule before the eyebrow text — gives it a typeset
+   "section marker" feel that ties together every slide. */
+.se-tutorial-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--terracotta);
+}
+/* Centered slides: keep the leading rule but mirror it on both sides
+   so the eyebrow reads as a centred section marker. */
+.se-tutorial-centered .se-tutorial-eyebrow {
+  margin: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.se-tutorial-centered .se-tutorial-eyebrow::before,
+.se-tutorial-centered .se-tutorial-eyebrow::after {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--terracotta);
+}
+.se-tutorial-centered .se-tutorial-eyebrow::after { content: ""; }
+
+/* Suit emblem on transition slides — four glyphs in a tidy row that gives
+   the slide a focal point without competing with the heading. */
+.se-tutorial-emblem {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 18px;
+  margin-top: 26px;
+  opacity: 0.78;
+}
+.se-tutorial-emblem-glyph {
+  font-size: 26px;
+  line-height: 1;
+}
+.se-tutorial-emblem-glyph.suit-black { color: var(--ink); }
+.se-tutorial-emblem-glyph.suit-red   { color: #C0392B; }
+
+/* (legacy .se-tutorial-mic-test panel chrome was removed — superseded
+   by .se-tutorial-mic-frame .se-tutorial-mic-test which renders the
+   recording strip flat on the warm tint inside the unified frame.) */
+
+/* ─── Fade-in animation for new screens ─── */
+
+@keyframes se-fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.se-animate-in {
+  animation: se-fadeIn 0.35s ease-out;
+}
+
+/* ─── Bulk articulation gallery (C3 — height-adaptive) ─── */
+
+/* Default: tight cap that works on the smallest tested viewport
+ * (1024×768 layout-audit). Overflow-y:auto is the safety net when
+ * the gallery + chrome exceeds 48vh. */
+.se-bulk-gallery-wrap {
+  max-height: 48vh;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+
+/* Tighten gallery chrome inside bulk articulation — saves ~16px so the
+ * inner stack (45vh from compact mode + label) fits the wrapper without
+ * triggering an internal scroll bar. Only scopes to bulk; the
+ * classification/recap galleries keep their normal padding. */
+.se-bulk-gallery-wrap .se-gallery {
+  padding: 8px 16px 6px;
+  margin: 0;
+}
+
+/* Height-based breakpoints. Conservative steps — empirically the bulk
+ * screen's non-gallery chrome (eyebrow + intro + prompt + textarea +
+ * button + screen padding) takes ~380px regardless of viewport, so the
+ * cap leaves at least that much room. Tested at 1024×768, 1280×800
+ * (13-inch), 1440×900, 1920×1080. */
+@media (min-height: 800px) {
+  .se-bulk-gallery-wrap {
+    max-height: 54vh;        /* 13-inch baseline */
+  }
+}
+@media (min-height: 900px) {
+  .se-bulk-gallery-wrap {
+    max-height: 60vh;
+  }
+}
+@media (min-height: 1050px) {
+  .se-bulk-gallery-wrap {
+    max-height: 65vh;
+  }
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 900px) {
+  .se-classification-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .se-history-column {
+    position: static;
+    max-height: 200px;
+  }
+
+  .se-tutorial-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .se-tutorial-slide-body {
+    padding: 28px 24px;
+  }
+
+  .se-tutorial-nav {
+    padding: 16px 24px 20px;
+  }
+}
+
+/* Wider-screen breakpoints — a few demo / bulk surfaces have hardcoded
+ * max-widths that can grow on big displays without becoming unwieldy. */
+@media (min-width: 1440px) {
+  .se-bulk-screen {
+    max-width: 1080px;       /* was 920px */
+  }
+}
+
+/* Study #2 — typed rule-query screen. Full width (the gallery wants the
+   room); the textarea keeps its own comfortable max-width below. */
+.se-rule-query-screen {
+  max-width: 100%; margin: 16px auto; padding: 8px 16px;
+  font-family: inherit; color: #2b2b2b;
+}
+.se-rule-query-gallery-label {
+  text-align: center; font-size: 13px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #94a3b8; margin: 6px 0 4px;
+}
+.se-rule-query-heading {
+  text-align: center; font-size: 17px; font-weight: 600;
+  color: #2b2b2b; margin: 16px auto 10px; max-width: 560px; line-height: 1.5;
+}
+.se-rule-query-textarea {
+  display: block; width: 100%; max-width: 680px; margin: 0 auto;
+  padding: 12px; font-size: 15px; line-height: 1.5;
+  border: 2px solid #cbd5e1; border-radius: 8px;
+  font-family: inherit; color: #1e293b; background: #fff;
+}
+.se-rule-query-textarea:focus { outline: none; border-color: var(--terracotta); }
+.se-rule-query-gate-hint {
+  text-align: center; margin-top: 8px; font-size: 13px; color: #94a3b8; min-height: 18px;
+}
+/* Viewport-fit: when the rule-query screen is in a viewport-locked #app, it
+   fills the height — the gallery flex-grows to use the space above the
+   textarea so there is no dead space at the bottom. */
+#app.se-fit-viewport > .se-rule-query-screen {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+#app.se-fit-viewport > .se-rule-query-screen .se-rule-query-gallery-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#app.se-fit-viewport > .se-rule-query-screen .se-rule-query-gallery-wrap > .se-gallery {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+}
+#app.se-fit-viewport > .se-rule-query-screen .se-rule-query-gallery-wrap > .se-gallery .se-gallery-stack {
+  flex: 1;
+  max-height: none;
+  min-height: 120px;
+}
+
+/* Study #2 — practice-round feedback panel.
+ * Rendered into the classification layout's focal area after both practice
+ * hands are classified (the gallery + history column stay visible). Styled
+ * to match the Warm Workshop aesthetic — no raw unstyled divs. */
+.se-practice-feedback-panel {
+  text-align: left;
+  padding: 18px 24px 6px;
+}
+.se-practice-feedback-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.se-practice-verdict-line {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0 auto 8px;
+  max-width: 520px;
+  padding-left: 30px;
+  position: relative;
+}
+.se-practice-verdict-line::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.se-practice-verdict-line.is-correct::before {
+  content: "\2713";
+  color: var(--ok);   /* correctness green (not category) */
+}
+.se-practice-verdict-line.is-incorrect::before {
+  content: "\2717";
+  color: var(--no);   /* correctness red (not category) */
+}
+.se-practice-verdict-line .se-practice-said {
+  font-style: italic;
+}
+.se-practice-verdict-line .se-practice-emph-win {
+  color: var(--win);
+  font-weight: 700;
+}
+.se-practice-verdict-line .se-practice-emph-lose {
+  color: var(--lose);
+  font-weight: 700;
+}
+.se-practice-meta {
+  margin: 16px auto 4px;
+  max-width: 520px;
+  padding: 14px 18px;
+  background: var(--panel-bg-warm);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--terracotta);
+  border-radius: 10px;
+}
+.se-practice-meta-line {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.se-practice-meta-line:last-child {
+  margin-bottom: 0;
+}
+.se-practice-meta-line strong {
+  color: var(--terracotta-strong);
+}
