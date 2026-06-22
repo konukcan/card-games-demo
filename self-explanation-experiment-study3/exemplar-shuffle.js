@@ -114,31 +114,25 @@
     return counts;
   }
 
-  // trialSampleFor(pid, ruleId, winningPool, losingPool, k) — sample k winning
-  // + (6-k) losing items (without replacement) from the rule's 6+6 pool and
-  // shuffle the 6 into presentation order. Seeded by pid+":trialdraw:"+ruleId.
-  // Returns the chosen pool items unchanged (caller maps to RuleData shape).
+  // trialSampleFor(pid, ruleId, winningPool, losingPool, k) — return the first k
+  // winning + (6-k) losing hands of a FIXED per-rule queue, display-shuffled.
   //
-  // RECURRENCE-MAXIMIZING: within each side, the from_study2 hands (the exact
-  // hands shown in study 2) are taken FIRST, then the remaining slots are filled
-  // from the new hands. So a side of size n includes min(n, #study2) study-2
-  // hands — the most possible at that count. Randomization is preserved (which
-  // study-2 hands when n < #study2, which new fillers, and the final order),
-  // all deterministic per pid. Pools with no from_study2 flag fall back to a
-  // plain uniform shuffle.
+  // The queue per side is DETERMINISTIC and identical for every participant: the
+  // from_study2 hands first (in pool order), then the new hands (in pool order).
+  // Taking the first n therefore makes the SET of shown hands a pure function of
+  // the split — everyone with the same split at a rule (e.g. 4W/2L) sees the
+  // IDENTICAL hands, which maximizes power for per-hand comparisons. Only the
+  // presentation ORDER is randomized per pid (seeded), to avoid trial-position
+  // confounds. Recurrence with study 2 is unchanged: min(n, #study2) per side.
   async function trialSampleFor(prolificPid, ruleId, winningPool, losingPool, k) {
     var seed = await _seedFromDigest(prolificPid + ":trialdraw:" + ruleId);
     var rng = mulberry32(seed);
-    function pickIdx(pool, need) {
+    function queue(pool) {
       var s2 = [], nw = [];
-      for (var i = 0; i < pool.length; i++) (pool[i].from_study2 ? s2 : nw).push(i);
-      return fisherYates(s2, rng).concat(fisherYates(nw, rng)).slice(0, need);
+      for (var i = 0; i < pool.length; i++) (pool[i].from_study2 ? s2 : nw).push(pool[i]);
+      return s2.concat(nw);   // study-2 first, then new — fixed order, no rng
     }
-    var wPick = pickIdx(winningPool, k);
-    var lPick = pickIdx(losingPool, 6 - k);
-    var items = [];
-    for (var i = 0; i < wPick.length; i++) items.push(winningPool[wPick[i]]);
-    for (var j = 0; j < lPick.length; j++) items.push(losingPool[lPick[j]]);
+    var items = queue(winningPool).slice(0, k).concat(queue(losingPool).slice(0, 6 - k));
     return fisherYates(items, rng);
   }
 

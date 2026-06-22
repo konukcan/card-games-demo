@@ -413,13 +413,14 @@ window.SESnapshotLoader = (function () {
         return FAIL("rules[" + ri + "].gallery must be an array of exactly 6 hands; got " +
           (Array.isArray(rule.gallery) ? rule.gallery.length : typeof rule.gallery));
       }
-      // Test hands: study #3 pool schema (6 winning + 6 losing) OR study #2
-      // legacy fixed schema (test_hands = 6 with exactly 3 winning).
+      // Test hands: study #3 pool schema (winning/losing pools, >=5 each so the
+      // 1-5 split always has enough) OR study #2 legacy fixed schema (test_hands
+      // = 6 with exactly 3 winning).
       if (rule.test_hand_pool && typeof rule.test_hand_pool === "object") {
         var thp = rule.test_hand_pool;
-        if (!Array.isArray(thp.winning) || thp.winning.length !== 6 ||
-            !Array.isArray(thp.losing) || thp.losing.length !== 6) {
-          return FAIL("rules[" + ri + "].test_hand_pool must have winning[6] and losing[6]; got " +
+        if (!Array.isArray(thp.winning) || thp.winning.length < 5 ||
+            !Array.isArray(thp.losing) || thp.losing.length < 5) {
+          return FAIL("rules[" + ri + "].test_hand_pool must have winning and losing arrays of >=5; got " +
             (Array.isArray(thp.winning) ? thp.winning.length : typeof thp.winning) + "W/" +
             (Array.isArray(thp.losing) ? thp.losing.length : typeof thp.losing) + "L");
         }

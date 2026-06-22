@@ -466,39 +466,6 @@
             "source_exemplar_idx": 3,
             "edit_description": "slot 3: suit CLUBS->SPADES; slot 4: rank Q->3; slot 5: rank 6->2",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "K",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "K",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "6",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "5",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "7",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 3: suit CLUBS->SPADES; slot 5: rank 3->2, suit CLUBS->SPADES",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -665,39 +632,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 3,
             "edit_description": "slot 1: rank 8->Q, suit DIAMONDS->SPADES; slot 4: rank Q->2, suit SPADES->DIAMONDS; slot 5: rank 6->2",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "K",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "K",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "6",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "5",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "3",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 3: suit CLUBS->DIAMONDS; slot 4: rank 7->3, suit SPADES->CLUBS; slot 5: rank 3->2, suit CLUBS->SPADES",
             "from_study2": false
           }
         ]
@@ -1182,39 +1116,6 @@
             "source_exemplar_idx": 5,
             "edit_description": "slot 0: rank 5->6; slot 1: suit CLUBS->SPADES; slot 4: rank J->2",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "7",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "8",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "4",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 0: rank 5->7; slot 1: suit CLUBS->SPADES; slot 4: rank J->2",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -1381,39 +1282,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 3,
             "edit_description": "slot 0: rank Q->3; slot 1: suit SPADES->DIAMONDS; slot 4: rank 8->2",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "Q",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "8",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "J",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "3",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 3,
-            "edit_description": "slot 0: suit CLUBS->DIAMONDS; slot 1: rank Q->2; slot 4: rank 8->3",
             "from_study2": false
           }
         ]
@@ -1890,39 +1758,6 @@
             "source_exemplar_idx": 5,
             "edit_description": "slot 0: rank Q->3; slot 2: suit HEARTS->SPADES; slot 5: suit DIAMONDS->CLUBS",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "Q",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "10",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "10",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "10",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "3",
-                "suit": "CLUBS"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 2: rank 5->10, suit HEARTS->SPADES; slot 5: suit DIAMONDS->CLUBS",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -2089,39 +1924,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 2,
             "edit_description": "slot 1: suit CLUBS->DIAMONDS; slot 3: rank 7->9; slot 5: rank A->9",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "7",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "7",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "7",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "7",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "4",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "A",
-                "suit": "CLUBS"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 2,
-            "edit_description": "slot 0: rank 9->7; slot 2: rank 9->7; slot 4: suit CLUBS->DIAMONDS",
             "from_study2": false
           }
         ]
@@ -2544,39 +2346,6 @@
             "source_exemplar_idx": 2,
             "edit_description": "slot 1: rank A->8; slot 4: rank A->8, suit SPADES->CLUBS",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "K",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "K",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "8",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "K",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "K",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "8",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 2,
-            "edit_description": "slot 1: rank A->K, suit HEARTS->CLUBS; slot 4: rank A->K",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -2743,39 +2512,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 5,
             "edit_description": "slot 2: rank 3->5; slot 4: rank 5->3, suit DIAMONDS->CLUBS; slot 5: suit HEARTS->SPADES",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "4",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "5",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "3",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "5",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "4",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 3: rank 4->5; slot 4: rank 5->4, suit DIAMONDS->SPADES; slot 5: suit HEARTS->SPADES",
             "from_study2": false
           }
         ]
@@ -3225,39 +2961,6 @@
             "source_exemplar_idx": 0,
             "edit_description": "slot 2: rank K->5; slot 3: rank K->5, suit CLUBS->DIAMONDS",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "Q",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "Q",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "Q",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "5",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "Q",
-                "suit": "CLUBS"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 0,
-            "edit_description": "slot 2: rank K->Q; slot 3: rank K->Q, suit CLUBS->DIAMONDS",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -3424,39 +3127,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 3,
             "edit_description": "slot 0: rank 7->3; slot 2: rank 3->7, suit SPADES->DIAMONDS; slot 3: rank 3->7; slot 4: rank 2->3, suit HEARTS->SPADES; slot 5: rank 7->2, suit DIAMONDS->HEARTS",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "5",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "2",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "10",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "10",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "5",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "2",
-                "suit": "HEARTS"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 4,
-            "edit_description": "slot 0: rank 9->5, suit DIAMONDS->HEARTS; slot 1: rank 5->2, suit HEARTS->DIAMONDS; slot 5: rank 9->2",
             "from_study2": false
           }
         ]
@@ -3975,39 +3645,6 @@
             "source_exemplar_idx": 4,
             "edit_description": "slot 3: suit CLUBS->HEARTS; slot 5: rank 8->9, suit CLUBS->SPADES",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "3",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "6",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "5",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "7",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "4",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "10",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 4,
-            "edit_description": "slot 3: suit CLUBS->HEARTS; slot 5: rank 8->10, suit CLUBS->SPADES",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -4174,39 +3811,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 4,
             "edit_description": "slot 0: rank 3->6; slot 1: rank 6->8, suit HEARTS->CLUBS; slot 5: rank 8->3, suit CLUBS->DIAMONDS",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "7",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "9",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "8",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "6",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "4",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 1,
-            "edit_description": "slot 0: rank 6->7; slot 1: rank Q->5; slot 4: rank 7->6; slot 5: suit HEARTS->SPADES",
             "from_study2": false
           }
         ]
@@ -4692,39 +4296,6 @@
             "source_exemplar_idx": 1,
             "edit_description": "slot 0: rank 3->10; slot 1: rank K->6; slot 5: suit HEARTS->DIAMONDS",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "Q",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "6",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "A",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "Q",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "3",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "10",
-                "suit": "DIAMONDS"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 1,
-            "edit_description": "slot 0: rank 3->Q; slot 1: rank K->6; slot 5: suit HEARTS->DIAMONDS",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -4891,39 +4462,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 1,
             "edit_description": "slot 3: rank Q->5; slot 5: rank 10->2, suit HEARTS->SPADES",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "4",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "6",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "3",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 2,
-            "edit_description": "slot 2: rank 3->4, suit DIAMONDS->HEARTS; slot 4: rank 4->3, suit HEARTS->DIAMONDS; slot 5: rank 10->2, suit DIAMONDS->SPADES",
             "from_study2": false
           }
         ]
@@ -5416,39 +4954,6 @@
             "source_exemplar_idx": 5,
             "edit_description": "slot 0: rank 6->K; slot 2: rank Q->9, suit HEARTS->SPADES; slot 3: rank 2->Q, suit DIAMONDS->CLUBS; slot 4: rank 9->Q, suit SPADES->HEARTS; slot 5: rank Q->2, suit CLUBS->DIAMONDS",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "6",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "J",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "K",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "8",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "J",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "3",
-                "suit": "DIAMONDS"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 0,
-            "edit_description": "slot 2: rank 9->K; slot 4: rank 3->J; slot 5: rank A->3",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -5615,39 +5120,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 3,
             "edit_description": "slot 1: rank 2->3; slot 4: suit HEARTS->CLUBS; slot 5: rank 3->2, suit DIAMONDS->SPADES",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "5",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "9",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "7",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "8",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "J",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 2,
-            "edit_description": "slot 4: rank 2->J, suit HEARTS->CLUBS; slot 5: rank J->2, suit DIAMONDS->SPADES",
             "from_study2": false
           }
         ]
@@ -6150,39 +5622,6 @@
             "source_exemplar_idx": 5,
             "edit_description": "slot 1: rank 7->3, suit SPADES->DIAMONDS; slot 5: rank 7->3",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "9",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "5",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "5",
-                "suit": "CLUBS"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 1: rank 7->5; slot 4: rank 3->5; slot 5: rank 7->5",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -6349,39 +5788,6 @@
             "edit_distance": 3,
             "source_exemplar_idx": 5,
             "edit_description": "slot 2: rank 5->3; slot 3: rank 9->2; slot 5: rank 7->2",
-            "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "3",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "7",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "3",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "7",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "3",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "2",
-                "suit": "CLUBS"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 5,
-            "edit_description": "slot 2: rank 5->3; slot 3: rank 9->7; slot 5: rank 7->2",
             "from_study2": false
           }
         ]
@@ -6870,39 +6276,6 @@
             "source_exemplar_idx": 0,
             "edit_description": "slot 2: rank 10->8, suit SPADES->CLUBS; slot 5: rank 6->2",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "2",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "6",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "2",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "8",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "6",
-                "suit": "CLUBS"
-              },
-              {
-                "rank": "2",
-                "suit": "CLUBS"
-              }
-            ],
-            "ground_truth": true,
-            "edit_distance": 3,
-            "source_exemplar_idx": 3,
-            "edit_description": "slot 1: rank 2->6, suit CLUBS->SPADES; slot 3: rank 4->8; slot 5: rank 10->2, suit SPADES->CLUBS",
-            "from_study2": false
           }
         ],
         "losing": [
@@ -7070,53 +6443,20 @@
             "source_exemplar_idx": 2,
             "edit_description": "slot 0: rank 2->4, suit DIAMONDS->HEARTS; slot 2: rank 10->3; slot 3: rank 2->6; slot 4: rank 4->2, suit HEARTS->DIAMONDS; slot 5: rank 6->2",
             "from_study2": false
-          },
-          {
-            "hand": [
-              {
-                "rank": "4",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "10",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "5",
-                "suit": "HEARTS"
-              },
-              {
-                "rank": "6",
-                "suit": "SPADES"
-              },
-              {
-                "rank": "2",
-                "suit": "DIAMONDS"
-              },
-              {
-                "rank": "2",
-                "suit": "SPADES"
-              }
-            ],
-            "ground_truth": false,
-            "edit_distance": 3,
-            "source_exemplar_idx": 2,
-            "edit_description": "slot 0: rank 2->4, suit DIAMONDS->HEARTS; slot 2: rank 10->5; slot 3: rank 2->6; slot 4: rank 4->2, suit HEARTS->DIAMONDS; slot 5: rank 6->2",
-            "from_study2": false
           }
         ]
       }
     }
   ],
   "schema_version": 3,
-  "snapshot_id": "se3_pool_2026_06_20_01f8b82a",
+  "snapshot_id": "se3_pool_2026_06_22_9968b7d6",
   "source": {
     "seeded_from_study2_snapshot": "se2_2026_05_26_5a302a55",
     "study2_snapshot_sha": "a28d4e16736c866c",
     "pools_manifest_sha": "7e977d78ed5a0816",
     "stage4_sha": "72b34a1a572905a0",
-    "built_at_utc": "2026-06-22T02:25:46Z",
-    "pool_per_side": 6
+    "built_at_utc": "2026-06-22T21:46:52Z",
+    "pool_per_side": 5
   },
   "trial_schema": "pool_6x6"
 }
