@@ -118,12 +118,24 @@
   // + (6-k) losing items (without replacement) from the rule's 6+6 pool and
   // shuffle the 6 into presentation order. Seeded by pid+":trialdraw:"+ruleId.
   // Returns the chosen pool items unchanged (caller maps to RuleData shape).
+  //
+  // RECURRENCE-MAXIMIZING: within each side, the from_study2 hands (the exact
+  // hands shown in study 2) are taken FIRST, then the remaining slots are filled
+  // from the new hands. So a side of size n includes min(n, #study2) study-2
+  // hands — the most possible at that count. Randomization is preserved (which
+  // study-2 hands when n < #study2, which new fillers, and the final order),
+  // all deterministic per pid. Pools with no from_study2 flag fall back to a
+  // plain uniform shuffle.
   async function trialSampleFor(prolificPid, ruleId, winningPool, losingPool, k) {
     var seed = await _seedFromDigest(prolificPid + ":trialdraw:" + ruleId);
     var rng = mulberry32(seed);
-    function idxs(n) { var a = []; for (var i = 0; i < n; i++) a.push(i); return a; }
-    var wPick = fisherYates(idxs(winningPool.length), rng).slice(0, k);
-    var lPick = fisherYates(idxs(losingPool.length), rng).slice(0, 6 - k);
+    function pickIdx(pool, need) {
+      var s2 = [], nw = [];
+      for (var i = 0; i < pool.length; i++) (pool[i].from_study2 ? s2 : nw).push(i);
+      return fisherYates(s2, rng).concat(fisherYates(nw, rng)).slice(0, need);
+    }
+    var wPick = pickIdx(winningPool, k);
+    var lPick = pickIdx(losingPool, 6 - k);
     var items = [];
     for (var i = 0; i < wPick.length; i++) items.push(winningPool[wPick[i]]);
     for (var j = 0; j < lPick.length; j++) items.push(losingPool[lPick[j]]);
